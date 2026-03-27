@@ -2,18 +2,16 @@
 
 A modern, full-stack trading journal application for tracking forex trades, analyzing performance, and managing prop firm accounts.
 
-![Dashboard Preview](https://via.placeholder.com/1200x600/1e293b/ffffff?text=Forex+Trading+Journal)
-
 ## Features
 
-### 📊 Dashboard
+### Dashboard
 - Real-time overview of your trading performance
 - Total balance and P/L tracking
 - Win rate statistics
 - Performance summary with profit/loss breakdown
 - Recent trades activity feed
 
-### 📝 Trade Journal
+### Trade Journal
 - Record and manage all your trades
 - Track entry/exit prices, lot sizes, and P/L
 - Associate trades with specific accounts
@@ -21,27 +19,27 @@ A modern, full-stack trading journal application for tracking forex trades, anal
 - Screenshot upload for trade documentation
 - Auto Risk/Reward ratio calculation
 
-### 📅 Trading Calendar
+### Trading Calendar
 - Visual calendar view of daily trading activity
 - Color-coded P/L visualization (green = profit, red = loss)
 - Weekly summary panel
 - Click on any day to see detailed trade breakdown
 - Filter by Prop Firm and Account
 
-### 📈 Reports
+### Reports
 - Comprehensive performance analytics
 - Win/loss statistics
 - Pair performance breakdown
 - Monthly performance tracking
 - Profit factor analysis
 
-### 🚫 Missed Trades Journal
+### Missed Trades Journal
 - Track missed trading opportunities
 - Record reason for missing trades (Late Entry, Fear, Overthinking, etc.)
 - Mark trades as Reviewed
 - Analyze patterns in missed opportunities
 
-### ⚙️ Account Management
+### Account Management
 - Multiple trading account support
 - Prop firm association
 - Balance and P/L tracking per account
@@ -54,7 +52,6 @@ A modern, full-stack trading journal application for tracking forex trades, anal
 - **TypeScript** - Type safety
 - **TailwindCSS** - Styling
 - **Vite** - Build tool
-- **Recharts** - Charts and visualizations
 - **Lucide React** - Icons
 - **Radix UI** - Accessible components
 - **date-fns** - Date manipulation
@@ -74,20 +71,19 @@ A modern, full-stack trading journal application for tracking forex trades, anal
 
 ### Installation
 
-1. **Clone the repository**
+1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd fx-journal
 ```
 
-2. **Install dependencies**
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. **Configure environment**
+3. Configure environment:
 ```bash
-# Create .env file in the backend directory
 cd backend
 cp .env.example .env
 ```
@@ -98,13 +94,12 @@ PORT=5000
 MONGODB_URI=mongodb://localhost:27017/fx-journal
 ```
 
-4. **Create frontend environment file**
+4. Create frontend environment file:
 ```bash
-# Create .env in root directory
 echo "VITE_API_BASE_URL=http://localhost:5000/api" > .env
 ```
 
-5. **Start the development servers**
+5. Start the development servers:
 
 Frontend (port 5173):
 ```bash
@@ -113,11 +108,10 @@ npm run dev
 
 Backend (port 5000):
 ```bash
-cd backend
-node server.js
+cd backend && node server.js
 ```
 
-6. **Build for production**
+6. Build for production:
 ```bash
 npm run build
 ```
@@ -130,13 +124,6 @@ fx-journal/
 │   ├── app/
 │   │   ├── components/
 │   │   │   ├── ui/           # Reusable UI components
-│   │   │   │   ├── Button.tsx
-│   │   │   ├── Calendar.tsx
-│   │   │   ├── FormField.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Popover.tsx
-│   │   │   ├── Select.tsx
-│   │   │   └── TimePicker.tsx
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── TradeJournal.tsx
 │   │   │   ├── TradingCalendar.tsx
@@ -145,18 +132,14 @@ fx-journal/
 │   │   │   ├── Accounts.tsx
 │   │   │   └── PropFirms.tsx
 │   │   ├── services/
-│   │   │   └── apiService.ts
 │   │   ├── types/
-│   │   │   └── trading.ts
 │   │   ├── utils/
-│   │   │   └── calculations.ts
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   └── styles/
 ├── backend/
-│   ├── server.js
-│   └── (models are defined inline)
-├── dist/                    # Production build
+│   └── server.js
+├── dist/
 ├── package.json
 └── README.md
 ```
@@ -183,8 +166,6 @@ fx-journal/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/trades` | Get all trades |
-| GET | `/api/trades?accountId=X` | Get trades by account |
-| GET | `/api/trades?firmId=X` | Get trades by firm |
 | POST | `/api/trades` | Create a trade |
 | PUT | `/api/trades/:id` | Update a trade |
 | DELETE | `/api/trades/:id` | Delete a trade |
@@ -212,16 +193,13 @@ fx-journal/
   id: string;
   accountId: string;
   propFirmId: string;
-  pair: string;           // e.g., "EUR/USD"
+  pair: string;
   type: 'BUY' | 'SELL';
   status: 'OPEN' | 'CLOSED';
   entryPrice: number;
   exitPrice?: number;
   lotSize: number;
-  entryDate: string;      // ISO date
-  entryTime?: string;     // HH:mm format
-  exitDate?: string;
-  exitTime?: string;
+  entryDate: string;
   profit?: number;
   stopLoss?: number;
   takeProfit?: number;
@@ -229,10 +207,6 @@ fx-journal/
   strategy?: string;
   keyLevel?: string;
   notes?: string;
-  screenshots?: {
-    before?: string;
-    after?: string;
-  };
 }
 ```
 
@@ -246,19 +220,11 @@ fx-journal/
   entryPrice: number;
   stopLoss: number;
   takeProfit: number;
-  rr: number;            // Risk/Reward ratio
+  rr: number;
   date: string;
-  time?: string;
-  session?: string;
-  strategy?: string;
-  keyLevel?: string;
-  reason: string;         // Late Entry, Fear, Overthinking, etc.
+  reason: string;
   emotion?: string;
   status: 'MISSED' | 'REVIEWED';
-  screenshots?: {
-    before?: string;
-    after?: string;
-  };
 }
 ```
 
@@ -271,7 +237,6 @@ fx-journal/
   initialBalance: number;
   currentBalance: number;
   currency: string;
-  createdAt: string;
 }
 ```
 
@@ -281,28 +246,7 @@ fx-journal/
   id: string;
   name: string;
   color: string;
-  createdAt: string;
 }
-```
-
-## UI Components
-
-### FormField
-Reusable labeled form input wrapper with required field support.
-```tsx
-<FormField label="Entry Price" required>
-  <Input type="number" />
-</FormField>
-```
-
-### TimePicker
-Modern wheel-style time picker with quick select options.
-```tsx
-<TimePicker
-  value={time}
-  onChange={(val) => setTime(val)}
-  placeholder="Select time"
-/>
 ```
 
 ## Calculations
@@ -348,10 +292,10 @@ PORT=5000
 MONGODB_URI=mongodb://localhost:27017/fx-journal
 ```
 
-## Features Breakdown
+## Features
 
 ### Dashboard
-- [x] Overview cards (Prop Firms count, Accounts, Total Trades, Win Rate)
+- [x] Overview cards (Prop Firms, Accounts, Total Trades, Win Rate)
 - [x] Balance & Performance section
 - [x] Accounts overview with P/L
 - [x] Recent closed trades list
@@ -362,17 +306,13 @@ MONGODB_URI=mongodb://localhost:27017/fx-journal
 - [x] Auto RR calculation
 - [x] Screenshot uploads
 - [x] Filter by account and status
-- [x] Risk/Reward calculation
 
 ### Calendar
 - [x] Monthly calendar grid
 - [x] Daily P/L visualization
 - [x] Color coding (green/red)
 - [x] Week summary panel
-- [x] Click to view trade details
-- [x] Filter by Prop Firm
-- [x] Filter by Account
-- [x] Dependent filter logic
+- [x] Filter by Prop Firm and Account
 
 ### Reports
 - [x] Total trades statistics
@@ -386,14 +326,13 @@ MONGODB_URI=mongodb://localhost:27017/fx-journal
 - [x] Reason categorization
 - [x] Review status
 - [x] Statistics dashboard
-- [x] Most common reason tracking
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
 
 ## License
