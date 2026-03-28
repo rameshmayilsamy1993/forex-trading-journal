@@ -2,106 +2,160 @@ import { PropFirm, TradingAccount, Trade, MasterData } from '../types/trading';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+  createdAt: string;
+}
+
+interface ApiError extends Error {
+  status?: number;
+}
+
+const handleResponse = async (response: Response) => {
+  if (response.status === 401) {
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+    throw new Error('Session expired - Please login again');
+  }
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Request failed' }));
+    const err: ApiError = new Error(error.message || 'Request failed');
+    err.status = response.status;
+    throw err;
+  }
+  
+  return response.json();
+};
+
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  return handleResponse(response);
+};
+
 const apiService = {
-  // Prop Firms
+  auth: {
+    login: async (email: string, password: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await handleResponse(response);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data;
+    },
+
+    register: async (name: string, email: string, password: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await handleResponse(response);
+      localStorage.setItem('user', JSON.stringify(data));
+      return data;
+    },
+
+    logout: async () => {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      } finally {
+        localStorage.removeItem('user');
+      }
+    },
+
+    getCurrentUser: async (): Promise<User | null> => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+          credentials: 'include',
+        });
+        if (response.status === 401) {
+          localStorage.removeItem('user');
+          return null;
+        }
+        return handleResponse(response);
+      } catch {
+        return null;
+      }
+    },
+
+    getStoredUser: (): User | null => {
+      const userStr = localStorage.getItem('user');
+      return userStr ? JSON.parse(userStr) : null;
+    },
+
+    changePassword: async (currentPassword: string, newPassword: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/auth/change-password`, {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+    },
+  },
+
   getPropFirms: async (): Promise<PropFirm[]> => {
-    const response = await fetch(`${API_BASE_URL}/prop-firms`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch prop firms');
-    }
-    return response.json();
+    return fetchWithAuth(`${API_BASE_URL}/prop-firms`);
   },
   
   createPropFirm: async (firm: Omit<PropFirm, 'id' | 'createdAt'>): Promise<PropFirm> => {
-    const response = await fetch(`${API_BASE_URL}/prop-firms`, {
+    return fetchWithAuth(`${API_BASE_URL}/prop-firms`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(firm),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create prop firm');
-    }
-    return response.json();
   },
   
   updatePropFirm: async (id: string, firm: Partial<PropFirm>): Promise<PropFirm> => {
-    const response = await fetch(`${API_BASE_URL}/prop-firms/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/prop-firms/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(firm),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update prop firm');
-    }
-    return response.json();
   },
   
   deletePropFirm: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/prop-firms/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/prop-firms/${id}`, {
       method: 'DELETE',
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete prop firm');
-    }
   },
   
-  // Accounts
   getAccounts: async (): Promise<TradingAccount[]> => {
-    const response = await fetch(`${API_BASE_URL}/accounts`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch accounts');
-    }
-    return response.json();
+    return fetchWithAuth(`${API_BASE_URL}/accounts`);
   },
   
   createAccount: async (account: Omit<TradingAccount, 'id' | 'createdAt'>): Promise<TradingAccount> => {
-    const response = await fetch(`${API_BASE_URL}/accounts`, {
+    return fetchWithAuth(`${API_BASE_URL}/accounts`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(account),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create account');
-    }
-    return response.json();
   },
   
   updateAccount: async (id: string, account: Partial<TradingAccount>): Promise<TradingAccount> => {
-    const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/accounts/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(account),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update account');
-    }
-    return response.json();
   },
   
   deleteAccount: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/accounts/${id}`, {
       method: 'DELETE',
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete account');
-    }
   },
   
-  // Trades
   getTrades: async (filters?: { accountId?: string; firmId?: string }): Promise<Trade[]> => {
     let url = `${API_BASE_URL}/trades`;
     if (filters?.accountId || filters?.firmId) {
@@ -110,139 +164,109 @@ const apiService = {
       if (filters.firmId) params.append('firmId', filters.firmId);
       url += `?${params.toString()}`;
     }
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Failed to fetch trades');
-    }
-    return response.json();
+    return fetchWithAuth(url);
   },
   
   createTrade: async (trade: Omit<Trade, 'id'>): Promise<Trade> => {
-    const response = await fetch(`${API_BASE_URL}/trades`, {
+    return fetchWithAuth(`${API_BASE_URL}/trades`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(trade),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create trade');
-    }
-    return response.json();
   },
   
   updateTrade: async (id: string, trade: Partial<Trade>): Promise<Trade> => {
-    const response = await fetch(`${API_BASE_URL}/trades/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/trades/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(trade),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update trade');
-    }
-    return response.json();
   },
   
   deleteTrade: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/trades/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/trades/${id}`, {
       method: 'DELETE',
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete trade');
-    }
   },
-  
-  // Masters
+
   getMasters: async (type?: string): Promise<MasterData[]> => {
     const url = type ? `${API_BASE_URL}/masters?type=${type}` : `${API_BASE_URL}/masters`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Failed to fetch masters');
-    }
-    return response.json();
+    return fetchWithAuth(url);
   },
   
   createMaster: async (master: Omit<MasterData, 'id'>): Promise<MasterData> => {
-    const response = await fetch(`${API_BASE_URL}/masters`, {
+    return fetchWithAuth(`${API_BASE_URL}/masters`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(master),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create master entry');
-    }
-    return response.json();
   },
   
   deleteMaster: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/masters/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
       method: 'DELETE',
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete master entry');
-    }
   },
 
-  // Missed Trades
   getMissedTrades: async (filters?: { accountId?: string }): Promise<any[]> => {
     let url = `${API_BASE_URL}/missed-trades`;
     if (filters?.accountId) {
       url += `?accountId=${filters.accountId}`;
     }
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Failed to fetch missed trades');
-    }
-    return response.json();
+    return fetchWithAuth(url);
   },
   
   createMissedTrade: async (missedTrade: any): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/missed-trades`, {
+    return fetchWithAuth(`${API_BASE_URL}/missed-trades`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(missedTrade),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create missed trade');
-    }
-    return response.json();
   },
   
   updateMissedTrade: async (id: string, missedTrade: any): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/missed-trades/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(missedTrade),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update missed trade');
-    }
-    return response.json();
   },
   
   deleteMissedTrade: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/missed-trades/${id}`, {
+    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
       method: 'DELETE',
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete missed trade');
-    }
+  },
+
+  upload: {
+    single: async (file: File): Promise<{ url: string; publicId: string; originalName: string }> => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      return handleResponse(response);
+    },
+
+    multiple: async (files: File[]): Promise<{ url: string; publicId: string; originalName: string }[]> => {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('images', file);
+      });
+
+      const response = await fetch(`${API_BASE_URL}/upload/multiple`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      return handleResponse(response);
+    },
+
+    delete: async (publicId: string): Promise<void> => {
+      const response = await fetch(`${API_BASE_URL}/upload/${encodeURIComponent(publicId)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
   }
 };
 

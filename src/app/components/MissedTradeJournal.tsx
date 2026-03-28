@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn } from 'lucide-react';
 import { MissedTrade, TradingAccount, MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
 import TimePicker from './ui/TimePicker';
 import { Button } from './ui/button';
+import ImageViewer from './ImageViewer';
+import { cn } from './ui/utils';
 
 const REASON_OPTIONS = [
   'Late Entry',
@@ -67,6 +69,8 @@ export default function MissedTradeJournal() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
+  const [viewingImageIndex, setViewingImageIndex] = useState(0);
 
   const [formData, setFormData] = useState({
     accountId: '',
@@ -275,17 +279,24 @@ export default function MissedTradeJournal() {
     }
   };
 
-  const handleFileUpload = (field: 'before' | 'after') => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+
+  const handleFileUpload = (field: 'before' | 'after') => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      setUploadingImage(field);
+      try {
+        const result = await apiService.upload.single(file);
         setFormData({
           ...formData,
-          screenshots: { ...formData.screenshots, [field]: reader.result as string }
+          screenshots: { ...formData.screenshots, [field]: result.url }
         });
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        alert('Failed to upload image. Please try again.');
+      } finally {
+        setUploadingImage(null);
+      }
     }
   };
 
@@ -542,18 +553,84 @@ export default function MissedTradeJournal() {
 
                   {/* Screenshots */}
                   <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Before Screenshot</label>
-                      <Input type="file" accept="image/*" onChange={handleFileUpload('before')} />
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Before Screenshot</label>
+                      <div className="modern-file-upload group relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload('before')}
+                          disabled={uploadingImage === 'before'}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className="flex flex-col items-center justify-center space-y-2 py-4">
+                          {uploadingImage === 'before' ? (
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          ) : (
+                            <>
+                              <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                                <ImageIcon className="w-6 h-6 text-blue-600" />
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                <span className="font-semibold text-blue-600">Click to upload</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                       {formData.screenshots.before && (
-                        <img src={formData.screenshots.before} alt="Before" className="mt-2 h-20 rounded object-cover" />
+                        <div className="relative inline-block">
+                          <img src={formData.screenshots.before} alt="Before" className="h-20 rounded object-cover border border-gray-200" />
+                          <button
+                            onClick={() => setFormData({
+                              ...formData,
+                              screenshots: { ...formData.screenshots, before: '' }
+                            })}
+                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
                       )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">After Screenshot</label>
-                      <Input type="file" accept="image/*" onChange={handleFileUpload('after')} />
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">After Screenshot</label>
+                      <div className="modern-file-upload group relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload('after')}
+                          disabled={uploadingImage === 'after'}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className="flex flex-col items-center justify-center space-y-2 py-4">
+                          {uploadingImage === 'after' ? (
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          ) : (
+                            <>
+                              <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                                <ImageIcon className="w-6 h-6 text-blue-600" />
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                <span className="font-semibold text-blue-600">Click to upload</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                       {formData.screenshots.after && (
-                        <img src={formData.screenshots.after} alt="After" className="mt-2 h-20 rounded object-cover" />
+                        <div className="relative inline-block">
+                          <img src={formData.screenshots.after} alt="After" className="h-20 rounded object-cover border border-gray-200" />
+                          <button
+                            onClick={() => setFormData({
+                              ...formData,
+                              screenshots: { ...formData.screenshots, after: '' }
+                            })}
+                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -640,6 +717,21 @@ export default function MissedTradeJournal() {
                           </td>
                           <td className="py-3 px-4 text-sm">
                             <div className="flex gap-1 justify-end">
+                              {(trade.screenshots?.before || trade.screenshots?.after) && (
+                                <button
+                                  onClick={() => {
+                                    const images = [];
+                                    if (trade.screenshots?.before) images.push({ url: trade.screenshots.before, label: 'Before Screenshot' });
+                                    if (trade.screenshots?.after) images.push({ url: trade.screenshots.after, label: 'After Screenshot' });
+                                    setViewingImages(images);
+                                    setViewingImageIndex(0);
+                                  }}
+                                  className="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                                  title="View screenshots"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => startEdit(trade)}
                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -664,6 +756,15 @@ export default function MissedTradeJournal() {
           )}
         </div>
       </div>
+
+      {/* Premium Image Viewer */}
+      {viewingImages.length > 0 && (
+        <ImageViewer
+          images={viewingImages}
+          initialIndex={viewingImageIndex}
+          onClose={() => setViewingImages([])}
+        />
+      )}
     </div>
   );
 }

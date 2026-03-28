@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Building2, Wallet, BarChart3, LogOut, EyeOff, Calendar } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Building2, Wallet, BarChart3, EyeOff, Calendar, Settings as SettingsIcon, User } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import TradeJournal from './components/TradeJournal';
 import PropFirms from './components/PropFirms';
@@ -8,12 +8,17 @@ import Reports from './components/Reports';
 import Masters from './components/Masters';
 import MissedTradeJournal from './components/MissedTradeJournal';
 import TradingCalendar from './components/TradingCalendar';
-import { Settings as SettingsIcon } from 'lucide-react';
+import apiService, { User as UserType } from './services/apiService';
 
 type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'firms' | 'accounts' | 'reports' | 'settings';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+
+  useEffect(() => {
+    setCurrentUser(apiService.auth.getStoredUser());
+  }, []);
 
   const tabs = [
     { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard },
@@ -26,8 +31,8 @@ export default function App() {
     { id: 'settings' as Tab, label: 'Settings', icon: SettingsIcon },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+  const handleLogout = async () => {
+    await apiService.auth.logout();
     window.location.href = '/login';
   };
 
@@ -40,10 +45,21 @@ export default function App() {
             <h1 className="text-2xl font-bold text-gray-900">Forex Trading Journal</h1>
             <p className="text-sm text-gray-500">Track your trades, analyze performance</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {currentUser && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{currentUser.name}</span>
+                {currentUser.role === 'admin' && (
+                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                    Admin
+                  </span>
+                )}
+              </div>
+            )}
             <button
               onClick={handleLogout}
-              className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
+              className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 hover:underline"
             >
               Logout
             </button>

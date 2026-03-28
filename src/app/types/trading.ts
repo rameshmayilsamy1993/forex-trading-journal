@@ -37,6 +37,7 @@ export interface Trade {
   entryPrice: number;
   exitPrice?: number;
   lotSize: number;
+  commission?: number;
   entryDate: string;
   entryTime?: string;
   exitDate?: string;

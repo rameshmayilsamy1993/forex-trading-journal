@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, TrendingUp, TrendingDown, X, Filte
 import { Trade, PropFirm, TradingAccount } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { getDateKey, getLocalDateString, formatDisplayDate } from '../utils/dateUtils';
 
 interface DayData {
   date: Date;
@@ -164,7 +165,7 @@ export default function TradingCalendar() {
   const groupTradesByDate = useMemo(() => {
     const grouped: Record<string, Trade[]> = {};
     filteredTrades.forEach(trade => {
-      const dateKey = trade.entryDate.split('T')[0];
+      const dateKey = getDateKey(trade.entryDate);
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
@@ -176,7 +177,7 @@ export default function TradingCalendar() {
   const calendarDays = useMemo(() => {
     const days = getDaysInMonth(currentDate);
     return days.map(date => {
-      const dateString = date.toISOString().split('T')[0];
+      const dateString = getDateKey(date);
       const dayTrades = groupTradesByDate[dateString] || [];
       const pnl = dayTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
       return {
@@ -185,7 +186,7 @@ export default function TradingCalendar() {
         trades: dayTrades,
         pnl,
         isCurrentMonth: date.getMonth() === currentDate.getMonth(),
-        isToday: date.getTime() === today.getTime()
+        isToday: getDateKey(date) === getDateKey(today)
       };
     });
   }, [currentDate, groupTradesByDate]);
@@ -229,7 +230,7 @@ export default function TradingCalendar() {
              tradeDate.getFullYear() === currentDate.getFullYear();
     });
     const pnl = monthTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
-    const daysTraded = new Set(monthTrades.map(t => t.entryDate.split('T')[0])).size;
+    const daysTraded = new Set(monthTrades.map(t => getDateKey(t.entryDate))).size;
     
     return {
       totalPnl: pnl,
@@ -252,7 +253,7 @@ export default function TradingCalendar() {
   };
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return getLocalDateString(date).split(',')[0];
   };
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -516,7 +517,7 @@ export default function TradingCalendar() {
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-bold text-gray-900">
-                  {selectedDay.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  {formatDisplayDate(selectedDay.date)}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
                   {selectedDay.trades.length} {selectedDay.trades.length === 1 ? 'trade' : 'trades'}

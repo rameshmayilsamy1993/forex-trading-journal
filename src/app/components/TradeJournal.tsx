@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm, TradingSession, MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { calculateTradeProfit, calculateRiskReward } from '../utils/calculations';
@@ -10,8 +10,10 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import TimePicker from './ui/TimePicker';
 import FormField from './ui/FormField';
+import ImageViewer from './ImageViewer';
 import { format } from 'date-fns';
 import { cn } from './ui/utils';
+import { getDateKey, getLocalDateString } from '../utils/dateUtils';
 
 
 
@@ -25,6 +27,8 @@ export default function TradeJournal() {
   const [filterAccount, setFilterAccount] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [viewingTrade, setViewingTrade] = useState<Trade | null>(null);
+  const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
+  const [viewingImageIndex, setViewingImageIndex] = useState(0);
   const [formData, setFormData] = useState({
     accountId: '',
     pair: '',
@@ -74,6 +78,8 @@ export default function TradeJournal() {
   const keyLevels = useMemo(() => masters.filter(m => m.type === 'keyLevel'), [masters]);
   const sessions = useMemo(() => masters.filter(m => m.type === 'session'), [masters]);
 
+  const COMMISSION_PER_LOT = 5;
+
   const calculatedRR = useMemo(() => {
     if (!formData.entryPrice || !formData.stopLoss || !formData.takeProfit) return null;
     const tempTrade: Trade = {
@@ -91,6 +97,11 @@ export default function TradeJournal() {
     };
     return calculateRiskReward(tempTrade);
   }, [formData.entryPrice, formData.stopLoss, formData.takeProfit, formData.type]);
+
+  const calculatedCommission = useMemo(() => {
+    const lots = parseFloat(formData.lotSize) || 0;
+    return Number((lots * COMMISSION_PER_LOT).toFixed(2));
+  }, [formData.lotSize]);
 
   const saveTrades = async (newTrades: Trade[]) => {
     setTrades(newTrades);
@@ -111,14 +122,21 @@ export default function TradeJournal() {
     setAccounts(updatedAccounts);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'beforeScreenshot' | 'afterScreenshot') => {
+  const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'beforeScreenshot' | 'afterScreenshot') => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, [field]: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      setUploadingImage(field);
+      try {
+        const result = await apiService.upload.single(file);
+        setFormData({ ...formData, [field]: result.url });
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        alert('Failed to upload image. Please try again.');
+      } finally {
+        setUploadingImage(null);
+      }
     }
   };
 
@@ -155,6 +173,7 @@ export default function TradeJournal() {
       entryPrice: parseFloat(formData.entryPrice),
       exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : undefined,
       lotSize: parseFloat(formData.lotSize),
+      commission: calculatedCommission,
       entryDate: formData.entryDate,
       entryTime: formData.entryTime || undefined,
       exitDate: formData.exitDate || undefined,
@@ -182,10 +201,19 @@ export default function TradeJournal() {
   };
 
   const handleEdit = async (id: string) => {
-    if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) return;
+    console.log('handleEdit called with id:', id);
+    console.log('formData:', formData);
+    
+    if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) {
+      alert('Please fill in all required fields: Account, Pair, Entry Price, and Lot Size');
+      return;
+    }
 
     const account = accounts.find(a => a.id === formData.accountId);
-    if (!account) return;
+    if (!account) {
+      alert('Account not found');
+      return;
+    }
 
     let profit = formData.profit ? parseFloat(formData.profit) : 0;
     if (!formData.profit && formData.status === 'CLOSED' && formData.exitPrice) {
@@ -215,6 +243,7 @@ export default function TradeJournal() {
         entryPrice: parseFloat(formData.entryPrice),
         exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : undefined,
         lotSize: parseFloat(formData.lotSize),
+        commission: calculatedCommission,
         entryDate: formData.entryDate,
         entryTime: formData.entryTime || undefined,
         exitDate: formData.exitDate || undefined,
@@ -232,11 +261,14 @@ export default function TradeJournal() {
         afterScreenshot: formData.afterScreenshot || undefined,
       };
 
+      console.log('Updating trade with:', updatedTrade);
       const savedTrade = await apiService.updateTrade(id, updatedTrade);
+      console.log('Updated trade:', savedTrade);
       setTrades(trades.map(trade => trade.id === id ? savedTrade : trade));
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update trade:', error);
+      alert(`Failed to update trade: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -253,17 +285,18 @@ export default function TradeJournal() {
 
   const startEdit = (trade: Trade) => {
     setEditingId(trade.id);
+    const accountId = getTradeAccountId(trade);
     setFormData({
-      accountId: trade.accountId,
+      accountId: accountId,
       pair: trade.pair,
       type: trade.type,
       status: trade.status,
       entryPrice: trade.entryPrice.toString(),
       exitPrice: trade.exitPrice?.toString() || '',
       lotSize: trade.lotSize.toString(),
-      entryDate: trade.entryDate.split('T')[0],
+      entryDate: getDateKey(trade.entryDate),
       entryTime: trade.entryTime || '',
-      exitDate: trade.exitDate?.split('T')[0] || '',
+      exitDate: trade.exitDate ? getDateKey(trade.exitDate) : '',
       exitTime: trade.exitTime || '',
       stopLoss: trade.stopLoss?.toString() || '',
       takeProfit: trade.takeProfit?.toString() || '',
@@ -290,7 +323,7 @@ export default function TradeJournal() {
       entryPrice: '',
       exitPrice: '',
       lotSize: '',
-      entryDate: new Date().toISOString().split('T')[0],
+      entryDate: getDateKey(new Date()),
       entryTime: '',
       exitDate: '',
       exitTime: '',
@@ -506,7 +539,7 @@ export default function TradeJournal() {
                       />
                     </FormField>
 
-                    {/* Lot Size & Risk Management */}
+                    {/* Lot Size & Commission */}
                     <FormField label="Lot Size" required>
                       <Input
                         className="bg-white"
@@ -516,6 +549,19 @@ export default function TradeJournal() {
                         onChange={e => setFormData({ ...formData, lotSize: e.target.value })}
                         step="0.01"
                       />
+                    </FormField>
+
+                    <FormField label="Commission">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <Input
+                          className="bg-gray-50 cursor-not-allowed pl-7"
+                          type="number"
+                          value={calculatedCommission}
+                          readOnly
+                          title={`Commission: $${COMMISSION_PER_LOT} per lot`}
+                        />
+                      </div>
                     </FormField>
 
                     <FormField label="Stop Loss">
@@ -688,21 +734,28 @@ export default function TradeJournal() {
                         <label className="block text-sm font-semibold text-gray-700">
                           Before Screenshot
                         </label>
-                        <div className="modern-file-upload group">
+                        <div className="modern-file-upload group relative">
                           <input
                             type="file"
                             accept="image/*"
                             onChange={e => handleFileUpload(e, 'beforeScreenshot')}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            disabled={uploadingImage === 'beforeScreenshot'}
                           />
                           <div className="flex flex-col items-center justify-center space-y-2">
-                            <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                              <ImageIcon className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
-                            </div>
-                            <p className="text-xs text-gray-400">PNG, JPG or WEBP (MAX. 50MB)</p>
+                            {uploadingImage === 'beforeScreenshot' ? (
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            ) : (
+                              <>
+                                <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                                  <ImageIcon className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                                </div>
+                                <p className="text-xs text-gray-400">PNG, JPG or WEBP</p>
+                              </>
+                            )}
                           </div>
                         </div>
                         {formData.beforeScreenshot && (
@@ -721,21 +774,28 @@ export default function TradeJournal() {
                         <label className="block text-sm font-semibold text-gray-700">
                           After Screenshot
                         </label>
-                        <div className="modern-file-upload group">
+                        <div className="modern-file-upload group relative">
                           <input
                             type="file"
                             accept="image/*"
                             onChange={e => handleFileUpload(e, 'afterScreenshot')}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            disabled={uploadingImage === 'afterScreenshot'}
                           />
                           <div className="flex flex-col items-center justify-center space-y-2">
-                            <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                              <ImageIcon className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-semibold text-blue-600 text-blue-600">Click to upload</span> or drag and drop
-                            </div>
-                            <p className="text-xs text-gray-400">PNG, JPG or WEBP (MAX. 50MB)</p>
+                            {uploadingImage === 'afterScreenshot' ? (
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            ) : (
+                              <>
+                                <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                                  <ImageIcon className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                                </div>
+                                <p className="text-xs text-gray-400">PNG, JPG or WEBP</p>
+                              </>
+                            )}
                           </div>
                         </div>
                         {formData.afterScreenshot && (
@@ -815,7 +875,7 @@ export default function TradeJournal() {
                         <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
                           <td className="py-3 px-4 text-sm text-gray-900">
                             <div>
-                              {new Date(trade.entryDate).toLocaleDateString()}
+                              {getLocalDateString(trade.entryDate)}
                               {trade.entryTime && (
                                 <div className="text-xs text-gray-500">{trade.entryTime}</div>
                               )}
@@ -918,70 +978,184 @@ export default function TradeJournal() {
         </div>
       </div>
 
-      {/* Screenshot Viewer Modal */}
+      {/* Trade Details Modal */}
       {viewingTrade && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="text-lg font-bold text-gray-900">
-                {viewingTrade.pair} - Trade Details
-              </h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  {viewingTrade.pair}
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    viewingTrade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {viewingTrade.type}
+                  </span>
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {getLocalDateString(viewingTrade.entryDate)} {viewingTrade.entryTime && `• ${viewingTrade.entryTime}`}
+                </p>
+              </div>
               <button
                 onClick={() => setViewingTrade(null)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              {/* Trade Info */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium">Entry: {viewingTrade.entryPrice.toFixed(5)} ({new Date(viewingTrade.entryDate).toLocaleDateString()} {viewingTrade.entryTime})</p>
-                  <p className="text-sm font-medium">Exit: {viewingTrade.exitPrice?.toFixed(5) || 'N/A'} {viewingTrade.exitDate ? `(${new Date(viewingTrade.exitDate).toLocaleDateString()} ${viewingTrade.exitTime || ''})` : ''}</p>
-                  <p className="text-sm text-gray-600">Strategy: {viewingTrade.strategy || 'N/A'}</p>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              {/* Trade Stats */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4">
+                  <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">Entry</p>
+                  <p className="text-lg font-bold text-gray-900">{viewingTrade.entryPrice.toFixed(5)}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Key Level: {viewingTrade.keyLevel || 'N/A'}</p>
-                  <p className="text-sm text-gray-600">Session: {viewingTrade.session || 'N/A'}</p>
-                  <p className="text-sm text-gray-600">RR: {viewingTrade.riskRewardRatio ? `1:${viewingTrade.riskRewardRatio.toFixed(2)}` : 'N/A'}</p>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-4">
+                  <p className="text-xs text-purple-600 font-medium uppercase tracking-wide">Exit</p>
+                  <p className="text-lg font-bold text-gray-900">{viewingTrade.exitPrice?.toFixed(5) || '-'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-4">
+                  <p className="text-xs text-green-600 font-medium uppercase tracking-wide">P/L</p>
+                  <p className={`text-lg font-bold ${viewingTrade.profit && viewingTrade.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {viewingTrade.profit !== undefined ? `${viewingTrade.profit >= 0 ? '+' : ''}$${viewingTrade.profit.toFixed(2)}` : '-'}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-4">
+                  <p className="text-xs text-orange-600 font-medium uppercase tracking-wide">Risk/Reward</p>
+                  <p className="text-lg font-bold text-gray-900">{viewingTrade.riskRewardRatio ? `1:${viewingTrade.riskRewardRatio.toFixed(2)}` : '-'}</p>
+                </div>
+              </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Account</span>
+                    <span className="font-medium text-gray-900">{getAccountName(viewingTrade.accountId)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Lot Size</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.lotSize}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Status</span>
+                    <span className={`font-medium ${viewingTrade.status === 'OPEN' ? 'text-blue-600' : 'text-gray-700'}`}>{viewingTrade.status}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Strategy</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.strategy || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Session</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.session || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Key Level</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.keyLevel || '-'}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Stop Loss</span>
+                    <span className="font-medium text-red-600">{viewingTrade.stopLoss?.toFixed(5) || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Take Profit</span>
+                    <span className="font-medium text-green-600">{viewingTrade.takeProfit?.toFixed(5) || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Commission</span>
+                    <span className="font-medium text-gray-900">${viewingTrade.commission?.toFixed(2) || '-'}</span>
+                  </div>
                 </div>
               </div>
 
               {/* Screenshots */}
-              <div className="grid grid-cols-2 gap-4">
-                {viewingTrade.beforeScreenshot && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Before Screenshot</h4>
-                    <img
-                      src={viewingTrade.beforeScreenshot}
-                      alt="Before trade"
-                      className="w-full rounded-lg border border-gray-200"
-                    />
+              {(viewingTrade.beforeScreenshot || viewingTrade.afterScreenshot) && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    Screenshots
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {viewingTrade.beforeScreenshot && (
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                        <img
+                          src={viewingTrade.beforeScreenshot}
+                          alt="Before trade"
+                          className="w-full h-48 object-cover rounded-xl cursor-pointer"
+                          onClick={() => {
+                            const images = [];
+                            if (viewingTrade.beforeScreenshot) images.push({ url: viewingTrade.beforeScreenshot, label: 'Before Screenshot' });
+                            if (viewingTrade.afterScreenshot) images.push({ url: viewingTrade.afterScreenshot, label: 'After Screenshot' });
+                            setViewingImages(images);
+                            setViewingImageIndex(0);
+                          }}
+                        />
+                        <div className="absolute bottom-3 left-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-between">
+                            <span className="text-white text-sm font-medium">Before</span>
+                            <button className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm">
+                              <ZoomIn className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {viewingTrade.afterScreenshot && (
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                        <img
+                          src={viewingTrade.afterScreenshot}
+                          alt="After trade"
+                          className="w-full h-48 object-cover rounded-xl cursor-pointer"
+                          onClick={() => {
+                            const images = [];
+                            if (viewingTrade.beforeScreenshot) images.push({ url: viewingTrade.beforeScreenshot, label: 'Before Screenshot' });
+                            if (viewingTrade.afterScreenshot) images.push({ url: viewingTrade.afterScreenshot, label: 'After Screenshot' });
+                            setViewingImages(images);
+                            setViewingImageIndex(viewingTrade.beforeScreenshot ? 1 : 0);
+                          }}
+                        />
+                        <div className="absolute bottom-3 left-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-between">
+                            <span className="text-white text-sm font-medium">After</span>
+                            <button className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm">
+                              <ZoomIn className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-                {viewingTrade.afterScreenshot && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">After Screenshot</h4>
-                    <img
-                      src={viewingTrade.afterScreenshot}
-                      alt="After trade"
-                      className="w-full rounded-lg border border-gray-200"
-                    />
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Notes */}
               {viewingTrade.notes && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Notes</h4>
-                  <p className="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg">{viewingTrade.notes}</p>
+                <div className="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                  <h4 className="text-sm font-semibold text-amber-800 mb-2">Notes</h4>
+                  <p className="text-sm text-gray-700 leading-relaxed">{viewingTrade.notes}</p>
                 </div>
               )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Premium Image Viewer */}
+      {viewingImages.length > 0 && (
+        <ImageViewer
+          images={viewingImages}
+          initialIndex={viewingImageIndex}
+          onClose={() => setViewingImages([])}
+        />
       )}
     </div>
   );
