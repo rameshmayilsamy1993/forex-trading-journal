@@ -258,7 +258,8 @@ export default function Accounts() {
 
                 {accounts.map((account, i) => {
                   const accountTrades = trades.filter(t => getTradeAccountId(t) === account.id && t.status === 'CLOSED');
-                  const pl = accountTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+                  const getRealPL = (t: any) => t.realPL ?? ((t.profit || 0) + (t.commission || 0) + (t.swap || 0));
+                  const pl = accountTrades.reduce((sum, t) => sum + getRealPL(t), 0);
                   const currentBalance = account.initialBalance + pl;
 
                   return (

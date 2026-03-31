@@ -249,9 +249,16 @@ export default function Dashboard() {
             <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-600" />
-                <span className="text-sm text-gray-700">Total Profit</span>
+                <span className="text-sm text-gray-700">Total Win</span>
               </div>
               <span className="font-bold text-green-600">${stats.totalProfit.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-600" />
+                <span className="text-sm text-gray-700">Net P/L</span>
+              </div>
+              <span className="font-bold text-emerald-600">${stats.netProfit.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
               <div className="flex items-center gap-2">
@@ -287,7 +294,8 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredAccounts.map(account => {
               const accountTrades = trades.filter(t => getTradeAccountId(t) === account.id && t.status === 'CLOSED');
-              const pl = accountTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+              const getRealPL = (t: Trade) => (t as any).realPL ?? ((t.profit || 0) + (t.commission || 0) + ((t as any).swap || 0));
+              const pl = accountTrades.reduce((sum, t) => sum + getRealPL(t), 0);
               const currentBalance = account.initialBalance + pl;
               const plPercent = (pl / account.initialBalance) * 100;
               return (
@@ -335,37 +343,41 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-2">
-            {recentTrades.map(trade => (
-              <div
-                key={trade.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <div
-                    className="w-2 h-12 rounded-full"
-                    style={{ backgroundColor: getFirmColor(getTradeFirmId(trade)) }}
-                  />
-                  <div>
-                    <p className="font-medium text-gray-900">{trade.pair}</p>
-                    <p className="text-sm text-gray-500">
-                      {getAccountName(getTradeAccountId(trade))} • {new Date(trade.entryDate).toLocaleDateString()}
-                    </p>
+            {recentTrades.map(trade => {
+              const getRealPL = (t: Trade) => (t as any).realPL ?? ((t.profit || 0) + (t.commission || 0) + ((t as any).swap || 0));
+              const realPL = getRealPL(trade);
+              return (
+                <div
+                  key={trade.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div
+                      className="w-2 h-12 rounded-full"
+                      style={{ backgroundColor: getFirmColor(getTradeFirmId(trade)) }}
+                    />
+                    <div>
+                      <p className="font-medium text-gray-900">{trade.pair}</p>
+                      <p className="text-sm text-gray-500">
+                        {getAccountName(getTradeAccountId(trade))} • {new Date(trade.entryDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className={`px-3 py-1 rounded text-sm font-medium ${
+                      trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {trade.type}
+                    </span>
+                    <span className={`font-bold min-w-[100px] text-right ${
+                      realPL >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded text-sm font-medium ${
-                    trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {trade.type}
-                  </span>
-                  <span className={`font-bold min-w-[100px] text-right ${
-                    (trade.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {(trade.profit || 0) >= 0 ? '+' : ''}${(trade.profit || 0).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

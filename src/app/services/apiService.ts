@@ -187,50 +187,86 @@ const apiService = {
     });
   },
 
+  deleteTrades: async (ids: string[]): Promise<{ deletedCount: number }> => {
+    return fetchWithAuth(`${API_BASE_URL}/trades/bulk-delete`, {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    });
+  },
+
+  getMissedTrades: async (filters?: { pair?: string; reason?: string }): Promise<any[]> => {
+    let url = `${API_BASE_URL}/missed-trades`;
+    if (filters?.pair || filters?.reason) {
+      const params = new URLSearchParams();
+      if (filters.pair) params.append('pair', filters.pair);
+      if (filters.reason) params.append('reason', filters.reason);
+      url += `?${params.toString()}`;
+    }
+    return fetchWithAuth(url);
+  },
+
+  createMissedTrade: async (trade: any): Promise<any> => {
+    return fetchWithAuth(`${API_BASE_URL}/missed-trades`, {
+      method: 'POST',
+      body: JSON.stringify(trade),
+    });
+  },
+
+  updateMissedTrade: async (id: string, trade: any): Promise<any> => {
+    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(trade),
+    });
+  },
+
+  deleteMissedTrade: async (id: string): Promise<void> => {
+    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   getMasters: async (type?: string): Promise<MasterData[]> => {
     const url = type ? `${API_BASE_URL}/masters?type=${type}` : `${API_BASE_URL}/masters`;
     return fetchWithAuth(url);
   },
-  
+
   createMaster: async (master: Omit<MasterData, 'id'>): Promise<MasterData> => {
     return fetchWithAuth(`${API_BASE_URL}/masters`, {
       method: 'POST',
       body: JSON.stringify(master),
     });
   },
-  
+
   deleteMaster: async (id: string): Promise<void> => {
     return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
       method: 'DELETE',
     });
   },
 
-  getMissedTrades: async (filters?: { accountId?: string }): Promise<any[]> => {
-    let url = `${API_BASE_URL}/missed-trades`;
-    if (filters?.accountId) {
-      url += `?accountId=${filters.accountId}`;
-    }
-    return fetchWithAuth(url);
-  },
-  
-  createMissedTrade: async (missedTrade: any): Promise<any> => {
-    return fetchWithAuth(`${API_BASE_URL}/missed-trades`, {
+  importTrades: async (file: File, accountId: string): Promise<{ total: number; inserted: number; skipped: number; errors: any[] }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('accountId', accountId);
+
+    const response = await fetch(`${API_BASE_URL}/trades/import`, {
       method: 'POST',
-      body: JSON.stringify(missedTrade),
+      credentials: 'include',
+      body: formData,
     });
+    return handleResponse(response);
   },
-  
-  updateMissedTrade: async (id: string, missedTrade: any): Promise<any> => {
-    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(missedTrade),
+
+  previewTrades: async (file: File, accountId: string): Promise<{ total: number; preview: any[]; stats: any }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('accountId', accountId);
+
+    const response = await fetch(`${API_BASE_URL}/trades/preview`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
     });
-  },
-  
-  deleteMissedTrade: async (id: string): Promise<void> => {
-    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
-      method: 'DELETE',
-    });
+    return handleResponse(response);
   },
 
   upload: {

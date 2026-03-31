@@ -1,5 +1,9 @@
 import { Trade, TradeStats } from '../types/trading';
 
+const getRealPL = (trade: Trade): number => {
+  return (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+};
+
 export const calculateRiskReward = (trade: Trade): number | undefined => {
   if (!trade.stopLoss || !trade.takeProfit) return undefined;
 
@@ -24,20 +28,20 @@ export const calculateTradeProfit = (trade: Trade): number => {
 export const calculateTradeStats = (trades: Trade[]): TradeStats => {
   const closedTrades = trades.filter(t => t.status === 'CLOSED' && t.profit !== undefined);
 
-  const winningTrades = closedTrades.filter(t => (t.profit || 0) > 0);
-  const losingTrades = closedTrades.filter(t => (t.profit || 0) < 0);
+  const winningTrades = closedTrades.filter(t => getRealPL(t) > 0);
+  const losingTrades = closedTrades.filter(t => getRealPL(t) < 0);
 
-  const totalProfit = winningTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
-  const totalLoss = Math.abs(losingTrades.reduce((sum, t) => sum + (t.profit || 0), 0));
+  const totalProfit = winningTrades.reduce((sum, t) => sum + getRealPL(t), 0);
+  const totalLoss = Math.abs(losingTrades.reduce((sum, t) => sum + getRealPL(t), 0));
 
   const averageWin = winningTrades.length > 0 ? totalProfit / winningTrades.length : 0;
   const averageLoss = losingTrades.length > 0 ? totalLoss / losingTrades.length : 0;
 
   const largestWin = winningTrades.length > 0
-    ? Math.max(...winningTrades.map(t => t.profit || 0))
+    ? Math.max(...winningTrades.map(t => getRealPL(t)))
     : 0;
   const largestLoss = losingTrades.length > 0
-    ? Math.min(...losingTrades.map(t => t.profit || 0))
+    ? Math.min(...losingTrades.map(t => getRealPL(t)))
     : 0;
 
   return {

@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn, Trash, AlertTriangle } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm, TradingSession, MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { calculateTradeProfit, calculateRiskReward } from '../utils/calculations';
@@ -29,6 +29,10 @@ export default function TradeJournal() {
   const [viewingTrade, setViewingTrade] = useState<Trade | null>(null);
   const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
   const [viewingImageIndex, setViewingImageIndex] = useState(0);
+  const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     accountId: '',
     pair: '',
@@ -44,10 +48,11 @@ export default function TradeJournal() {
     stopLoss: '',
     takeProfit: '',
     profit: '',
+    swap: '',
     notes: '',
-    session: '' as TradingSession | '',
+    session: 'LONDON' as TradingSession | '',
     strategy: '',
-    keyLevel: '',
+    keyLevel: 'No Key Level',
     highLowTime: '',
     beforeScreenshot: '',
     afterScreenshot: '',
@@ -146,6 +151,25 @@ export default function TradeJournal() {
     const account = accounts.find(a => a.id === formData.accountId);
     if (!account) return;
 
+    // Combine date + time into ISO datetime string
+    const entryDateISO = formData.entryDate && formData.entryTime
+      ? new Date(`${formData.entryDate}T${formData.entryTime}:00`).toISOString()
+      : formData.entryDate
+        ? new Date(`${formData.entryDate}T00:00:00`).toISOString()
+        : new Date().toISOString();
+
+    const exitDateISO = formData.exitDate && formData.exitTime
+      ? new Date(`${formData.exitDate}T${formData.exitTime}:00`).toISOString()
+      : formData.exitDate
+        ? new Date(`${formData.exitDate}T00:00:00`).toISOString()
+        : undefined;
+
+    console.log('=== FRONTEND DEBUG ===');
+    console.log('entryDate:', formData.entryDate, 'entryTime:', formData.entryTime);
+    console.log('exitDate:', formData.exitDate, 'exitTime:', formData.exitTime);
+    console.log('entryDateISO:', entryDateISO);
+    console.log('exitDateISO:', exitDateISO);
+
     let profit = formData.profit ? parseFloat(formData.profit) : 0;
     if (!formData.profit && formData.status === 'CLOSED' && formData.exitPrice) {
       const trade: Trade = {
@@ -158,8 +182,8 @@ export default function TradeJournal() {
         entryPrice: parseFloat(formData.entryPrice),
         exitPrice: parseFloat(formData.exitPrice),
         lotSize: parseFloat(formData.lotSize),
-        entryDate: formData.entryDate,
-        exitDate: formData.exitDate || formData.entryDate,
+        entryDate: entryDateISO,
+        exitDate: exitDateISO,
       };
       profit = calculateTradeProfit(trade);
     }
@@ -174,9 +198,10 @@ export default function TradeJournal() {
       exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : undefined,
       lotSize: parseFloat(formData.lotSize),
       commission: calculatedCommission,
-      entryDate: formData.entryDate,
+      swap: formData.swap ? parseFloat(formData.swap) : 0,
+      entryDate: entryDateISO,
       entryTime: formData.entryTime || undefined,
-      exitDate: formData.exitDate || undefined,
+      exitDate: exitDateISO,
       exitTime: formData.exitTime || undefined,
       profit: formData.status === 'CLOSED' ? profit : undefined,
       stopLoss: formData.stopLoss ? parseFloat(formData.stopLoss) : undefined,
@@ -193,6 +218,7 @@ export default function TradeJournal() {
 
     try {
       const savedTrade = await apiService.createTrade(newTrade);
+      console.log('Trade saved:', savedTrade);
       setTrades([...trades, savedTrade]);
       resetForm();
     } catch (error) {
@@ -215,6 +241,19 @@ export default function TradeJournal() {
       return;
     }
 
+    // Combine date + time into ISO datetime string
+    const entryDateISO = formData.entryDate && formData.entryTime
+      ? new Date(`${formData.entryDate}T${formData.entryTime}:00`).toISOString()
+      : formData.entryDate
+        ? new Date(`${formData.entryDate}T00:00:00`).toISOString()
+        : undefined;
+
+    const exitDateISO = formData.exitDate && formData.exitTime
+      ? new Date(`${formData.exitDate}T${formData.exitTime}:00`).toISOString()
+      : formData.exitDate
+        ? new Date(`${formData.exitDate}T00:00:00`).toISOString()
+        : undefined;
+
     let profit = formData.profit ? parseFloat(formData.profit) : 0;
     if (!formData.profit && formData.status === 'CLOSED' && formData.exitPrice) {
       const trade: Trade = {
@@ -227,8 +266,8 @@ export default function TradeJournal() {
         entryPrice: parseFloat(formData.entryPrice),
         exitPrice: parseFloat(formData.exitPrice),
         lotSize: parseFloat(formData.lotSize),
-        entryDate: formData.entryDate,
-        exitDate: formData.exitDate || formData.entryDate,
+        entryDate: entryDateISO,
+        exitDate: exitDateISO,
       };
       profit = calculateTradeProfit(trade);
     }
@@ -244,9 +283,10 @@ export default function TradeJournal() {
         exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : undefined,
         lotSize: parseFloat(formData.lotSize),
         commission: calculatedCommission,
-        entryDate: formData.entryDate,
+        swap: formData.swap ? parseFloat(formData.swap) : 0,
+        entryDate: entryDateISO,
         entryTime: formData.entryTime || undefined,
-        exitDate: formData.exitDate || undefined,
+        exitDate: exitDateISO,
         exitTime: formData.exitTime || undefined,
         profit: formData.status === 'CLOSED' ? profit : undefined,
         stopLoss: formData.stopLoss ? parseFloat(formData.stopLoss) : undefined,
@@ -283,9 +323,41 @@ export default function TradeJournal() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedTrades(prev =>
+      prev.includes(id)
+        ? prev.filter(i => i !== id)
+        : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedTrades.length === filteredTrades.length) {
+      setSelectedTrades([]);
+    } else {
+      setSelectedTrades(filteredTrades.map(t => t.id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await apiService.deleteTrades(selectedTrades);
+      setTrades(trades.filter(t => !selectedTrades.includes(t.id)));
+      setSelectedTrades([]);
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error('Failed to delete trades:', error);
+      alert('Failed to delete trades. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const startEdit = (trade: Trade) => {
     setEditingId(trade.id);
     const accountId = getTradeAccountId(trade);
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setFormData({
       accountId: accountId,
       pair: trade.pair,
@@ -301,6 +373,7 @@ export default function TradeJournal() {
       stopLoss: trade.stopLoss?.toString() || '',
       takeProfit: trade.takeProfit?.toString() || '',
       profit: trade.profit?.toString() || '',
+      swap: (trade as any).swap?.toString() || '',
       notes: trade.notes || '',
       session: trade.session || '',
       strategy: trade.strategy || '',
@@ -330,10 +403,11 @@ export default function TradeJournal() {
       stopLoss: '',
       takeProfit: '',
       profit: '',
+      swap: '',
       notes: '',
-      session: '',
+      session: 'LONDON',
       strategy: '',
-      keyLevel: '',
+      keyLevel: 'No Key Level',
       highLowTime: '',
       beforeScreenshot: '',
       afterScreenshot: '',
@@ -379,33 +453,32 @@ export default function TradeJournal() {
   }, [trades, filterAccount, filterStatus]);
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Trade Journal</h2>
-              <p className="text-sm text-gray-500 mt-1">Record and track your trades</p>
-            </div>
-            <button
-              onClick={() => setIsAdding(true)}
-              disabled={accounts.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="w-4 h-4" />
-              Add Trade
-            </button>
-          </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Trade Journal</h1>
+          <p className="text-sm text-slate-500 mt-1">Record and track your trading activity</p>
+        </div>
+        <button
+          onClick={() => setIsAdding(true)}
+          disabled={accounts.length === 0}
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/40 hover:-translate-y-0.5"
+        >
+          <Plus className="w-5 h-5" />
+          Add Trade
+        </button>
+      </div>
 
-          {/* Filters */}
-          <div className="flex gap-3">
-            <Select
-              value={filterAccount || 'all'}
-              onValueChange={(value: string) => setFilterAccount(value)}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Accounts" />
-              </SelectTrigger>
+      <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-slate-200/50">
+        <span className="text-sm text-slate-500 font-medium">Filters:</span>
+        <div className="flex gap-3">
+          <Select
+            value={filterAccount || 'all'}
+            onValueChange={(value: string) => setFilterAccount(value)}
+          >
+            <SelectTrigger className="w-[200px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+              <SelectValue placeholder="All Accounts" />
+            </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Accounts</SelectItem>
                 {accounts.map(account => (
@@ -418,7 +491,7 @@ export default function TradeJournal() {
               value={filterStatus || 'all'}
               onValueChange={(value: string) => setFilterStatus(value)}
             >
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -430,30 +503,39 @@ export default function TradeJournal() {
           </div>
         </div>
 
-        <div className="p-6">
-          {accounts.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <p>Please add an account first</p>
-              <p className="text-sm">Go to "Accounts" tab to create one</p>
-            </div>
-          )}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50">
+          <div className="p-6">
+            {accounts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-slate-600 font-medium">Please add an account first</p>
+                <p className="text-sm text-slate-500">Go to "Accounts" tab to create one</p>
+              </div>
+            )}
 
-          {accounts.length > 0 && (
-            <>
-              {/* Add/Edit Form */}
-              {(isAdding || editingId) && (
-                <div className="mb-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
-                  <h3 className="font-bold text-gray-900 mb-6">
-                    {editingId ? 'Edit Trade' : 'New Trade'}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Basic Info */}
-                    <FormField label="Account" required>
-                      <Select value={formData.accountId} onValueChange={value => setFormData({ ...formData, accountId: value })}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select Account" />
-                        </SelectTrigger>
-                        <SelectContent>
+            {accounts.length > 0 && (
+              <>
+                {/* Add/Edit Form */}
+                {(isAdding || editingId) && (
+                  <div ref={formRef} className="p-6 bg-white rounded-2xl shadow-lg border border-slate-200/50">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-bold text-slate-900">
+                        {editingId ? 'Edit Trade' : 'New Trade'}
+                      </h3>
+                      <button
+                        onClick={resetForm}
+                        className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <X className="w-5 h-5 text-slate-500" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      {/* Basic Info */}
+                      <FormField label="Account" required>
+                        <Select value={formData.accountId} onValueChange={value => setFormData({ ...formData, accountId: value })}>
+                          <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+                            <SelectValue placeholder="Select Account" />
+                          </SelectTrigger>
+                          <SelectContent>
                           {accounts.map(account => (
                             <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
                           ))}
@@ -461,18 +543,18 @@ export default function TradeJournal() {
                       </Select>
                     </FormField>
 
-                    <FormField label="Pair" required>
-                      <Input
-                        className="bg-white"
-                        placeholder="EUR/USD"
-                        value={formData.pair}
-                        onChange={e => setFormData({ ...formData, pair: e.target.value.toUpperCase() })}
-                      />
-                    </FormField>
+                      <FormField label="Pair" required>
+                        <Input
+                          className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                          placeholder="EUR/USD"
+                          value={formData.pair}
+                          onChange={e => setFormData({ ...formData, pair: e.target.value.toUpperCase() })}
+                        />
+                      </FormField>
 
-                    <FormField label="Type" required>
-                      <Select value={formData.type} onValueChange={value => setFormData({ ...formData, type: value as 'BUY' | 'SELL' })}>
-                        <SelectTrigger className="bg-white">
+                      <FormField label="Type" required>
+                        <Select value={formData.type} onValueChange={value => setFormData({ ...formData, type: value as 'BUY' | 'SELL' })}>
+                          <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -485,7 +567,7 @@ export default function TradeJournal() {
                     {/* Entry Details */}
                     <FormField label="Entry Price" required>
                       <Input
-                        className="bg-white"
+                        className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                         type="number"
                         placeholder="1.0850"
                         value={formData.entryPrice}
@@ -500,8 +582,8 @@ export default function TradeJournal() {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full justify-start text-left font-normal h-10 bg-white border-gray-200 hover:bg-gray-50",
-                              !formData.entryDate && "text-gray-400"
+                              "w-full justify-start text-left font-normal h-10 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors",
+                              !formData.entryDate && "text-slate-400"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -542,7 +624,7 @@ export default function TradeJournal() {
                     {/* Lot Size & Commission */}
                     <FormField label="Lot Size" required>
                       <Input
-                        className="bg-white"
+                        className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                         type="number"
                         placeholder="0.10"
                         value={formData.lotSize}
@@ -553,9 +635,9 @@ export default function TradeJournal() {
 
                     <FormField label="Commission">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                         <Input
-                          className="bg-gray-50 cursor-not-allowed pl-7"
+                          className="bg-slate-50 cursor-not-allowed pl-7 border-slate-200"
                           type="number"
                           value={calculatedCommission}
                           readOnly
@@ -564,9 +646,23 @@ export default function TradeJournal() {
                       </div>
                     </FormField>
 
+                    <FormField label="Swap">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                        <Input
+                          className="bg-slate-50 border-slate-200 focus:bg-white transition-colors pl-7"
+                          type="number"
+                          placeholder="0.00"
+                          value={formData.swap}
+                          onChange={e => setFormData({ ...formData, swap: e.target.value })}
+                          step="0.01"
+                        />
+                      </div>
+                    </FormField>
+
                     <FormField label="Stop Loss">
                       <Input
-                        className="bg-white"
+                        className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                         type="number"
                         placeholder="1.0820"
                         value={formData.stopLoss}
@@ -577,7 +673,7 @@ export default function TradeJournal() {
 
                     <FormField label="Take Profit">
                       <Input
-                        className="bg-white"
+                        className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                         type="number"
                         placeholder="1.0950"
                         value={formData.takeProfit}
@@ -598,7 +694,7 @@ export default function TradeJournal() {
                     {/* Session & Strategy */}
                     <FormField label="Session">
                       <Select value={formData.session} onValueChange={value => setFormData({ ...formData, session: value as TradingSession })}>
-                        <SelectTrigger className="bg-white">
+                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
                           <SelectValue placeholder="Select Session" />
                         </SelectTrigger>
                         <SelectContent>
@@ -611,7 +707,7 @@ export default function TradeJournal() {
 
                     <FormField label="Strategy">
                       <Select value={formData.strategy} onValueChange={value => setFormData({ ...formData, strategy: value })}>
-                        <SelectTrigger className="bg-white">
+                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
                           <SelectValue placeholder="Select Strategy" />
                         </SelectTrigger>
                         <SelectContent>
@@ -624,7 +720,7 @@ export default function TradeJournal() {
 
                     <FormField label="Key Level">
                       <Select value={formData.keyLevel} onValueChange={value => setFormData({ ...formData, keyLevel: value })}>
-                        <SelectTrigger className="bg-white">
+                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
                           <SelectValue placeholder="Select Key Level" />
                         </SelectTrigger>
                         <SelectContent>
@@ -646,7 +742,7 @@ export default function TradeJournal() {
                     {/* Status */}
                     <FormField label="Status" required>
                       <Select value={formData.status} onValueChange={value => setFormData({ ...formData, status: value as 'OPEN' | 'CLOSED' })}>
-                        <SelectTrigger className="bg-white">
+                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -658,7 +754,7 @@ export default function TradeJournal() {
 
                     <FormField label="Profit/Loss">
                       <Input
-                        className="bg-white"
+                        className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                         type="number"
                         placeholder="+100.00"
                         value={formData.profit}
@@ -672,7 +768,7 @@ export default function TradeJournal() {
                       <>
                         <FormField label="Exit Price" required>
                           <Input
-                            className="bg-white"
+                            className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                             type="number"
                             placeholder="1.0900"
                             value={formData.exitPrice}
@@ -687,8 +783,8 @@ export default function TradeJournal() {
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  "w-full justify-start text-left font-normal h-10 bg-white border-gray-200 hover:bg-gray-50",
-                                  !formData.exitDate && "text-gray-400"
+                                  "w-full justify-start text-left font-normal h-10 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors",
+                                  !formData.exitDate && "text-slate-400"
                                 )}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -819,7 +915,7 @@ export default function TradeJournal() {
                           placeholder="Add trade notes..."
                           value={formData.notes}
                           onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl resize-none min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl resize-none min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                       </FormField>
                     </div>
@@ -827,14 +923,14 @@ export default function TradeJournal() {
                   <div className="flex gap-2 justify-end mt-4">
                     <button
                       onClick={editingId ? () => handleEdit(editingId) : handleSubmit}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-500/25"
                     >
                       <Check className="w-4 h-4" />
                       {editingId ? 'Update' : 'Save'}
                     </button>
                     <button
                       onClick={resetForm}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
+                      className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 flex items-center gap-2"
                     >
                       <X className="w-4 h-4" />
                       Cancel
@@ -846,54 +942,100 @@ export default function TradeJournal() {
               {/* Trades Table */}
               <div className="overflow-x-auto">
                 {filteredTrades.length === 0 && !isAdding && !editingId && (
-                  <div className="text-center py-12 text-gray-500">
-                    <p>No trades recorded yet</p>
-                    <p className="text-sm">Click "Add Trade" to start logging</p>
+                  <div className="text-center py-12">
+                    <p className="text-slate-600">No trades recorded yet</p>
+                    <p className="text-sm text-slate-500">Click "Add Trade" to start logging</p>
                   </div>
                 )}
 
                 {filteredTrades.length > 0 && (
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Date/Time</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Account</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Pair</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Type</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Strategy</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Entry</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Exit</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Exit Date</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">RR</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">P/L</th>
-                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredTrades.map(trade => (
-                        <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4 text-sm text-gray-900">
-                            <div>
-                              {getLocalDateString(trade.entryDate)}
-                              {trade.entryTime && (
-                                <div className="text-xs text-gray-500">{trade.entryTime}</div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: getFirmColor(trade.propFirmId) }}
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedTrades.length === filteredTrades.length && filteredTrades.length > 0}
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Select All</span>
+                      </label>
+                      <span className="text-sm text-slate-500">
+                        {selectedTrades.length > 0 ? `${selectedTrades.length} selected` : `${filteredTrades.length} trades`}
+                      </span>
+                    </div>
+                    {selectedTrades.length > 0 && (
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200 shadow-lg shadow-red-500/25"
+                      >
+                        <Trash className="w-4 h-4" />
+                        Delete ({selectedTrades.length})
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {filteredTrades.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50/50">
+                          <th className="w-12 py-3 px-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedTrades.length === filteredTrades.length && filteredTrades.length > 0}
+                              onChange={toggleSelectAll}
+                              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            />
+                          </th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Account</th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Pair</th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Type</th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Strategy</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Entry</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Exit</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">RR</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">P/L</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Swap</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Real P/L</th>
+                          <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                          <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredTrades.map(trade => (
+                          <tr key={trade.id} className={`hover:bg-slate-50/50 transition-colors duration-150 ${selectedTrades.includes(trade.id) ? 'bg-blue-50/50' : ''}`}>
+                            <td className="py-3 px-4">
+                              <input
+                                type="checkbox"
+                                checked={selectedTrades.includes(trade.id)}
+                                onChange={() => toggleSelect(trade.id)}
+                                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                               />
-                              <span className="text-gray-900">{getAccountName(trade.accountId)}</span>
+                            </td>
+                            <td className="py-3 px-4 text-sm text-slate-900">
+                              <div>
+                                {getLocalDateString(trade.entryDate)}
+                                {trade.entryTime && (
+                                  <div className="text-xs text-slate-400">{trade.entryTime}</div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: getFirmColor(trade.propFirmId) }}
+                                />
+                                <span className="text-slate-700">{getAccountName(trade.accountId)}</span>
                             </div>
                           </td>
                           <td className="py-3 px-4 text-sm">
-                            <div className="font-medium text-gray-900">{trade.pair}</div>
+                            <div className="font-semibold text-slate-900">{trade.pair}</div>
                             {trade.session && (
-                              <div className="text-xs text-gray-500">{trade.session}</div>
+                              <div className="text-xs text-slate-400">{trade.session}</div>
                             )}
                           </td>
                           <td className="py-3 px-4 text-sm">
@@ -903,20 +1045,12 @@ export default function TradeJournal() {
                               {trade.type}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-sm text-gray-900">
+                          <td className="py-3 px-4 text-sm text-slate-700">
                             {trade.strategy || '-'}
                           </td>
-                          <td className="py-3 px-4 text-sm text-right text-gray-900">{trade.entryPrice.toFixed(5)}</td>
-                          <td className="py-3 px-4 text-sm text-right text-gray-900">
+                          <td className="py-3 px-4 text-sm text-right font-mono text-slate-700">{trade.entryPrice.toFixed(5)}</td>
+                          <td className="py-3 px-4 text-sm text-right font-mono text-slate-700">
                             {trade.exitPrice ? trade.exitPrice.toFixed(5) : '-'}
-                          </td>
-                          <td className="py-3 px-4 text-sm text-right text-gray-900">
-                            <div>
-                              {trade.exitDate ? new Date(trade.exitDate).toLocaleDateString() : '-'}
-                              {trade.exitTime && (
-                                <div className="text-xs text-gray-500">{trade.exitTime}</div>
-                              )}
-                            </div>
                           </td>
                           <td className="py-3 px-4 text-sm text-right">
                             {trade.riskRewardRatio ? (
@@ -924,44 +1058,59 @@ export default function TradeJournal() {
                                 1:{trade.riskRewardRatio.toFixed(2)}
                               </span>
                             ) : (
-                              <span className="text-gray-400">-</span>
+                              <span className="text-slate-300">-</span>
                             )}
                           </td>
                           <td className="py-3 px-4 text-sm text-right">
                             {trade.profit !== undefined ? (
-                              <span className={`font-medium ${trade.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={`font-semibold ${trade.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {trade.profit >= 0 ? '+' : ''}${trade.profit.toFixed(2)}
                               </span>
                             ) : (
-                              <span className="text-gray-400">-</span>
+                              <span className="text-slate-300">-</span>
                             )}
                           </td>
+                          <td className="py-3 px-4 text-sm text-right text-slate-500">
+                            {(trade as any).swap ? `$${(trade as any).swap.toFixed(2)}` : '-'}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-right">
+                            {(() => {
+                              const realPL = (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+                              return (
+                                <span className={`font-semibold ${realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
+                                </span>
+                              );
+                            })()}
+                          </td>
                           <td className="py-3 px-4 text-sm text-center">
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${trade.status === 'OPEN' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                            <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${trade.status === 'OPEN' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
                               }`}>
                               {trade.status}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-sm text-right">
-                            <div className="flex gap-1 justify-end">
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
                               {(trade.beforeScreenshot || trade.afterScreenshot) && (
                                 <button
                                   onClick={() => setViewingTrade(trade)}
-                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                  title="View screenshots"
+                                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all duration-150 hover:scale-105"
+                                  title="View"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </button>
                               )}
                               <button
                                 onClick={() => startEdit(trade)}
-                                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                                className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all duration-150 hover:scale-105"
+                                title="Edit"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(trade.id)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all duration-150 hover:scale-105"
+                                title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -971,6 +1120,7 @@ export default function TradeJournal() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
             </>
@@ -980,58 +1130,70 @@ export default function TradeJournal() {
 
       {/* Trade Details Modal */}
       {viewingTrade && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  {viewingTrade.pair}
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    viewingTrade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {viewingTrade.type}
-                  </span>
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {getLocalDateString(viewingTrade.entryDate)} {viewingTrade.entryTime && `• ${viewingTrade.entryTime}`}
-                </p>
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200"
+          onClick={() => setViewingTrade(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Sticky Header */}
+            <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-gray-900">{viewingTrade.pair}</h2>
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      viewingTrade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {viewingTrade.type}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {getLocalDateString(viewingTrade.entryDate)} {viewingTrade.entryTime && `at ${viewingTrade.entryTime}`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setViewingTrade(null)}
+                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
               </div>
-              <button
-                onClick={() => setViewingTrade(null)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
             </div>
 
-            {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-              {/* Trade Stats */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {/* Key Metrics Cards */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4">
-                  <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">Entry</p>
-                  <p className="text-lg font-bold text-gray-900">{viewingTrade.entryPrice.toFixed(5)}</p>
+                  <p className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">Entry Price</p>
+                  <p className="text-xl font-bold text-gray-900">{viewingTrade.entryPrice.toFixed(5)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-4">
-                  <p className="text-xs text-purple-600 font-medium uppercase tracking-wide">Exit</p>
-                  <p className="text-lg font-bold text-gray-900">{viewingTrade.exitPrice?.toFixed(5) || '-'}</p>
+                  <p className="text-xs text-purple-600 font-medium uppercase tracking-wide mb-1">Exit Price</p>
+                  <p className="text-xl font-bold text-gray-900">{viewingTrade.exitPrice?.toFixed(5) || '-'}</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-4">
-                  <p className="text-xs text-green-600 font-medium uppercase tracking-wide">P/L</p>
-                  <p className={`text-lg font-bold ${viewingTrade.profit && viewingTrade.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`text-xs font-medium uppercase tracking-wide mb-1 ${(viewingTrade.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>P/L</p>
+                  <p className={`text-xl font-bold ${(viewingTrade.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {viewingTrade.profit !== undefined ? `${viewingTrade.profit >= 0 ? '+' : ''}$${viewingTrade.profit.toFixed(2)}` : '-'}
                   </p>
                 </div>
                 <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-4">
-                  <p className="text-xs text-orange-600 font-medium uppercase tracking-wide">Risk/Reward</p>
-                  <p className="text-lg font-bold text-gray-900">{viewingTrade.riskRewardRatio ? `1:${viewingTrade.riskRewardRatio.toFixed(2)}` : '-'}</p>
+                  <p className="text-xs text-orange-600 font-medium uppercase tracking-wide mb-1">Risk / Reward</p>
+                  <p className="text-xl font-bold text-gray-900">{viewingTrade.riskRewardRatio ? `1:${viewingTrade.riskRewardRatio.toFixed(2)}` : '-'}</p>
                 </div>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
-                <div className="space-y-2">
+              {/* Trade Information */}
+              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
+                  Trade Details
+                </h4>
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Account</span>
                     <span className="font-medium text-gray-900">{getAccountName(viewingTrade.accountId)}</span>
@@ -1041,25 +1203,55 @@ export default function TradeJournal() {
                     <span className="font-medium text-gray-900">{viewingTrade.lotSize}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-gray-500">Commission</span>
+                    <span className="font-medium text-gray-900">${viewingTrade.commission?.toFixed(2) || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Swap</span>
+                    <span className="font-medium text-gray-900">${(viewingTrade as any).swap?.toFixed(2) || '0.00'}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-gray-500">Status</span>
                     <span className={`font-medium ${viewingTrade.status === 'OPEN' ? 'text-blue-600' : 'text-gray-700'}`}>{viewingTrade.status}</span>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Strategy</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.strategy || '-'}</span>
+              </div>
+
+              {/* Real P/L Summary */}
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 mb-4 border border-slate-200">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-emerald-500 rounded-full"></span>
+                  Net Performance
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <p className="text-xs text-slate-500 uppercase tracking-wide">Profit</p>
+                    <p className={`text-lg font-bold ${(viewingTrade.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ${viewingTrade.profit?.toFixed(2) || '0.00'}
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Session</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.session || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Key Level</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.keyLevel || '-'}</span>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-500 uppercase tracking-wide">Real P/L</p>
+                    <p className={`text-lg font-bold ${(() => {
+                      const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) + (viewingTrade.commission || 0) + ((viewingTrade as any).swap || 0));
+                      return realPL >= 0 ? 'text-green-600' : 'text-red-600';
+                    })()}`}>
+                      ${(() => {
+                        const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) + (viewingTrade.commission || 0) + ((viewingTrade as any).swap || 0));
+                        return realPL.toFixed(2);
+                      })()}
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-2">
+              </div>
+
+              {/* Trade Management */}
+              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-orange-500 rounded-full"></span>
+                  Risk Management
+                </h4>
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Stop Loss</span>
                     <span className="font-medium text-red-600">{viewingTrade.stopLoss?.toFixed(5) || '-'}</span>
@@ -1069,27 +1261,60 @@ export default function TradeJournal() {
                     <span className="font-medium text-green-600">{viewingTrade.takeProfit?.toFixed(5) || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Commission</span>
-                    <span className="font-medium text-gray-900">${viewingTrade.commission?.toFixed(2) || '-'}</span>
+                    <span className="text-gray-500">Risk (pips)</span>
+                    <span className="font-medium text-red-600">
+                      {viewingTrade.stopLoss && viewingTrade.entryPrice ? Math.abs((viewingTrade.entryPrice - viewingTrade.stopLoss) * 10000).toFixed(1) : '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Reward (pips)</span>
+                    <span className="font-medium text-green-600">
+                      {viewingTrade.takeProfit && viewingTrade.entryPrice ? Math.abs((viewingTrade.takeProfit - viewingTrade.entryPrice) * 10000).toFixed(1) : '-'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Session & Strategy */}
+              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-purple-500 rounded-full"></span>
+                  Session & Strategy
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Session</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.session || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Strategy</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.strategy || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Key Level</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.keyLevel || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">High/Low Time</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.highLowTime || '-'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Screenshots */}
               {(viewingTrade.beforeScreenshot || viewingTrade.afterScreenshot) && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <ImageIcon className="w-4 h-4" />
                     Screenshots
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     {viewingTrade.beforeScreenshot && (
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                      <div className="relative group rounded-lg overflow-hidden">
                         <img
                           src={viewingTrade.beforeScreenshot}
                           alt="Before trade"
-                          className="w-full h-48 object-cover rounded-xl cursor-pointer"
+                          className="w-full h-40 object-cover cursor-pointer"
                           onClick={() => {
                             const images = [];
                             if (viewingTrade.beforeScreenshot) images.push({ url: viewingTrade.beforeScreenshot, label: 'Before Screenshot' });
@@ -1098,23 +1323,20 @@ export default function TradeJournal() {
                             setViewingImageIndex(0);
                           }}
                         />
-                        <div className="absolute bottom-3 left-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="flex items-center justify-between">
-                            <span className="text-white text-sm font-medium">Before</span>
-                            <button className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm">
-                              <ZoomIn className="w-4 h-4 text-white" />
-                            </button>
-                          </div>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
+                          <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
+                        <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          Before
+                        </span>
                       </div>
                     )}
                     {viewingTrade.afterScreenshot && (
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                      <div className="relative group rounded-lg overflow-hidden">
                         <img
                           src={viewingTrade.afterScreenshot}
                           alt="After trade"
-                          className="w-full h-48 object-cover rounded-xl cursor-pointer"
+                          className="w-full h-40 object-cover cursor-pointer"
                           onClick={() => {
                             const images = [];
                             if (viewingTrade.beforeScreenshot) images.push({ url: viewingTrade.beforeScreenshot, label: 'Before Screenshot' });
@@ -1123,24 +1345,25 @@ export default function TradeJournal() {
                             setViewingImageIndex(viewingTrade.beforeScreenshot ? 1 : 0);
                           }}
                         />
-                        <div className="absolute bottom-3 left-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="flex items-center justify-between">
-                            <span className="text-white text-sm font-medium">After</span>
-                            <button className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm">
-                              <ZoomIn className="w-4 h-4 text-white" />
-                            </button>
-                          </div>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
+                          <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
+                        <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          After
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Notes */}
+              {/* Notes Section */}
               {viewingTrade.notes && (
-                <div className="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
-                  <h4 className="text-sm font-semibold text-amber-800 mb-2">Notes</h4>
+                <div className="bg-amber-50/50 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                    <span className={`w-1 h-4 rounded-full ${viewingTrade.notes ? 'bg-amber-500' : 'bg-gray-400'}`}></span>
+                    Notes
+                  </h4>
                   <p className="text-sm text-gray-700 leading-relaxed">{viewingTrade.notes}</p>
                 </div>
               )}
@@ -1156,6 +1379,49 @@ export default function TradeJournal() {
           initialIndex={viewingImageIndex}
           onClose={() => setViewingImages([])}
         />
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-red-100 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Delete Trades</h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete <span className="font-semibold">{selectedTrades.length}</span> trade{selectedTrades.length > 1 ? 's' : ''}? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 shadow-lg shadow-red-500/25"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash className="w-4 h-4" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

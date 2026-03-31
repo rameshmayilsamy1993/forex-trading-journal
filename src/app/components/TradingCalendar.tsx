@@ -159,13 +159,23 @@ export default function TradingCalendar() {
   };
 
   const getTradePnL = (trade: Trade): number => {
-    return trade.profit || 0;
+    return (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+  };
+
+  const formatDateKey = (date: Date | string | undefined): string => {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    d.setHours(0, 0, 0, 0);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
   const groupTradesByDate = useMemo(() => {
     const grouped: Record<string, Trade[]> = {};
     filteredTrades.forEach(trade => {
-      const dateKey = getDateKey(trade.entryDate);
+      if (!trade.entryDate) return;
+      const dateKey = formatDateKey(trade.entryDate);
+      if (!dateKey) return;
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
@@ -177,7 +187,7 @@ export default function TradingCalendar() {
   const calendarDays = useMemo(() => {
     const days = getDaysInMonth(currentDate);
     return days.map(date => {
-      const dateString = getDateKey(date);
+      const dateString = formatDateKey(date);
       const dayTrades = groupTradesByDate[dateString] || [];
       const pnl = dayTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
       return {
@@ -186,7 +196,7 @@ export default function TradingCalendar() {
         trades: dayTrades,
         pnl,
         isCurrentMonth: date.getMonth() === currentDate.getMonth(),
-        isToday: getDateKey(date) === getDateKey(today)
+        isToday: formatDateKey(date) === formatDateKey(today)
       };
     });
   }, [currentDate, groupTradesByDate]);
@@ -225,12 +235,14 @@ export default function TradingCalendar() {
 
   const monthStats = useMemo(() => {
     const monthTrades = filteredTrades.filter(t => {
+      if (!t.entryDate) return false;
       const tradeDate = new Date(t.entryDate);
+      if (isNaN(tradeDate.getTime())) return false;
       return tradeDate.getMonth() === currentDate.getMonth() && 
              tradeDate.getFullYear() === currentDate.getFullYear();
     });
     const pnl = monthTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
-    const daysTraded = new Set(monthTrades.map(t => getDateKey(t.entryDate))).size;
+    const daysTraded = new Set(monthTrades.map(t => formatDateKey(t.entryDate))).size;
     
     return {
       totalPnl: pnl,
@@ -451,7 +463,7 @@ export default function TradingCalendar() {
                       <span
                         key={i}
                         className={`px-2 py-0.5 text-xs rounded-full ${
-                          (trade.profit || 0) >= 0 
+                          getTradePnL(trade) >= 0 
                             ? 'bg-green-100 text-green-700' 
                             : 'bg-red-100 text-red-700'
                         }`}
@@ -527,7 +539,7 @@ export default function TradingCalendar() {
                 <p className={`text-2xl font-bold ${selectedDay.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {selectedDay.pnl >= 0 ? '+' : ''}${selectedDay.pnl.toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-500">Total PnL</p>
+                <p className="text-sm text-gray-500">Net P/L</p>
               </div>
               <button
                 onClick={() => setSelectedDay(null)}
@@ -554,9 +566,9 @@ export default function TradingCalendar() {
                         <span className="font-medium text-gray-900">{trade.pair}</span>
                       </div>
                       <span className={`font-bold ${
-                        (trade.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                        getTradePnL(trade) >= 0 ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {(trade.profit || 0) >= 0 ? '+' : ''}${(trade.profit || 0).toFixed(2)}
+                        {getTradePnL(trade) >= 0 ? '+' : ''}${getTradePnL(trade).toFixed(2)}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-sm text-gray-500">

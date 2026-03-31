@@ -74,7 +74,36 @@ export default function Reports() {
     return String(firm || '');
   };
 
-  const stats = useMemo(() => calculateTradeStats(trades), [trades]);
+  const getRealPL = (trade: Trade): number => {
+    return (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+  };
+
+  const stats = useMemo(() => {
+    const closedTrades = trades.filter(t => t.status === 'CLOSED');
+    const wins = closedTrades.filter(t => getRealPL(t) > 0);
+    const losses = closedTrades.filter(t => getRealPL(t) < 0);
+    
+    const totalWin = wins.reduce((sum, t) => sum + getRealPL(t), 0);
+    const totalLoss = Math.abs(losses.reduce((sum, t) => sum + getRealPL(t), 0));
+    const netPL = totalWin - totalLoss;
+    const profitFactor = totalLoss !== 0 ? totalWin / totalLoss : totalWin > 0 ? Infinity : 0;
+    const avgWin = wins.length ? totalWin / wins.length : 0;
+    
+    return {
+      totalTrades: closedTrades.length,
+      winningTrades: wins.length,
+      losingTrades: losses.length,
+      winRate: closedTrades.length > 0 ? (wins.length / closedTrades.length) * 100 : 0,
+      totalProfit: totalWin,
+      totalLoss: totalLoss,
+      netProfit: netPL,
+      averageWin: avgWin,
+      averageLoss: losses.length ? totalLoss / losses.length : 0,
+      profitFactor,
+      largestWin: wins.length > 0 ? Math.max(...wins.map(t => getRealPL(t))) : 0,
+      largestLoss: losses.length > 0 ? Math.min(...losses.map(t => getRealPL(t))) : 0,
+    };
+  }, [trades]);
 
   const pairStats = useMemo(() => {
     const closedTrades = trades.filter(t => t.status === 'CLOSED');
@@ -82,10 +111,11 @@ export default function Reports() {
 
     closedTrades.forEach(trade => {
       const existing = pairs.get(trade.pair) || { trades: 0, profit: 0, wins: 0 };
+      const realPL = getRealPL(trade);
       pairs.set(trade.pair, {
         trades: existing.trades + 1,
-        profit: existing.profit + (trade.profit || 0),
-        wins: existing.wins + ((trade.profit || 0) > 0 ? 1 : 0),
+        profit: existing.profit + realPL,
+        wins: existing.wins + (realPL > 0 ? 1 : 0),
       });
     });
 
@@ -99,17 +129,24 @@ export default function Reports() {
   }, [trades]);
 
   const monthlyStats = useMemo(() => {
-    const closedTrades = trades.filter(t => t.status === 'CLOSED');
+    const closedTrades = trades.filter(t => t.status === 'CLOSED' && t.entryDate);
     const months = new Map<string, { profit: number; trades: number; wins: number }>();
 
     closedTrades.forEach(trade => {
-      const month = new Date(trade.entryDate).toISOString().slice(0, 7);
-      const existing = months.get(month) || { profit: 0, trades: 0, wins: 0 };
-      months.set(month, {
-        profit: existing.profit + (trade.profit || 0),
-        trades: existing.trades + 1,
-        wins: existing.wins + ((trade.profit || 0) > 0 ? 1 : 0),
-      });
+      try {
+        const date = new Date(trade.entryDate);
+        if (isNaN(date.getTime())) return;
+        const month = date.toISOString().slice(0, 7);
+        const existing = months.get(month) || { profit: 0, trades: 0, wins: 0 };
+        const realPL = getRealPL(trade);
+        months.set(month, {
+          profit: existing.profit + realPL,
+          trades: existing.trades + 1,
+          wins: existing.wins + (realPL > 0 ? 1 : 0),
+        });
+      } catch (e) {
+        return;
+      }
     });
 
     return Array.from(months.entries())
@@ -189,7 +226,7 @@ export default function Reports() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
           title="Total Trades"
           value={stats.totalTrades}
@@ -204,14 +241,20 @@ export default function Reports() {
           color="text-purple-600"
         />
         <StatCard
-          title="Net Profit"
+          title="Total Win"
+          value={`$${stats.totalProfit.toFixed(2)}`}
+          icon={TrendingUp}
+          color="text-green-600"
+        />
+        <StatCard
+          title="Net P/L"
           value={`$${stats.netProfit.toFixed(2)}`}
           subtitle={`PF: ${stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}`}
           icon={stats.netProfit >= 0 ? TrendingUp : TrendingDown}
           color={stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}
         />
         <StatCard
-          title="Average Win/Loss"
+          title="Avg Win"
           value={`$${stats.averageWin.toFixed(2)}`}
           subtitle={`Avg Loss: $${stats.averageLoss.toFixed(2)}`}
           icon={AlertCircle}
@@ -223,18 +266,18 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profit Breakdown */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-bold text-gray-900 mb-4">Profit Breakdown</h3>
+          <h3 className="font-bold text-gray-900 mb-4">Net Performance</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-              <span className="text-sm text-gray-700">Total Profit</span>
+              <span className="text-sm text-gray-700">Total Win</span>
               <span className="font-bold text-green-600">${stats.totalProfit.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
               <span className="text-sm text-gray-700">Total Loss</span>
               <span className="font-bold text-red-600">-${stats.totalLoss.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm text-gray-700">Net Profit/Loss</span>
+            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <span className="text-sm font-medium text-gray-700">Net P/L</span>
               <span className={`font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {stats.netProfit >= 0 ? '+' : ''}${stats.netProfit.toFixed(2)}
               </span>
@@ -292,13 +335,19 @@ export default function Reports() {
                 </tr>
               </thead>
               <tbody>
-                {monthlyStats.map(month => (
+                {monthlyStats.map(month => {
+                  const monthDate = (() => {
+                    try {
+                      const d = new Date(month.month + '-01T00:00:00');
+                      return isNaN(d.getTime()) ? null : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                    } catch {
+                      return month.month;
+                    }
+                  })();
+                  return (
                   <tr key={month.month} className="border-b border-gray-100">
                     <td className="py-3 px-4 text-sm text-gray-900">
-                      {new Date(month.month + '-01').toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long'
-                      })}
+                      {monthDate || month.month}
                     </td>
                     <td className="py-3 px-4 text-sm text-right text-gray-900">{month.trades}</td>
                     <td className="py-3 px-4 text-sm text-right text-gray-900">{month.wins}</td>
@@ -317,7 +366,8 @@ export default function Reports() {
                       </span>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           )}
