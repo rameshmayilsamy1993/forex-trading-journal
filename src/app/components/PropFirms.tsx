@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, X, Check, Building2 } from 'lucide-react';
 import { PropFirm } from '../types/trading';
 import apiService from '../services/apiService';
 import { Input } from './ui/input';
+import { PageHeader, CardContainer, StatCard } from './ui/DesignSystem';
 
 export default function PropFirms() {
   const [firms, setFirms] = useState<PropFirm[]>([]);
@@ -88,35 +89,43 @@ export default function PropFirms() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Prop Firms</h2>
-            <p className="text-sm text-gray-500 mt-1">Manage your prop trading firms</p>
-          </div>
-          <button
-            onClick={() => setIsAdding(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add Prop Firm
-          </button>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title="Prop Firms"
+        subtitle="Manage your prop trading firms"
+        icon={Building2}
+        color="blue"
+        action={{
+          label: 'Add Prop Firm',
+          icon: Plus,
+          onClick: () => setIsAdding(true)
+        }}
+      />
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard
+          label="Total Firms"
+          value={firms.length}
+          icon={Building2}
+          color="blue"
+        />
+      </div>
+
+      <CardContainer className="!p-0">
         <div className="p-6">
           {/* Add Form */}
           {isAdding && (
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex gap-3">
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-xl border border-blue-100">
+              <div className="flex gap-3 flex-wrap">
                 <Input
                   type="text"
                   placeholder="Prop firm name"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  className="flex-1 min-w-[200px]"
                   autoFocus
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                   {colors.map(color => (
                     <button
                       key={color}
@@ -157,7 +166,7 @@ export default function PropFirms() {
             {firms.map(firm => (
               <div
                 key={firm.id}
-                className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                className="flex items-center gap-3 p-4 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200"
               >
                 {editingId === firm.id ? (
                   <>
@@ -165,6 +174,7 @@ export default function PropFirms() {
                       type="text"
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      className="flex-1"
                       autoFocus
                     />
                     <div className="flex gap-2">
@@ -220,7 +230,7 @@ export default function PropFirms() {
             ))}
           </div>
         </div>
-      </div>
+      </CardContainer>
     </div>
   );
 }

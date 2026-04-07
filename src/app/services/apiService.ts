@@ -156,14 +156,14 @@ const apiService = {
     });
   },
   
-  getTrades: async (filters?: { accountId?: string; firmId?: string }): Promise<Trade[]> => {
+  getTrades: async (filters?: { accountId?: string; firmId?: string; ssmtType?: string }): Promise<Trade[]> => {
     let url = `${API_BASE_URL}/trades`;
-    if (filters?.accountId || filters?.firmId) {
-      const params = new URLSearchParams();
-      if (filters.accountId) params.append('accountId', filters.accountId);
-      if (filters.firmId) params.append('firmId', filters.firmId);
-      url += `?${params.toString()}`;
-    }
+    const params = new URLSearchParams();
+    if (filters?.accountId) params.append('accountId', filters.accountId);
+    if (filters?.firmId) params.append('firmId', filters.firmId);
+    if (filters?.ssmtType) params.append('ssmtType', filters.ssmtType);
+    const queryString = params.toString();
+    if (queryString) url += `?${queryString}`;
     return fetchWithAuth(url);
   },
   
@@ -241,6 +241,35 @@ const apiService = {
     return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  settings: {
+    getPairs: async (): Promise<string[]> => {
+      const data = await fetchWithAuth(`${API_BASE_URL}/settings/pairs`);
+      return data.pairs || [];
+    },
+    
+    updatePairs: async (pairs: string[]): Promise<{ message: string; pairs: string[] }> => {
+      return fetchWithAuth(`${API_BASE_URL}/settings/pairs`, {
+        method: 'POST',
+        body: JSON.stringify({ pairs }),
+      });
+    },
+    
+    getAll: async (): Promise<any[]> => {
+      return fetchWithAuth(`${API_BASE_URL}/settings`);
+    },
+    
+    get: async (key: string): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/settings?key=${key}`);
+    },
+    
+    save: async (key: string, value: any): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/settings`, {
+        method: 'POST',
+        body: JSON.stringify({ key, value }),
+      });
+    },
   },
 
   importTrades: async (file: File, accountId: string): Promise<{ total: number; inserted: number; skipped: number; errors: any[] }> => {

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Building2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, Building2, Wallet } from 'lucide-react';
 import { TradingAccount, PropFirm, Trade } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
+import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
 
 interface FormFieldsProps {
   formData: { name: string; propFirmId: string; initialBalance: string; currency: string };
@@ -206,23 +207,42 @@ export default function Accounts() {
 
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Trading Accounts</h2>
-            <p className="text-sm text-gray-500 mt-1">Manage your trading accounts</p>
-          </div>
-          <button
-            onClick={() => setIsAdding(true)}
-            disabled={firms.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Plus className="w-4 h-4" />
-            Add Account
-          </button>
-        </div>
+    <div className="max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        title="Trading Accounts"
+        subtitle="Manage your trading accounts"
+        icon={Building2}
+        color="teal"
+        action={{
+          label: 'Add Account',
+          icon: Plus,
+          onClick: () => setIsAdding(true)
+        }}
+      />
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard
+          label="Total Accounts"
+          value={accounts.length}
+          icon={Wallet}
+          color="teal"
+        />
+        <StatCard
+          label="Total Balance"
+          value={`$${accounts.reduce((sum, acc) => sum + acc.initialBalance, 0).toLocaleString()}`}
+          icon={Building2}
+          color="blue"
+        />
+        <StatCard
+          label="Prop Firms"
+          value={firms.length}
+          icon={Building2}
+          color="green"
+        />
+      </div>
+
+      <CardContainer className="!p-0">
         <div className="p-6">
           {firms.length === 0 && (
             <div className="text-center py-12 text-gray-500">
@@ -236,7 +256,7 @@ export default function Accounts() {
             <>
               {/* Add Form */}
               {isAdding && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mb-6 p-4 bg-gradient-to-r from-teal-50/50 to-cyan-50/50 rounded-xl border border-teal-100">
                   <FormFields
                     formData={formData}
                     setFormData={setFormData}
@@ -248,9 +268,9 @@ export default function Accounts() {
               )}
 
               {/* Accounts Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {accounts.length === 0 && !isAdding && (
-                  <div className="col-span-2 text-center py-12 text-gray-500">
+                  <div className="col-span-full text-center py-12 text-gray-500">
                     <p>No accounts added yet</p>
                     <p className="text-sm">Click "Add Account" to get started</p>
                   </div>
@@ -265,7 +285,7 @@ export default function Accounts() {
                   return (
                     <div
                       key={account.id ?? i}
-                      className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                      className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md hover:border-teal-200 transition-all duration-200"
                     >
                       {editingId === account.id ? (
                         <FormFields
@@ -277,7 +297,7 @@ export default function Accounts() {
                         />
                       ) : (
                         <>
-                          <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
                               <h3 className="font-bold text-gray-900">{account.name}</h3>
                               <div className="flex items-center gap-2 mt-1">
@@ -291,13 +311,13 @@ export default function Accounts() {
                             <div className="flex gap-1">
                               <button
                                 onClick={() => startEdit(account)}
-                                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(account.id)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -306,13 +326,13 @@ export default function Accounts() {
 
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Initial Balance:</span>
+                              <span className="text-gray-600">Initial:</span>
                               <span className="font-medium text-gray-900">
                                 {formatCurrency(account.initialBalance, account.currency)}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Current Balance:</span>
+                              <span className="text-gray-600">Current:</span>
                               <span className={`font-bold ${currentBalance >= account.initialBalance
                                   ? 'text-green-600'
                                   : 'text-red-600'
@@ -320,9 +340,9 @@ export default function Accounts() {
                                 {formatCurrency(currentBalance, account.currency)}
                               </span>
                             </div>
-                            <div className="flex justify-between text-sm">
+                            <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
                               <span className="text-gray-600">P/L:</span>
-                              <span className={`font-medium ${pl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={`font-bold ${pl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {pl >= 0 ? '+' : ''}
                                 {formatCurrency(pl, account.currency)}
                               </span>
@@ -337,7 +357,7 @@ export default function Accounts() {
             </>
           )}
         </div>
-      </div>
+      </CardContainer>
     </div>
   );
 }

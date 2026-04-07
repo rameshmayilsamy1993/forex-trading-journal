@@ -18,6 +18,9 @@ export interface TradingAccount {
 export type TradeType = 'BUY' | 'SELL';
 export type TradeStatus = 'OPEN' | 'CLOSED';
 export type TradingSession = string;
+export type SSMTType = 'NO' | 'GBPUSD' | 'EURUSD' | 'DXY';
+export type SMTType = 'No' | 'Yes with GBPUSD' | 'Yes with EURUSD' | 'Yes with DXY';
+export type Model1Type = 'Yes (Both EUR and GBP)' | 'Yes (EUR)' | 'Yes (GBP)' | 'No';
 
 export type MasterType = 'strategy' | 'keyLevel' | 'session';
 
@@ -50,9 +53,12 @@ export interface Trade {
   session?: TradingSession;
   strategy?: string;
   keyLevel?: string;
+  highLowTime?: string;
+  ssmtType?: SSMTType;
+  smt?: SMTType;
+  model1?: Model1Type;
   beforeScreenshot?: string;
   afterScreenshot?: string;
-  highLowTime?: string;
 }
 
 export interface TradeStats {
@@ -87,7 +93,15 @@ export interface MissedTrade {
   strategy?: string;
   keyLevel?: string;
   reason: string;
+  missedReason?: string;
+  ssmtType?: SSMTType;
+  smt?: SMTType;
+  model1?: Model1Type;
   emotion?: string;
+  commission?: number;
+  swap?: number;
+  profitLoss?: number;
+  realPL?: number;
   status: MissedTradeStatus;
   screenshots?: {
     before?: string;

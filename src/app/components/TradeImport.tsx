@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, AlertTriangle } from 'lucide-react';
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, AlertTriangle, FileUp } from 'lucide-react';
 import apiService, { TradingAccount } from '../services/apiService';
+import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
 
 interface PreviewTrade {
   positionId: string;
@@ -144,17 +145,16 @@ export default function TradeImport() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Import Trades</h1>
-          <p className="text-sm text-slate-500 mt-1">Upload your MT4/MT5 export file to bulk import trades</p>
-        </div>
-      </div>
+    <div className="max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        title="Import Trades"
+        subtitle="Upload your MT4/MT5 export file to bulk import trades"
+        icon={FileUp}
+        color="indigo"
+      />
 
       {/* Main Card */}
-      <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 overflow-hidden">
+      <CardContainer className="!p-0">
         {error && (
           <div className="p-4 bg-red-50 border-b border-red-200 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -443,7 +443,7 @@ export default function TradeImport() {
             </p>
           </div>
         </div>
-      </div>
+      </CardContainer>
     </div>
   );
 }

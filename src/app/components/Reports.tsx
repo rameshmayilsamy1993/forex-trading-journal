@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Target, Award, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Award, AlertCircle, BarChart3 } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm, TradeStats } from '../types/trading';
 import apiService from '../services/apiService';
 import { calculateTradeStats } from '../utils/calculations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { PageHeader, StatCard, CardContainer, SectionCard } from './ui/DesignSystem';
+import { LoadingSpinner } from './ui/Loading';
 
 export default function Reports() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -11,17 +13,23 @@ export default function Reports() {
   const [firms, setFirms] = useState<PropFirm[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [selectedFirm, setSelectedFirm] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadAccountsAndFirms = async () => {
+    setIsLoading(true);
     try {
       const [accountsData, firmsData] = await Promise.all([
         apiService.getAccounts(),
         apiService.getPropFirms()
       ]);
-      setAccounts(accountsData);
-      setFirms(firmsData);
+      setAccounts(accountsData || []);
+      setFirms(firmsData || []);
     } catch (error) {
       console.error('Failed to load accounts and firms:', error);
+      setAccounts([]);
+      setFirms([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -158,115 +166,98 @@ export default function Reports() {
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [trades]);
 
-  const StatCard = ({
-    title,
-    value,
-    subtitle,
-    icon: Icon,
-    color
-  }: {
-    title: string;
-    value: string | number;
-    subtitle?: string;
-    icon: any;
-    color: string;
-  }) => (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm text-gray-600 mb-1">{title}</p>
-          <p className={`text-2xl font-bold ${color}`}>{value}</p>
-          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
-        </div>
-        <div className={`p-3 rounded-lg ${color.replace('text-', 'bg-').replace('-600', '-100')}`}>
-          <Icon className={`w-6 h-6 ${color}`} />
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Filters */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Performance Reports</h2>
-        <div className="flex gap-3">
-          <Select 
-            value={selectedFirm} 
-            onValueChange={(value: string) => setSelectedFirm(value)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Prop Firms" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Prop Firms</SelectItem>
-              {firms.map(firm => (
-                <SelectItem key={getPropFirmId(firm)} value={getPropFirmId(firm)}>{firm.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <PageHeader
+        title="Performance Reports"
+        subtitle="Analyze your trading performance"
+        icon={BarChart3}
+        color="purple"
+      />
 
-          <Select 
-            value={selectedAccount || 'all'}
-            onValueChange={(value: string) => setSelectedAccount(value)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Accounts" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Accounts</SelectItem>
-              {accounts
-                .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
-                .map(account => (
-                  <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+      {/* Filters */}
+      <CardContainer className="!p-0">
+        <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
+          <div className="flex gap-3">
+            <Select 
+              value={selectedFirm} 
+              onValueChange={(value: string) => setSelectedFirm(value)}
+            >
+              <SelectTrigger className="w-[200px] bg-white">
+                <SelectValue placeholder="All Prop Firms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Prop Firms</SelectItem>
+                {firms.map(firm => (
+                  <SelectItem key={getPropFirmId(firm)} value={getPropFirmId(firm)}>{firm.name}</SelectItem>
                 ))}
-            </SelectContent>
-          </Select>
+              </SelectContent>
+            </Select>
+
+            <Select 
+              value={selectedAccount || 'all'}
+              onValueChange={(value: string) => setSelectedAccount(value)}
+            >
+              <SelectTrigger className="w-[200px] bg-white">
+                <SelectValue placeholder="All Accounts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Accounts</SelectItem>
+                {accounts
+                  .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
+                  .map(account => (
+                    <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      </CardContainer>
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
-          title="Total Trades"
+          label="Total Trades"
           value={stats.totalTrades}
           icon={Target}
-          color="text-blue-600"
+          color="blue"
         />
         <StatCard
-          title="Win Rate"
+          label="Win Rate"
           value={`${stats.winRate.toFixed(1)}%`}
-          subtitle={`${stats.winningTrades}W / ${stats.losingTrades}L`}
           icon={Award}
-          color="text-purple-600"
+          color="purple"
+          trend={{ value: `${stats.winningTrades}W / ${stats.losingTrades}L`, positive: stats.winRate >= 50 }}
         />
         <StatCard
-          title="Total Win"
+          label="Total Win"
           value={`$${stats.totalProfit.toFixed(2)}`}
           icon={TrendingUp}
-          color="text-green-600"
+          color="green"
         />
         <StatCard
-          title="Net P/L"
+          label="Net P/L"
           value={`$${stats.netProfit.toFixed(2)}`}
-          subtitle={`PF: ${stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}`}
           icon={stats.netProfit >= 0 ? TrendingUp : TrendingDown}
-          color={stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}
+          color={stats.netProfit >= 0 ? 'green' : 'red'}
+          trend={{ value: `PF: ${stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}`, positive: stats.netProfit >= 0 }}
         />
         <StatCard
-          title="Avg Win"
+          label="Avg Win"
           value={`$${stats.averageWin.toFixed(2)}`}
-          subtitle={`Avg Loss: $${stats.averageLoss.toFixed(2)}`}
           icon={AlertCircle}
-          color="text-orange-600"
+          color="orange"
         />
       </div>
 
       {/* Detailed Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profit Breakdown */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-bold text-gray-900 mb-4">Net Performance</h3>
+        <SectionCard
+          title="Net Performance"
+          icon={TrendingUp}
+          color="purple"
+        >
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
               <span className="text-sm text-gray-700">Total Win</span>
@@ -291,17 +282,20 @@ export default function Reports() {
               <span className="font-bold text-orange-600">${stats.largestLoss.toFixed(2)}</span>
             </div>
           </div>
-        </div>
+        </SectionCard>
 
         {/* Best Performing Pairs */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-bold text-gray-900 mb-4">Top Pairs by Profit</h3>
+        <SectionCard
+          title="Top Pairs by Profit"
+          icon={Target}
+          color="green"
+        >
           <div className="space-y-2">
             {pairStats.length === 0 && (
               <p className="text-sm text-gray-500 text-center py-8">No closed trades yet</p>
             )}
             {pairStats.slice(0, 5).map(pair => (
-              <div key={pair.pair} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div key={pair.pair} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">{pair.pair}</p>
                   <p className="text-xs text-gray-500">
@@ -314,19 +308,22 @@ export default function Reports() {
               </div>
             ))}
           </div>
-        </div>
+        </SectionCard>
       </div>
 
       {/* Monthly Performance */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="font-bold text-gray-900 mb-4">Monthly Performance</h3>
+      <SectionCard
+        title="Monthly Performance"
+        icon={BarChart3}
+        color="indigo"
+      >
         <div className="overflow-x-auto">
           {monthlyStats.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-8">No closed trades yet</p>
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Month</th>
                   <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Trades</th>
                   <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Wins</th>
@@ -345,7 +342,7 @@ export default function Reports() {
                     }
                   })();
                   return (
-                  <tr key={month.month} className="border-b border-gray-100">
+                  <tr key={month.month} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4 text-sm text-gray-900">
                       {monthDate || month.month}
                     </td>
@@ -372,7 +369,7 @@ export default function Reports() {
             </table>
           )}
         </div>
-      </div>
+      </SectionCard>
     </div>
   );
 }

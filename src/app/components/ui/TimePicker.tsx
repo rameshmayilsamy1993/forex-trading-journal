@@ -8,23 +8,57 @@ interface TimePickerProps {
   disabled?: boolean;
 }
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+const HOURS_12 = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
 const MINUTES = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+const PERIODS = ['AM', 'PM'];
 
-export default function TimePicker({ value, onChange, placeholder = "--:--", disabled = false }: TimePickerProps) {
+export default function TimePicker({ value, onChange, placeholder = "--:-- --", disabled = false }: TimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [hours, minutes] = value ? value.split(':') : ['', ''];
-  const [selectedHour, setSelectedHour] = useState(hours || '00');
-  const [selectedMinute, setSelectedMinute] = useState(minutes || '00');
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const [selectedHour, setSelectedHour] = useState('12');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  const [selectedPeriod, setSelectedPeriod] = useState<'AM' | 'PM'>('AM');
 
   useEffect(() => {
     if (value) {
-      const [h, m] = value.split(':');
-      setSelectedHour(h || '00');
-      setSelectedMinute(m || '00');
+      parseTime(value);
     }
   }, [value]);
+
+  const parseTime = (timeStr: string) => {
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (match) {
+      let hour = parseInt(match[1]);
+      const minute = match[2];
+      const period = match[3]?.toUpperCase() as 'AM' | 'PM' || 'AM';
+      
+      if (period === 'PM' && hour !== 12) {
+        hour += 12;
+      } else if (period === 'AM' && hour === 12) {
+        hour = 0;
+      }
+      
+      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      setSelectedHour(hour12.toString());
+      setSelectedMinute(minute);
+      setSelectedPeriod(period);
+    }
+  };
+
+  const formatTime = (hour12: string, minute: string, period: 'AM' | 'PM'): string => {
+    return `${hour12.padStart(2, '0')}:${minute} ${period}`;
+  };
+
+  const get24HourTime = (): string => {
+    let hour = parseInt(selectedHour);
+    if (selectedPeriod === 'PM' && hour !== 12) {
+      hour += 12;
+    } else if (selectedPeriod === 'AM' && hour === 12) {
+      hour = 0;
+    }
+    return `${hour.toString().padStart(2, '0')}:${selectedMinute}`;
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,27 +73,30 @@ export default function TimePicker({ value, onChange, placeholder = "--:--", dis
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const handleSelect = (type: 'hour' | 'minute', val: string) => {
-    if (type === 'hour') {
-      setSelectedHour(val);
-    } else {
-      setSelectedMinute(val);
-    }
+  const handleHourChange = (hour: string) => {
+    setSelectedHour(hour);
+    onChange(formatTime(hour, selectedMinute, selectedPeriod));
   };
 
-  const handleConfirm = () => {
-    onChange(`${selectedHour}:${selectedMinute}`);
-    setIsOpen(false);
+  const handleMinuteChange = (minute: string) => {
+    setSelectedMinute(minute);
+    onChange(formatTime(selectedHour, minute, selectedPeriod));
+  };
+
+  const handlePeriodChange = (period: 'AM' | 'PM') => {
+    setSelectedPeriod(period);
+    onChange(formatTime(selectedHour, selectedMinute, period));
   };
 
   const handleQuickSelect = (time: string) => {
     onChange(time);
+    parseTime(time);
     setIsOpen(false);
   };
 
-  const scrollToSelected = (container: HTMLDivElement | null, selected: string) => {
+  const scrollToSelected = (container: HTMLDivElement | null, selected: string, items: string[]) => {
     if (container) {
-      const index = selected === '' ? 0 : parseInt(selected);
+      const index = items.indexOf(selected);
       const itemHeight = 40;
       container.scrollTop = index * itemHeight - container.clientHeight / 2 + itemHeight / 2;
     }
@@ -70,17 +107,27 @@ export default function TimePicker({ value, onChange, placeholder = "--:--", dis
 
   useEffect(() => {
     if (isOpen) {
-      scrollToSelected(hourRef.current, selectedHour);
-      scrollToSelected(minuteRef.current, selectedMinute);
+      scrollToSelected(hourRef.current, selectedHour, HOURS_12);
+      scrollToSelected(minuteRef.current, selectedMinute, MINUTES);
     }
   }, [isOpen]);
 
+  const getCurrentTime12Hour = () => {
+    return new Date().toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+  };
+
   const quickSelects = [
-    { label: 'Now', time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) },
-    { label: 'London Open', time: '08:00' },
-    { label: 'NY Open', time: '13:30' },
-    { label: 'Asia Open', time: '00:00' },
+    { label: 'Now', time: getCurrentTime12Hour() },
+    { label: 'London Open', time: '08:00 AM' },
+    { label: 'NY Open', time: '01:30 PM' },
+    { label: 'Asia Open', time: '12:00 AM' },
   ];
+
+  const displayValue = value || placeholder;
 
   return (
     <div ref={containerRef} className="relative">
@@ -97,12 +144,11 @@ export default function TimePicker({ value, onChange, placeholder = "--:--", dis
         `}
       >
         <Clock className="w-4 h-4 text-gray-400" />
-        <span className="text-sm">{value || placeholder}</span>
+        <span className="text-sm">{displayValue}</span>
       </button>
 
       {isOpen && (
         <div className="absolute z-50 mt-2 left-0 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 animate-in fade-in zoom-in-95 duration-200">
-          {/* Quick Select */}
           <div className="flex gap-2 mb-4 pb-3 border-b border-gray-100">
             {quickSelects.map((qs) => (
               <button
@@ -116,124 +162,105 @@ export default function TimePicker({ value, onChange, placeholder = "--:--", dis
             ))}
           </div>
 
-          {/* Time Selector */}
-          <div className="flex items-center gap-4">
-            {/* Hours */}
-            <div className="relative">
-              <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50 rounded-lg pointer-events-none border border-blue-200" />
-              <div
-                ref={hourRef}
-                className="w-16 h-40 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative"
-                onScroll={(e) => {
-                  const container = e.currentTarget;
-                  const scrollTop = container.scrollTop;
-                  const itemHeight = 40;
-                  const index = Math.round(scrollTop / itemHeight);
-                  setSelectedHour(HOURS[Math.max(0, Math.min(23, index))]);
-                }}
-              >
-                <div className="pt-[72px] pb-[72px]">
-                  {HOURS.map((hour) => (
-                    <div
-                      key={hour}
-                      onClick={() => handleSelect('hour', hour)}
-                      className={`
-                        h-10 flex items-center justify-center text-sm font-medium cursor-pointer
-                        transition-all duration-150 rounded-lg mx-1
-                        ${selectedHour === hour 
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}
-                      `}
-                    >
-                      {hour}
-                    </div>
-                  ))}
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] text-gray-400 uppercase mb-1">Hour</span>
+              <div className="relative">
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50 rounded-lg pointer-events-none border border-blue-200" />
+                <div
+                  ref={hourRef}
+                  className="w-14 h-40 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative"
+                  onScroll={(e) => {
+                    const container = e.currentTarget;
+                    const scrollTop = container.scrollTop;
+                    const itemHeight = 40;
+                    const index = Math.round(scrollTop / itemHeight);
+                    const clampedIndex = Math.max(0, Math.min(11, index));
+                    handleHourChange(HOURS_12[clampedIndex]);
+                  }}
+                >
+                  <div className="pt-[72px] pb-[72px]">
+                    {HOURS_12.map((hour) => (
+                      <div
+                        key={hour}
+                        onClick={() => handleHourChange(hour)}
+                        className={`
+                          h-10 flex items-center justify-center text-sm font-medium cursor-pointer
+                          transition-all duration-150 rounded-lg mx-1
+                          ${selectedHour === hour 
+                            ? 'text-blue-600 bg-blue-50' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}
+                        `}
+                      >
+                        {hour}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const newHour = Math.max(0, parseInt(selectedHour) - 1).toString().padStart(2, '0');
-                  setSelectedHour(newHour);
-                  onChange(`${newHour}:${selectedMinute}`);
-                }}
-                className="absolute top-1 left-1/2 -translate-x-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <ChevronUp className="w-4 h-4 text-gray-400" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const newHour = Math.min(23, parseInt(selectedHour) + 1).toString().padStart(2, '0');
-                  setSelectedHour(newHour);
-                  onChange(`${newHour}:${selectedMinute}`);
-                }}
-                className="absolute bottom-1 left-1/2 -translate-x-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </button>
             </div>
 
-            <span className="text-2xl font-bold text-gray-400">:</span>
+            <span className="text-2xl font-bold text-gray-400 mt-4">:</span>
 
-            {/* Minutes */}
-            <div className="relative">
-              <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50 rounded-lg pointer-events-none border border-blue-200" />
-              <div
-                ref={minuteRef}
-                className="w-16 h-40 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative"
-                onScroll={(e) => {
-                  const container = e.currentTarget;
-                  const scrollTop = container.scrollTop;
-                  const itemHeight = 40;
-                  const index = Math.round(scrollTop / itemHeight);
-                  setSelectedMinute(MINUTES[Math.max(0, Math.min(59, index))]);
-                }}
-              >
-                <div className="pt-[72px] pb-[72px]">
-                  {MINUTES.map((minute) => (
-                    <div
-                      key={minute}
-                      onClick={() => handleSelect('minute', minute)}
-                      className={`
-                        h-10 flex items-center justify-center text-sm font-medium cursor-pointer
-                        transition-all duration-150 rounded-lg mx-1
-                        ${selectedMinute === minute 
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}
-                      `}
-                    >
-                      {minute}
-                    </div>
-                  ))}
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] text-gray-400 uppercase mb-1">Min</span>
+              <div className="relative">
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50 rounded-lg pointer-events-none border border-blue-200" />
+                <div
+                  ref={minuteRef}
+                  className="w-14 h-40 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative"
+                  onScroll={(e) => {
+                    const container = e.currentTarget;
+                    const scrollTop = container.scrollTop;
+                    const itemHeight = 40;
+                    const index = Math.round(scrollTop / itemHeight);
+                    const clampedIndex = Math.max(0, Math.min(59, index));
+                    handleMinuteChange(MINUTES[clampedIndex]);
+                  }}
+                >
+                  <div className="pt-[72px] pb-[72px]">
+                    {MINUTES.filter((_, i) => i % 5 === 0).map((minute) => (
+                      <div
+                        key={minute}
+                        onClick={() => handleMinuteChange(minute)}
+                        className={`
+                          h-10 flex items-center justify-center text-sm font-medium cursor-pointer
+                          transition-all duration-150 rounded-lg mx-1
+                          ${selectedMinute === minute 
+                            ? 'text-blue-600 bg-blue-50' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}
+                        `}
+                      >
+                        {minute}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const newMinute = Math.max(0, parseInt(selectedMinute) - 5).toString().padStart(2, '0');
-                  setSelectedMinute(newMinute);
-                  onChange(`${selectedHour}:${newMinute}`);
-                }}
-                className="absolute top-1 left-1/2 -translate-x-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <ChevronUp className="w-4 h-4 text-gray-400" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const newMinute = Math.min(55, parseInt(selectedMinute) + 5).toString().padStart(2, '0');
-                  setSelectedMinute(newMinute);
-                  onChange(`${selectedHour}:${newMinute}`);
-                }}
-                className="absolute bottom-1 left-1/2 -translate-x-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </button>
+            </div>
+
+            <div className="flex flex-col items-center ml-2">
+              <span className="text-[10px] text-gray-400 uppercase mb-1">AM/PM</span>
+              <div className="flex flex-col gap-1">
+                {PERIODS.map((period) => (
+                  <button
+                    key={period}
+                    type="button"
+                    onClick={() => handlePeriodChange(period as 'AM' | 'PM')}
+                    className={`
+                      px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 cursor-pointer
+                      ${selectedPeriod === period 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                    `}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
             <button
               type="button"
@@ -244,7 +271,10 @@ export default function TimePicker({ value, onChange, placeholder = "--:--", dis
             </button>
             <button
               type="button"
-              onClick={handleConfirm}
+              onClick={() => {
+                onChange(formatTime(selectedHour, selectedMinute, selectedPeriod));
+                setIsOpen(false);
+              }}
               className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
             >
               Set Time

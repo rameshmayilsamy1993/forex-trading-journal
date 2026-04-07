@@ -205,4 +205,81 @@
     @apply relative border-2 border-dashed border-gray-200 rounded-xl p-6 transition-all duration-200 
            hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer text-center;
   }
+
+  .missed-reason-editor .ql-container {
+    min-height: 200px;
+    max-height: 400px;
+    font-size: 14px;
+    border: none;
+    background: white;
+  }
+
+  .missed-reason-editor .ql-toolbar {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: 8px;
+  }
+
+  .missed-reason-editor .ql-toolbar .ql-stroke {
+    stroke: #6b7280;
+  }
+
+  .missed-reason-editor .ql-toolbar .ql-fill {
+    fill: #6b7280;
+  }
+
+  .missed-reason-editor .ql-toolbar button:hover .ql-stroke,
+  .missed-reason-editor .ql-toolbar button.ql-active .ql-stroke {
+    stroke: #2563eb;
+  }
+
+  .missed-reason-editor .ql-toolbar button:hover .ql-fill,
+  .missed-reason-editor .ql-toolbar button.ql-active .ql-fill {
+    fill: #2563eb;
+  }
+
+  .missed-reason-editor .ql-toolbar .ql-picker-label:hover,
+  .missed-reason-editor .ql-toolbar .ql-picker-label.ql-active {
+    color: #2563eb;
+  }
+
+  .missed-reason-editor .ql-editor {
+    min-height: 180px;
+    padding: 12px 16px;
+    line-height: 1.6;
+  }
+
+  .missed-reason-editor .ql-editor.ql-blank::before {
+    color: #9ca3af;
+    font-style: normal;
+    left: 16px;
+    right: 16px;
+  }
+
+  .missed-reason-editor .ql-editor h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0;
+  }
+
+  .missed-reason-editor .ql-editor h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 0;
+  }
+
+  .missed-reason-preview p {
+    margin: 0;
+  }
+
+  .missed-reason-preview ul, 
+  .missed-reason-preview ol {
+    margin: 0;
+    padding-left: 1rem;
+  }
+
+  .missed-reason-preview strong {
+    font-weight: 600;
+  }
 }

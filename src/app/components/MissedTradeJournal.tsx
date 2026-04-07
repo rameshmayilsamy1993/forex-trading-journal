@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn } from 'lucide-react';
-import { MissedTrade, TradingAccount, MasterData } from '../types/trading';
+import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn, Eye as ViewIcon } from 'lucide-react';
+import { MissedTrade, TradingAccount, MasterData, SMTType, Model1Type } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
@@ -8,6 +8,8 @@ import TimePicker from './ui/TimePicker';
 import { Button } from './ui/button';
 import ImageViewer from './ImageViewer';
 import { cn } from './ui/utils';
+import { truncateText, stripHTML, decodeHtml, hasHTML } from '../utils/htmlUtils';
+import DOMPurify from 'dompurify';
 
 const REASON_OPTIONS = [
   'Late Entry',
@@ -64,6 +66,7 @@ export default function MissedTradeJournal() {
   const [missedTrades, setMissedTrades] = useState<MissedTrade[]>(SAMPLE_MISSED_TRADES);
   const [accounts, setAccounts] = useState<TradingAccount[]>([]);
   const [masters, setMasters] = useState<MasterData[]>([]);
+  const [pairs, setPairs] = useState<string[]>([]);
   const [filterAccount, setFilterAccount] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isAdding, setIsAdding] = useState(false);
@@ -71,6 +74,7 @@ export default function MissedTradeJournal() {
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
   const [viewingImageIndex, setViewingImageIndex] = useState(0);
+  const [viewingReason, setViewingReason] = useState<{ title: string; content: string } | null>(null);
 
   const [formData, setFormData] = useState({
     accountId: '',
@@ -86,6 +90,12 @@ export default function MissedTradeJournal() {
     keyLevel: '',
     reason: '',
     emotion: '',
+    smt: 'No' as SMTType,
+    model1: 'Yes (EUR)' as Model1Type,
+    profitLoss: '',
+    commission: '',
+    swap: '',
+    realPL: 0,
     status: 'MISSED' as 'MISSED' | 'REVIEWED',
     screenshots: { before: '', after: '' }
   });
@@ -93,20 +103,23 @@ export default function MissedTradeJournal() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [missedTradesData, accountsData, mastersData] = await Promise.all([
+        const [missedTradesData, accountsData, mastersData, pairsData] = await Promise.all([
           apiService.getMissedTrades(),
           apiService.getAccounts(),
-          apiService.getMasters()
+          apiService.getMasters(),
+          apiService.settings.getPairs()
         ]);
         if (missedTradesData.length > 0) {
           setMissedTrades(missedTradesData);
         }
         setAccounts(accountsData);
         setMasters(mastersData);
+        setPairs(pairsData || []);
       } catch (error) {
         console.error('Failed to load data:', error);
         setAccounts([]);
         setMasters([]);
+        setPairs([]);
       }
     };
 
@@ -135,6 +148,13 @@ export default function MissedTradeJournal() {
     }
     return null;
   }, [formData.entryPrice, formData.stopLoss, formData.takeProfit, formData.type]);
+
+  const calculatedRealPL = useMemo(() => {
+    const profit = parseFloat(formData.profitLoss) || 0;
+    const comm = parseFloat(formData.commission) || 0;
+    const swp = parseFloat(formData.swap) || 0;
+    return profit - comm - swp;
+  }, [formData.profitLoss, formData.commission, formData.swap]);
 
   const getTradeAccountId = (trade: MissedTrade): string => {
     if (typeof trade.accountId === 'object' && trade.accountId !== null) {
@@ -205,6 +225,12 @@ export default function MissedTradeJournal() {
       keyLevel: trade.keyLevel || '',
       reason: trade.reason,
       emotion: trade.emotion || '',
+      smt: trade.smt || 'No',
+      model1: trade.model1 || 'Yes (EUR)',
+      profitLoss: trade.profitLoss?.toString() || '',
+      commission: trade.commission?.toString() || '',
+      swap: trade.swap?.toString() || '',
+      realPL: trade.realPL || 0,
       status: trade.status,
       screenshots: trade.screenshots || { before: '', after: '' }
     });
@@ -237,6 +263,11 @@ export default function MissedTradeJournal() {
       keyLevel: formData.keyLevel,
       reason: formData.reason,
       emotion: formData.emotion,
+      smt: formData.smt,
+      model1: formData.model1,
+      profitLoss: parseFloat(formData.profitLoss) || 0,
+      commission: parseFloat(formData.commission) || 0,
+      swap: parseFloat(formData.swap) || 0,
       status: formData.status,
       screenshots: formData.screenshots
     };
@@ -393,11 +424,20 @@ export default function MissedTradeJournal() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Pair *</label>
-                      <Input
-                        placeholder="EUR/USD"
-                        value={formData.pair}
-                        onChange={(e) => setFormData({ ...formData, pair: e.target.value.toUpperCase() })}
-                      />
+                      <Select value={formData.pair} onValueChange={(value) => setFormData({ ...formData, pair: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Pair" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {pairs.length > 0 ? (
+                            pairs.map(p => (
+                              <SelectItem key={p} value={p}>{p}</SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="EURUSD">EURUSD</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div>
@@ -512,6 +552,90 @@ export default function MissedTradeJournal() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SMT</label>
+                      <Select value={formData.smt} onValueChange={(value) => setFormData({ ...formData, smt: value as SMTType })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="No">No</SelectItem>
+                          <SelectItem value="Yes with GBPUSD">Yes with GBPUSD</SelectItem>
+                          <SelectItem value="Yes with EURUSD">Yes with EURUSD</SelectItem>
+                          <SelectItem value="Yes with DXY">Yes with DXY</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Model #1</label>
+                      <Select value={formData.model1} onValueChange={(value) => setFormData({ ...formData, model1: value as Model1Type })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Yes (Both EUR and GBP)">Yes (Both EUR and GBP)</SelectItem>
+                          <SelectItem value="Yes (EUR)">Yes (EUR)</SelectItem>
+                          <SelectItem value="Yes (GBP)">Yes (GBP)</SelectItem>
+                          <SelectItem value="No">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Profit/Loss</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="pl-7"
+                          value={formData.profitLoss}
+                          onChange={(e) => setFormData({ ...formData, profitLoss: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="pl-7"
+                          value={formData.commission}
+                          onChange={(e) => setFormData({ ...formData, commission: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Swap</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="pl-7"
+                          value={formData.swap}
+                          onChange={(e) => setFormData({ ...formData, swap: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Real P/L</label>
+                      <div className={`h-10 px-3 flex items-center bg-gray-100 rounded-md border font-semibold ${
+                        calculatedRealPL >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {calculatedRealPL >= 0 ? '+' : ''}${calculatedRealPL.toFixed(2)}
+                      </div>
                     </div>
 
                     <div>
@@ -674,80 +798,117 @@ export default function MissedTradeJournal() {
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">SL</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">TP</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">RR</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">P/L</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Comm</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Swap</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Real P/L</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Reason</th>
+                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">Details</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredMissedTrades.map(trade => (
-                        <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4 text-sm">{new Date(trade.date).toLocaleDateString()}</td>
-                          <td className="py-3 px-4 text-sm">{getAccountName(trade.accountId)}</td>
-                          <td className="py-3 px-4 text-sm font-medium">{trade.pair}</td>
-                          <td className="py-3 px-4 text-sm">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                            }`}>
-                              {trade.type}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-sm text-right">{trade.entryPrice.toFixed(5)}</td>
-                          <td className="py-3 px-4 text-sm text-right text-red-600">{trade.stopLoss.toFixed(5)}</td>
-                          <td className="py-3 px-4 text-sm text-right text-green-600">{trade.takeProfit.toFixed(5)}</td>
-                          <td className="py-3 px-4 text-sm text-right">
-                            <span className={trade.rr >= 1 ? 'text-green-600 font-medium' : 'text-yellow-600'}>
-                              {trade.rr.toFixed(2)}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-sm">
-                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
-                              {trade.reason}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-sm">
-                            <button
-                              onClick={() => toggleReviewStatus(trade)}
-                              className={`px-2 py-1 rounded text-xs font-medium cursor-pointer ${
-                                trade.status === 'REVIEWED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                              }`}
-                            >
-                              {trade.status === 'REVIEWED' ? 'Reviewed' : 'Missed'}
-                            </button>
-                          </td>
-                          <td className="py-3 px-4 text-sm">
-                            <div className="flex gap-1 justify-end">
-                              {(trade.screenshots?.before || trade.screenshots?.after) && (
+                      {filteredMissedTrades.map(trade => {
+                        const realPL = trade.realPL ?? ((trade.profitLoss || 0) - (trade.commission || 0) - (trade.swap || 0));
+                        return (
+                          <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-3 px-4 text-sm">{new Date(trade.date).toLocaleDateString()}</td>
+                            <td className="py-3 px-4 text-sm">{getAccountName(trade.accountId)}</td>
+                            <td className="py-3 px-4 text-sm font-medium">{trade.pair}</td>
+                            <td className="py-3 px-4 text-sm">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              }`}>
+                                {trade.type}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-sm text-right">{trade.entryPrice.toFixed(5)}</td>
+                            <td className="py-3 px-4 text-sm text-right text-red-600">{trade.stopLoss.toFixed(5)}</td>
+                            <td className="py-3 px-4 text-sm text-right text-green-600">{trade.takeProfit.toFixed(5)}</td>
+                            <td className="py-3 px-4 text-sm text-right">
+                              <span className={trade.rr >= 1 ? 'text-green-600 font-medium' : 'text-yellow-600'}>
+                                {trade.rr.toFixed(2)}
+                              </span>
+                            </td>
+                            <td className={`py-3 px-4 text-sm text-right font-medium ${(trade.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {(trade.profitLoss || 0) >= 0 ? '+' : ''}${(trade.profitLoss || 0).toFixed(2)}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-right text-gray-500">
+                              ${(trade.commission || 0).toFixed(2)}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-right text-gray-500">
+                              ${(trade.swap || 0).toFixed(2)}
+                            </td>
+                            <td className={`py-3 px-4 text-sm text-right font-semibold ${realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
+                                {hasHTML(trade.missedReason) ? truncateText(trade.missedReason, 30) : (trade.reason || 'N/A')}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              {(trade.missedReason || trade.reason) && (
                                 <button
                                   onClick={() => {
-                                    const images = [];
-                                    if (trade.screenshots?.before) images.push({ url: trade.screenshots.before, label: 'Before Screenshot' });
-                                    if (trade.screenshots?.after) images.push({ url: trade.screenshots.after, label: 'After Screenshot' });
-                                    setViewingImages(images);
-                                    setViewingImageIndex(0);
+                                    const content = trade.missedReason || trade.reason || '';
+                                    setViewingReason({
+                                      title: `${trade.pair} - Missed Reason`,
+                                      content: DOMPurify.sanitize(decodeHtml(content))
+                                    });
                                   }}
-                                  className="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors"
-                                  title="View screenshots"
+                                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                  title="View full reason"
                                 >
-                                  <Eye className="w-4 h-4" />
+                                  <ViewIcon className="w-4 h-4" />
                                 </button>
                               )}
+                            </td>
+                            <td className="py-3 px-4 text-sm">
                               <button
-                                onClick={() => startEdit(trade)}
-                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                onClick={() => toggleReviewStatus(trade)}
+                                className={`px-2 py-1 rounded text-xs font-medium cursor-pointer ${
+                                  trade.status === 'REVIEWED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                }`}
                               >
-                                <Edit2 className="w-4 h-4" />
+                                {trade.status === 'REVIEWED' ? 'Reviewed' : 'Missed'}
                               </button>
-                              <button
-                                onClick={() => handleDelete(trade.id)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="flex gap-1 justify-end">
+                                {(trade.screenshots?.before || trade.screenshots?.after) && (
+                                  <button
+                                    onClick={() => {
+                                      const images = [];
+                                      if (trade.screenshots?.before) images.push({ url: trade.screenshots.before, label: 'Before Screenshot' });
+                                      if (trade.screenshots?.after) images.push({ url: trade.screenshots.after, label: 'After Screenshot' });
+                                      setViewingImages(images);
+                                      setViewingImageIndex(0);
+                                    }}
+                                    className="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                                    title="View screenshots"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => startEdit(trade)}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(trade.id)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -764,6 +925,37 @@ export default function MissedTradeJournal() {
           initialIndex={viewingImageIndex}
           onClose={() => setViewingImages([])}
         />
+      )}
+
+      {/* Missed Reason Viewer Modal */}
+      {viewingReason && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={() => setViewingReason(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-gray-900">{viewingReason.title}</h3>
+                <button
+                  onClick={() => setViewingReason(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div 
+                className="prose prose-sm max-w-none text-gray-700"
+                dangerouslySetInnerHTML={{ __html: viewingReason.content }}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

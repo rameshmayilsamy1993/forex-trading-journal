@@ -8,6 +8,40 @@ const XLSX = require('xlsx');
 const { upload, deleteImage } = require('./config/cloudinary');
 require('dotenv').config();
 
+const sanitizeHtml = require('sanitize-html');
+
+const sanitizeOptions = {
+  allowedTags: ['p', 'ul', 'li', 'ol', 'strong', 'em', 'b', 'i', 'u', 'a', 'h2', 'h3', 'br', 'span'],
+  allowedAttributes: {
+    'a': ['href', 'target', 'rel'],
+    'span': ['class']
+  },
+  allowedSchemes: ['http', 'https', 'mailto'],
+  encodeEntities: false,
+  transformTags: {
+    'a': (tagName, attribs) => ({
+      tagName,
+      attribs: {
+        ...attribs,
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      }
+    })
+  }
+};
+
+const sanitizeMissedReason = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  const stripped = html.replace(/<[^>]*>/g, '');
+  if (stripped.trim().length < 10) {
+    return null;
+  }
+  if (stripped.length > 2000) {
+    return null;
+  }
+  return sanitizeHtml(html, sanitizeOptions);
+};
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -131,6 +165,8 @@ const accountSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
+const SSMT_TYPES = ['NO', 'GBPUSD', 'EURUSD', 'DXY'];
+
 const tradeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
@@ -154,6 +190,7 @@ const tradeSchema = new mongoose.Schema({
   strategy: String,
   keyLevel: String,
   highLowTime: String,
+  ssmtType: { type: String, enum: SSMT_TYPES, default: 'NO' },
   beforeScreenshot: String,
   afterScreenshot: String,
   entryDate: Date,
@@ -191,7 +228,15 @@ const missedTradeSchema = new mongoose.Schema({
   strategy: String,
   keyLevel: String,
   reason: String,
+  missedReason: { type: String, required: true },
+  ssmtType: { type: String, enum: SSMT_TYPES, default: 'NO' },
+  smt: { type: String, enum: ['No', 'Yes with GBPUSD', 'Yes with EURUSD', 'Yes with DXY'], default: 'No' },
+  model1: { type: String, enum: ['Yes (Both EUR and GBP)', 'Yes (EUR)', 'Yes (GBP)', 'No'], default: 'Yes (EUR)' },
   emotion: String,
+  commission: { type: Number, default: 0 },
+  swap: { type: Number, default: 0 },
+  profitLoss: { type: Number, default: 0 },
+  realPL: { type: Number, default: 0 },
   status: { type: String, enum: ['MISSED', 'REVIEWED'], default: 'MISSED' },
   screenshots: {
     before: String,
@@ -206,6 +251,40 @@ const Account = mongoose.model('Account', accountSchema);
 const Trade = mongoose.model('Trade', tradeSchema);
 const Master = mongoose.model('Master', masterSchema);
 const MissedTrade = mongoose.model('MissedTrade', missedTradeSchema);
+
+const settingsSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  value: mongoose.Schema.Types.Mixed,
+  updatedAt: { type: Date, default: Date.now }
+}, schemaOptions);
+
+const Settings = mongoose.model('Settings', settingsSchema);
+
+const pairCache = {
+  data: null,
+  timestamp: null,
+  ttl: 5 * 60 * 1000
+};
+
+const getCachedPairs = async () => {
+  const now = Date.now();
+  if (pairCache.data && pairCache.timestamp && (now - pairCache.timestamp < pairCache.ttl)) {
+    return pairCache.data;
+  }
+  
+  const settings = await Settings.findOne({ key: 'pairs' });
+  const pairs = settings ? settings.value : ['EURUSD', 'GBPUSD', 'USDJPY', 'XAUUSD'];
+  
+  pairCache.data = pairs;
+  pairCache.timestamp = now;
+  
+  return pairs;
+};
+
+const invalidatePairCache = () => {
+  pairCache.data = null;
+  pairCache.timestamp = null;
+};
 
 const isAuthenticated = (req, res, next) => {
   if (!req.session || !req.session.userId) {
@@ -228,6 +307,98 @@ const isAdmin = async (req, res, next) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+app.get('/api/settings/pairs', isAuthenticated, async (req, res) => {
+  try {
+    const pairs = await getCachedPairs();
+    res.json({ pairs });
+  } catch (error) {
+    console.error('Error fetching pairs:', error);
+    res.status(500).json({ message: 'Failed to fetch pairs' });
+  }
+});
+
+app.post('/api/settings/pairs', isAuthenticated, async (req, res) => {
+  try {
+    const { pairs } = req.body;
+    
+    if (!Array.isArray(pairs)) {
+      return res.status(400).json({ message: 'Pairs must be an array' });
+    }
+    
+    const cleanedPairs = pairs
+      .map(p => String(p).trim().toUpperCase())
+      .filter(p => p.length > 0)
+      .filter((p, index, arr) => arr.indexOf(p) === index);
+    
+    if (cleanedPairs.length === 0) {
+      return res.status(400).json({ message: 'At least one pair is required' });
+    }
+    
+    const settings = await Settings.findOneAndUpdate(
+      { key: 'pairs' },
+      { 
+        key: 'pairs',
+        value: cleanedPairs,
+        updatedAt: new Date()
+      },
+      { upsert: true, new: true }
+    );
+    
+    invalidatePairCache();
+    
+    res.json({ 
+      message: 'Pairs updated successfully',
+      pairs: settings.value 
+    });
+  } catch (error) {
+    console.error('Error updating pairs:', error);
+    res.status(500).json({ message: 'Failed to update pairs' });
+  }
+});
+
+app.get('/api/settings', isAuthenticated, async (req, res) => {
+  try {
+    const { key } = req.query;
+    let settings;
+    
+    if (key) {
+      settings = await Settings.findOne({ key });
+    } else {
+      settings = await Settings.find({});
+    }
+    
+    res.json(settings || []);
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({ message: 'Failed to fetch settings' });
+  }
+});
+
+app.post('/api/settings', isAuthenticated, async (req, res) => {
+  try {
+    const { key, value } = req.body;
+    
+    if (!key) {
+      return res.status(400).json({ message: 'Key is required' });
+    }
+    
+    const settings = await Settings.findOneAndUpdate(
+      { key },
+      { key, value, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+    
+    if (key === 'pairs') {
+      invalidatePairCache();
+    }
+    
+    res.json(settings);
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    res.status(500).json({ message: 'Failed to save settings' });
+  }
+});
 
 const seedMasters = async (userId) => {
   try {
@@ -363,11 +534,10 @@ function parseDateTime(dateTimeValue) {
   
   if (typeof dateTimeValue === 'number') {
     const date = XLSX.SSF.parse_date_code(dateTimeValue);
-    result.date = new Date(date.y, date.m - 1, date.d, date.q || 0, date.q ? date.q % 100 : 0);
-    result.time = date.q ? String(date.q).padStart(4, '0') : null;
-    if (result.time && result.time.length === 4) {
-      result.time = result.time.slice(0, 2) + ':' + result.time.slice(2);
-    }
+    result.date = new Date(date.y, date.m - 1, date.d, date.H || 0, date.M || 0, date.S || 0);
+    const h = String(date.H || 0).padStart(2, '0');
+    const m = String(date.M || 0).padStart(2, '0');
+    result.time = `${h}:${m}`;
     return result;
   }
   
@@ -599,12 +769,59 @@ app.post('/api/trades/import', isAuthenticated, uploadExcel.single('file'), asyn
         const profit = safeNumber(getValue(row, 'Profit', 'profit', 'P/L', 'pl')) || 0;
         const realPL = calculateRealPL(profit, commission, swap);
 
+        // Handle SSMT Type - map from various formats to enum
+        const ssmtRaw = (getValue(row, 'SSMT', 'SSMT Type', 'ssmtType', 'ssmt') || '').toString().toLowerCase().trim();
+        const ssmtTypeMap = {
+          'yes with gbpusd': 'GBPUSD',
+          'gbpusd': 'GBPUSD',
+          'yes with eurusd': 'EURUSD',
+          'eurusd': 'EURUSD',
+          'yes with dxy': 'DXY',
+          'dxy': 'DXY',
+          'no': 'NO',
+          'false': 'NO',
+          'yes': 'NO' // Default to NO for generic yes
+        };
+        const ssmtType = ssmtTypeMap[ssmtRaw] || 'NO';
+
+        // Handle SMT - default "No"
+        const smtRaw = (getValue(row, 'SMT', 'smt', 'SMT Type') || 'No').toString();
+        const smtMap = {
+          'yes with gbpusd': 'Yes with GBPUSD',
+          'yes with eurusd': 'Yes with EURUSD',
+          'yes with dxy': 'Yes with DXY',
+          'no': 'No',
+          '': 'No'
+        };
+        const smt = smtMap[smtRaw.toLowerCase()] || 'No';
+
+        // Handle Model #1 - default "Yes (EUR)"
+        const model1Raw = (getValue(row, 'Model #1', 'Model #1 Occurred', 'Model1', 'model1') || 'Yes (EUR)').toString();
+        const model1Map = {
+          'yes (both eur and gbp)': 'Yes (Both EUR and GBP)',
+          'yes (eur)': 'Yes (EUR)',
+          'yes (gbp)': 'Yes (GBP)',
+          'no': 'No',
+          '': 'Yes (EUR)'
+        };
+        const model1 = model1Map[model1Raw] || 'Yes (EUR)';
+
+        // Validate pair against settings
+        const allowedPairs = await getCachedPairs();
+        const rawPair = safeString(getValue(row, 'Symbol', 'pair', 'Pair', 'Currency', 'instrument')).toUpperCase();
+        const validatedPair = allowedPairs.includes(rawPair) ? rawPair : null;
+
+        if (!validatedPair) {
+          errors.push({ row: i + 2, error: `Invalid pair: ${rawPair}. Allowed: ${allowedPairs.join(', ')}` });
+          continue;
+        }
+
         const newTrade = {
           userId: req.session.userId,
           accountId: accountId,
           propFirmId: account.propFirmId || null,
           positionId: positionId,
-          pair: safeString(getValue(row, 'Symbol', 'pair', 'Pair', 'Currency', 'instrument')),
+          pair: validatedPair,
           type: typeValue.toUpperCase(),
           status: 'CLOSED',
           entryPrice: entryPriceNum,
@@ -620,10 +837,13 @@ app.post('/api/trades/import', isAuthenticated, uploadExcel.single('file'), asyn
           strategy: defaultStrategy?.name || undefined,
           session: safeString(getValue(row, 'Session', 'session')) || 'LONDON',
           keyLevel: safeString(getValue(row, 'Key Level', 'KeyLevel', 'keyLevel')) || 'No Key Level',
-          entryDate: parsedEntry.date,
-          entryTime: parsedEntry.time,
-          exitDate: parsedExit.date.getTime() !== new Date().getTime() || exitDateTime ? parsedExit.date : undefined,
-          exitTime: parsedExit.time,
+          ssmtType: ssmtType,
+          smt: smt,
+          model1: model1,
+          entryDate: entryDateTime ? parsedEntry.date : new Date(),
+          entryTime: entryDateTime ? parsedEntry.time : undefined,
+          exitDate: exitDateTime ? parsedExit.date : undefined,
+          exitTime: exitDateTime ? parsedExit.time : undefined,
           notes: safeString(getValue(row, 'Comment', 'comment', 'Notes', 'notes', 'Description')),
         };
 
@@ -697,6 +917,21 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
       const exitDateTime = getValue(row, 'Exit Time', 'Close Time', 'Exit Date Time', 'exitDate');
       const parsedExit = parseDateTime(exitDateTime);
 
+      // Handle SSMT Type - map from various formats to enum
+      const ssmtRaw = (getValue(row, 'SSMT', 'SSMT Type', 'ssmtType', 'ssmt') || '').toString().toLowerCase().trim();
+      const ssmtTypeMap = {
+        'yes with gbpusd': 'GBPUSD',
+        'gbpusd': 'GBPUSD',
+        'yes with eurusd': 'EURUSD',
+        'eurusd': 'EURUSD',
+        'yes with dxy': 'DXY',
+        'dxy': 'DXY',
+        'no': 'NO',
+        'false': 'NO',
+        'yes': 'NO'
+      };
+      const ssmtType = ssmtTypeMap[ssmtRaw] || 'NO';
+
       preview.push({
         positionId,
         pair: safeString(getValue(row, 'Symbol', 'pair', 'Pair', 'Currency', 'instrument')),
@@ -705,6 +940,7 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
         entryPrice: safeNumber(entryPriceValue),
         exitPrice: safeNumber(exitPriceValue),
         profit: safeNumber(getValue(row, 'Profit', 'profit', 'P/L', 'pl')),
+        ssmtType: ssmtType,
         entryDate: parsedEntry.date.toISOString().split('T')[0],
         entryTime: parsedEntry.time,
         exitDate: exitDateTime ? parsedExit.date.toISOString().split('T')[0] : null,
@@ -957,10 +1193,14 @@ app.delete('/api/accounts/:id', isAuthenticated, async (req, res) => {
 
 app.get('/api/trades', isAuthenticated, async (req, res) => {
   try {
-    const { accountId, firmId } = req.query;
+    const { accountId, firmId, ssmtType } = req.query;
     let filter = { userId: req.session.userId };
     if (accountId) filter.accountId = accountId;
     if (firmId) filter.propFirmId = firmId;
+    
+    if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
+      filter.ssmtType = ssmtType;
+    }
     
     const trades = await Trade.find(filter)
       .populate('accountId')
@@ -974,17 +1214,27 @@ app.get('/api/trades', isAuthenticated, async (req, res) => {
 
 app.post('/api/trades', isAuthenticated, async (req, res) => {
   try {
-    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ...rest } = req.body;
+    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, ...rest } = req.body;
     
     console.log('=== BACKEND CREATE DEBUG ===');
     console.log('entryDate:', entryDate);
     console.log('entryTime:', entryTime);
     console.log('exitDate:', exitDate);
     console.log('exitTime:', exitTime);
+    console.log('ssmtType:', ssmtType);
+    console.log('pair:', pair);
+    
+    const allowedPairs = await getCachedPairs();
+    const finalPair = allowedPairs.includes(pair) ? pair : null;
+    
+    if (!finalPair) {
+      return res.status(400).json({ 
+        message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}` 
+      });
+    }
     
     const realPL = calculateRealPL(profit, commission, swap);
     
-    // Accept ISO string or parse string date
     let finalEntryDate = entryDate ? new Date(entryDate) : new Date();
     if (isNaN(finalEntryDate.getTime())) {
       finalEntryDate = new Date();
@@ -995,15 +1245,21 @@ app.post('/api/trades', isAuthenticated, async (req, res) => {
       finalExitDate = undefined;
     }
     
+    const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
+    
     console.log('finalEntryDate:', finalEntryDate);
     console.log('finalExitDate:', finalExitDate);
+    console.log('finalSsmtType:', finalSsmtType);
+    console.log('finalPair:', finalPair);
     
     const trade = new Trade({
       ...rest,
+      pair: finalPair,
       profit,
       commission,
       swap: swap || 0,
       realPL,
+      ssmtType: finalSsmtType,
       entryDate: finalEntryDate,
       entryTime: entryTime || undefined,
       exitDate: finalExitDate,
@@ -1012,6 +1268,8 @@ app.post('/api/trades', isAuthenticated, async (req, res) => {
     });
     const savedTrade = await trade.save();
     console.log('Saved trade entryDate:', savedTrade.entryDate);
+    console.log('Saved trade ssmtType:', savedTrade.ssmtType);
+    console.log('Saved trade pair:', savedTrade.pair);
     res.status(201).json(savedTrade);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -1020,10 +1278,22 @@ app.post('/api/trades', isAuthenticated, async (req, res) => {
 
 app.put('/api/trades/:id', isAuthenticated, async (req, res) => {
   try {
-    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ...rest } = req.body;
+    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, ...rest } = req.body;
+    
+    const allowedPairs = await getCachedPairs();
+    let finalPair = undefined;
+    
+    if (pair !== undefined) {
+      finalPair = allowedPairs.includes(pair) ? pair : null;
+      if (!finalPair) {
+        return res.status(400).json({ 
+          message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}` 
+        });
+      }
+    }
+    
     const realPL = calculateRealPL(profit, commission, swap);
     
-    // Accept ISO string or parse string date
     let finalEntryDate = entryDate ? new Date(entryDate) : undefined;
     if (finalEntryDate && isNaN(finalEntryDate.getTime())) {
       finalEntryDate = undefined;
@@ -1034,19 +1304,28 @@ app.put('/api/trades/:id', isAuthenticated, async (req, res) => {
       finalExitDate = undefined;
     }
     
+    const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
+    
+    const updateData = {
+      ...rest,
+      profit,
+      commission,
+      swap: swap || 0,
+      realPL,
+      ssmtType: finalSsmtType,
+      entryDate: finalEntryDate,
+      entryTime: entryTime || undefined,
+      exitDate: finalExitDate,
+      exitTime: exitTime || undefined
+    };
+    
+    if (finalPair) {
+      updateData.pair = finalPair;
+    }
+    
     const trade = await Trade.findOneAndUpdate(
       { _id: req.params.id, userId: req.session.userId },
-      {
-        ...rest,
-        profit,
-        commission,
-        swap: swap || 0,
-        realPL,
-        entryDate: finalEntryDate,
-        entryTime: entryTime || undefined,
-        exitDate: finalExitDate,
-        exitTime: exitTime || undefined
-      },
+      updateData,
       { new: true, runValidators: true }
     );
     if (!trade) {
@@ -1193,9 +1472,12 @@ app.delete('/api/masters/:id', isAuthenticated, async (req, res) => {
 
 app.get('/api/missed-trades', isAuthenticated, async (req, res) => {
   try {
-    const { accountId } = req.query;
+    const { accountId, ssmtType } = req.query;
     let filter = { userId: req.session.userId };
     if (accountId) filter.accountId = accountId;
+    if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
+      filter.ssmtType = ssmtType;
+    }
     
     const missedTrades = await MissedTrade.find(filter)
       .populate('accountId')
@@ -1208,26 +1490,116 @@ app.get('/api/missed-trades', isAuthenticated, async (req, res) => {
 
 app.post('/api/missed-trades', isAuthenticated, async (req, res) => {
   try {
-    const missedTrade = new MissedTrade({ ...req.body, userId: req.session.userId });
+    console.log('=== CREATE MISSED TRADE DEBUG ===');
+    console.log('Incoming payload:', JSON.stringify(req.body, null, 2));
+    
+    const { missedReason, reason, ssmtType, pair, profitLoss, commission, swap, ...rest } = req.body;
+    
+    const sanitizedReason = sanitizeMissedReason(missedReason);
+    
+    if (!sanitizedReason) {
+      return res.status(400).json({ 
+        message: 'Missed reason is required and must be between 10-2000 characters' 
+      });
+    }
+    
+    const allowedPairs = await getCachedPairs();
+    const finalPair = allowedPairs.includes(pair) ? pair : null;
+    
+    if (!finalPair) {
+      return res.status(400).json({ 
+        message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}` 
+      });
+    }
+    
+    const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
+    const finalProfitLoss = Number(profitLoss || 0);
+    const finalCommission = Number(commission || 0);
+    const finalSwap = Number(swap || 0);
+    const finalRealPL = finalProfitLoss - finalCommission - finalSwap;
+    
+    const missedTrade = new MissedTrade({ 
+      ...rest, 
+      pair: finalPair,
+      reason: sanitizedReason,
+      missedReason: sanitizedReason,
+      ssmtType: finalSsmtType,
+      profitLoss: finalProfitLoss,
+      commission: finalCommission,
+      swap: finalSwap,
+      realPL: finalRealPL,
+      userId: req.session.userId 
+    });
+    
+    console.log('Sanitized missed reason:', sanitizedReason);
+    console.log('SsmtType:', finalSsmtType);
+    console.log('Pair:', finalPair);
+    console.log('Real PL:', finalRealPL);
+    console.log('Saving missed trade...');
+    
     const savedMissedTrade = await missedTrade.save();
+    console.log('Saved missed trade:', savedMissedTrade);
+    
     res.status(201).json(savedMissedTrade);
   } catch (error) {
+    console.error('Create missed trade error:', error);
     res.status(400).json({ message: error.message });
   }
 });
 
 app.put('/api/missed-trades/:id', isAuthenticated, async (req, res) => {
   try {
+    console.log('=== UPDATE MISSED TRADE DEBUG ===');
+    console.log('Incoming payload:', JSON.stringify(req.body, null, 2));
+    
+    const { missedReason, reason, ssmtType, profitLoss, commission, swap, ...rest } = req.body;
+    
+    let updateData = { ...rest };
+    
+    if (missedReason !== undefined) {
+      const sanitizedReason = sanitizeMissedReason(missedReason);
+      
+      if (!sanitizedReason) {
+        return res.status(400).json({ 
+          message: 'Missed reason must be between 10-2000 characters' 
+        });
+      }
+      
+      updateData.reason = sanitizedReason;
+      updateData.missedReason = sanitizedReason;
+      console.log('Sanitized missed reason:', sanitizedReason);
+    }
+    
+    if (ssmtType !== undefined) {
+      updateData.ssmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
+      console.log('SsmtType:', updateData.ssmtType);
+    }
+    
+    if (profitLoss !== undefined || commission !== undefined || swap !== undefined) {
+      const finalProfitLoss = Number(profitLoss ?? updateData.profitLoss ?? 0);
+      const finalCommission = Number(commission ?? updateData.commission ?? 0);
+      const finalSwap = Number(swap ?? updateData.swap ?? 0);
+      updateData.profitLoss = finalProfitLoss;
+      updateData.commission = finalCommission;
+      updateData.swap = finalSwap;
+      updateData.realPL = finalProfitLoss - finalCommission - finalSwap;
+      console.log('Real PL recalculated:', updateData.realPL);
+    }
+    
     const missedTrade = await MissedTrade.findOneAndUpdate(
       { _id: req.params.id, userId: req.session.userId },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
+    
     if (!missedTrade) {
       return res.status(404).json({ message: 'Missed trade not found' });
     }
+    
+    console.log('Updated missed trade:', missedTrade);
     res.json(missedTrade);
   } catch (error) {
+    console.error('Update missed trade error:', error);
     res.status(400).json({ message: error.message });
   }
 });

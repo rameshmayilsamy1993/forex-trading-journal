@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn, Trash, AlertTriangle } from 'lucide-react';
-import { Trade, TradingAccount, PropFirm, TradingSession, MasterData } from '../types/trading';
+import { Trade, TradingAccount, PropFirm, TradingSession, MasterData, SMTType, Model1Type } from '../types/trading';
 import apiService from '../services/apiService';
 import { calculateTradeProfit, calculateRiskReward } from '../utils/calculations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -22,6 +22,7 @@ export default function TradeJournal() {
   const [accounts, setAccounts] = useState<TradingAccount[]>([]);
   const [firms, setFirms] = useState<PropFirm[]>([]);
   const [masters, setMasters] = useState<MasterData[]>([]);
+  const [pairs, setPairs] = useState<string[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterAccount, setFilterAccount] = useState<string>('all');
@@ -54,6 +55,8 @@ export default function TradeJournal() {
     strategy: '',
     keyLevel: 'No Key Level',
     highLowTime: '',
+    smt: 'No' as SMTType,
+    model1: 'Yes (EUR)' as Model1Type,
     beforeScreenshot: '',
     afterScreenshot: '',
   });
@@ -61,16 +64,18 @@ export default function TradeJournal() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [tradesData, accountsData, firmsData, mastersData] = await Promise.all([
+        const [tradesData, accountsData, firmsData, mastersData, pairsData] = await Promise.all([
           apiService.getTrades(),
           apiService.getAccounts(),
           apiService.getPropFirms(),
-          apiService.getMasters()
+          apiService.getMasters(),
+          apiService.settings.getPairs()
         ]);
         setTrades(tradesData);
         setAccounts(accountsData);
         setFirms(firmsData);
         setMasters(mastersData);
+        setPairs(pairsData || []);
       } catch (error) {
         console.error('Failed to load data:', error);
       }
@@ -212,6 +217,8 @@ export default function TradeJournal() {
       strategy: formData.strategy || undefined,
       keyLevel: formData.keyLevel || undefined,
       highLowTime: formData.highLowTime || undefined,
+      smt: formData.smt,
+      model1: formData.model1,
       beforeScreenshot: formData.beforeScreenshot || undefined,
       afterScreenshot: formData.afterScreenshot || undefined,
     };
@@ -297,6 +304,8 @@ export default function TradeJournal() {
         strategy: formData.strategy || undefined,
         keyLevel: formData.keyLevel || undefined,
         highLowTime: formData.highLowTime || undefined,
+        smt: formData.smt,
+        model1: formData.model1,
         beforeScreenshot: formData.beforeScreenshot || undefined,
         afterScreenshot: formData.afterScreenshot || undefined,
       };
@@ -379,6 +388,8 @@ export default function TradeJournal() {
       strategy: trade.strategy || '',
       keyLevel: trade.keyLevel || '',
       highLowTime: trade.highLowTime || '',
+      smt: trade.smt || 'No',
+      model1: trade.model1 || 'Yes (EUR)',
       beforeScreenshot: trade.beforeScreenshot || '',
       afterScreenshot: trade.afterScreenshot || '',
     });
@@ -544,12 +555,20 @@ export default function TradeJournal() {
                     </FormField>
 
                       <FormField label="Pair" required>
-                        <Input
-                          className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                          placeholder="EUR/USD"
-                          value={formData.pair}
-                          onChange={e => setFormData({ ...formData, pair: e.target.value.toUpperCase() })}
-                        />
+                        <Select value={formData.pair} onValueChange={value => setFormData({ ...formData, pair: value })}>
+                          <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+                            <SelectValue placeholder="Select Pair" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {pairs.length > 0 ? (
+                              pairs.map(p => (
+                                <SelectItem key={p} value={p}>{p}</SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="EURUSD">EURUSD</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
                       </FormField>
 
                       <FormField label="Type" required>
@@ -727,6 +746,34 @@ export default function TradeJournal() {
                           {keyLevels.map(level => (
                             <SelectItem key={level.id} value={level.name}>{level.name}</SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="SMT">
+                      <Select value={formData.smt} onValueChange={value => setFormData({ ...formData, smt: value as SMTType })}>
+                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="No">No</SelectItem>
+                          <SelectItem value="Yes with GBPUSD">Yes with GBPUSD</SelectItem>
+                          <SelectItem value="Yes with EURUSD">Yes with EURUSD</SelectItem>
+                          <SelectItem value="Yes with DXY">Yes with DXY</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Model #1">
+                      <Select value={formData.model1} onValueChange={value => setFormData({ ...formData, model1: value as Model1Type })}>
+                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Yes (Both EUR and GBP)">Yes (Both EUR and GBP)</SelectItem>
+                          <SelectItem value="Yes (EUR)">Yes (EUR)</SelectItem>
+                          <SelectItem value="Yes (GBP)">Yes (GBP)</SelectItem>
+                          <SelectItem value="No">No</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormField>
@@ -1297,6 +1344,14 @@ export default function TradeJournal() {
                   <div className="flex justify-between">
                     <span className="text-gray-500">High/Low Time</span>
                     <span className="font-medium text-gray-900">{viewingTrade.highLowTime || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">SMT</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.smt || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Model #1</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.model1 || '-'}</span>
                   </div>
                 </div>
               </div>

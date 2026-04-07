@@ -6,12 +6,15 @@ import PropFirms from './components/PropFirms';
 import Accounts from './components/Accounts';
 import Reports from './components/Reports';
 import Masters from './components/Masters';
+import Settings from './components/Settings';
 import MissedTradeJournal from './components/MissedTradeJournal';
+import MissedTradesCalendar from './components/MissedTradesCalendar';
 import TradingCalendar from './components/TradingCalendar';
 import TradeImport from './components/TradeImport';
 import apiService, { User as UserType } from './services/apiService';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import';
+type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import';
 
 const tabs = [
   { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard },
@@ -19,6 +22,7 @@ const tabs = [
   { id: 'import' as Tab, label: 'Import', icon: FileUp },
   { id: 'calendar' as Tab, label: 'Calendar', icon: Calendar },
   { id: 'missed' as Tab, label: 'Missed Trades', icon: EyeOff },
+  { id: 'missed-calendar' as Tab, label: 'Missed Calendar', icon: Calendar },
   { id: 'firms' as Tab, label: 'Prop Firms', icon: Building2 },
   { id: 'accounts' as Tab, label: 'Accounts', icon: Wallet },
   { id: 'reports' as Tab, label: 'Reports', icon: BarChart3 },
@@ -127,15 +131,18 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 p-6 overflow-auto">
         <div className="max-w-[1800px] mx-auto">
-          {activeTab === 'dashboard' && <Dashboard />}
-          {activeTab === 'journal' && <TradeJournal />}
-          {activeTab === 'import' && <TradeImport />}
-          {activeTab === 'calendar' && <TradingCalendar />}
-          {activeTab === 'missed' && <MissedTradeJournal />}
-          {activeTab === 'firms' && <PropFirms />}
-          {activeTab === 'accounts' && <Accounts />}
-          {activeTab === 'reports' && <Reports />}
-          {activeTab === 'settings' && <Masters />}
+          <ErrorBoundary>
+            {activeTab === 'dashboard' && <Dashboard />}
+            {activeTab === 'journal' && <TradeJournal />}
+            {activeTab === 'import' && <TradeImport />}
+            {activeTab === 'calendar' && <TradingCalendar />}
+            {activeTab === 'missed' && <MissedTradeJournal />}
+            {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
+            {activeTab === 'firms' && <PropFirms />}
+            {activeTab === 'accounts' && <Accounts />}
+            {activeTab === 'reports' && <Reports />}
+            {activeTab === 'settings' && <Settings />}
+          </ErrorBoundary>
         </div>
       </main>
     </div>
