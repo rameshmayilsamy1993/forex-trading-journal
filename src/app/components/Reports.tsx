@@ -83,7 +83,7 @@ export default function Reports() {
   };
 
   const getRealPL = (trade: Trade): number => {
-    return (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+    return (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs((trade as any).swap || 0));
   };
 
   const stats = useMemo(() => {

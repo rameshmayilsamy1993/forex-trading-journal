@@ -151,8 +151,8 @@ export default function MissedTradeJournal() {
 
   const calculatedRealPL = useMemo(() => {
     const profit = parseFloat(formData.profitLoss) || 0;
-    const comm = parseFloat(formData.commission) || 0;
-    const swp = parseFloat(formData.swap) || 0;
+    const comm = Math.abs(parseFloat(formData.commission) || 0);
+    const swp = Math.abs(parseFloat(formData.swap) || 0);
     return profit - comm - swp;
   }, [formData.profitLoss, formData.commission, formData.swap]);
 
@@ -182,9 +182,12 @@ export default function MissedTradeJournal() {
     const reviewed = filteredMissedTrades.filter(t => t.status === 'REVIEWED').length;
     const reasonCounts: Record<string, number> = {};
     filteredMissedTrades.forEach(t => {
-      reasonCounts[t.reason] = (reasonCounts[t.reason] || 0) + 1;
+      const reasonKey = stripHTML(t.reason || t.missedReason || '');
+      reasonCounts[reasonKey] = (reasonCounts[reasonKey] || 0) + 1;
     });
-    const mostCommonReason = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const sortedReasons = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1]);
+    const mostCommonRaw = sortedReasons[0]?.[0] || '';
+    const mostCommonReason = DOMPurify.sanitize(mostCommonRaw);
     return { total, reviewed, mostCommonReason };
   }, [filteredMissedTrades]);
 
@@ -268,6 +271,7 @@ export default function MissedTradeJournal() {
       profitLoss: parseFloat(formData.profitLoss) || 0,
       commission: parseFloat(formData.commission) || 0,
       swap: parseFloat(formData.swap) || 0,
+      realPL: calculatedRealPL,
       status: formData.status,
       screenshots: formData.screenshots
     };
@@ -362,7 +366,14 @@ export default function MissedTradeJournal() {
             </div>
             <div className="bg-purple-50 p-3 rounded-lg">
               <p className="text-sm text-gray-600">Most Common Reason</p>
-              <p className="text-lg font-bold text-purple-600 truncate">{stats.mostCommonReason}</p>
+              {stats.mostCommonReason ? (
+                <div
+                  className="prose prose-sm max-w-none text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: stats.mostCommonReason }}
+                />
+              ) : (
+                <p className="text-lg font-bold text-purple-600">No reason provided</p>
+              )}
             </div>
           </div>
 
@@ -631,9 +642,8 @@ export default function MissedTradeJournal() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Real P/L</label>
-                      <div className={`h-10 px-3 flex items-center bg-gray-100 rounded-md border font-semibold ${
-                        calculatedRealPL >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <div className={`h-10 px-3 flex items-center bg-gray-100 rounded-md border font-semibold ${calculatedRealPL >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
                         {calculatedRealPL >= 0 ? '+' : ''}${calculatedRealPL.toFixed(2)}
                       </div>
                     </div>
@@ -802,24 +812,21 @@ export default function MissedTradeJournal() {
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Comm</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Swap</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Real P/L</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Reason</th>
-                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">Details</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredMissedTrades.map(trade => {
-                        const realPL = trade.realPL ?? ((trade.profitLoss || 0) - (trade.commission || 0) - (trade.swap || 0));
+                        const realPL = trade.realPL ?? ((trade.profitLoss || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
                         return (
                           <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
                             <td className="py-3 px-4 text-sm">{new Date(trade.date).toLocaleDateString()}</td>
                             <td className="py-3 px-4 text-sm">{getAccountName(trade.accountId)}</td>
                             <td className="py-3 px-4 text-sm font-medium">{trade.pair}</td>
                             <td className="py-3 px-4 text-sm">
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                              }`}>
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                }`}>
                                 {trade.type}
                               </span>
                             </td>
@@ -834,43 +841,21 @@ export default function MissedTradeJournal() {
                             <td className={`py-3 px-4 text-sm text-right font-medium ${(trade.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {(trade.profitLoss || 0) >= 0 ? '+' : ''}${(trade.profitLoss || 0).toFixed(2)}
                             </td>
-                            <td className="py-3 px-4 text-sm text-right text-gray-500">
-                              ${(trade.commission || 0).toFixed(2)}
+                            <td className="py-3 px-4 text-sm text-right text-red-500">
+                              -${Math.abs(trade.commission || 0).toFixed(2)}
                             </td>
-                            <td className="py-3 px-4 text-sm text-right text-gray-500">
-                              ${(trade.swap || 0).toFixed(2)}
+                            <td className="py-3 px-4 text-sm text-right text-red-500">
+                              -${Math.abs(trade.swap || 0).toFixed(2)}
                             </td>
                             <td className={`py-3 px-4 text-sm text-right font-semibold ${realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
                             </td>
-                            <td className="py-3 px-4 text-sm">
-                              <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
-                                {hasHTML(trade.missedReason) ? truncateText(trade.missedReason, 30) : (trade.reason || 'N/A')}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {(trade.missedReason || trade.reason) && (
-                                <button
-                                  onClick={() => {
-                                    const content = trade.missedReason || trade.reason || '';
-                                    setViewingReason({
-                                      title: `${trade.pair} - Missed Reason`,
-                                      content: DOMPurify.sanitize(decodeHtml(content))
-                                    });
-                                  }}
-                                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                                  title="View full reason"
-                                >
-                                  <ViewIcon className="w-4 h-4" />
-                                </button>
-                              )}
-                            </td>
+
                             <td className="py-3 px-4 text-sm">
                               <button
                                 onClick={() => toggleReviewStatus(trade)}
-                                className={`px-2 py-1 rounded text-xs font-medium cursor-pointer ${
-                                  trade.status === 'REVIEWED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                                }`}
+                                className={`px-2 py-1 rounded text-xs font-medium cursor-pointer ${trade.status === 'REVIEWED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                  }`}
                               >
                                 {trade.status === 'REVIEWED' ? 'Reviewed' : 'Missed'}
                               </button>
@@ -929,11 +914,11 @@ export default function MissedTradeJournal() {
 
       {/* Missed Reason Viewer Modal */}
       {viewingReason && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           onClick={() => setViewingReason(null)}
         >
-          <div 
+          <div
             className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
@@ -949,7 +934,7 @@ export default function MissedTradeJournal() {
               </div>
             </div>
             <div className="p-6 overflow-y-auto max-h-[60vh]">
-              <div 
+              <div
                 className="prose prose-sm max-w-none text-gray-700"
                 dangerouslySetInnerHTML={{ __html: viewingReason.content }}
               />

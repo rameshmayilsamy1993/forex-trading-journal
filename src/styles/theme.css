@@ -282,4 +282,12 @@
   .missed-reason-preview strong {
     font-weight: 600;
   }
+
+  .prose p {
+    margin-bottom: 4px;
+  }
+
+  .prose strong {
+    color: #111827;
+  }
 }

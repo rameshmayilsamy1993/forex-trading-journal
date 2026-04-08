@@ -49,6 +49,7 @@ export default function TradeJournal() {
     stopLoss: '',
     takeProfit: '',
     profit: '',
+    commission: '',
     swap: '',
     notes: '',
     session: 'LONDON' as TradingSession | '',
@@ -60,6 +61,17 @@ export default function TradeJournal() {
     beforeScreenshot: '',
     afterScreenshot: '',
   });
+
+  useEffect(() => {
+    if (formData.status === 'OPEN') {
+      setFormData(prev => ({
+        ...prev,
+        exitDate: '',
+        exitTime: '',
+        exitPrice: ''
+      }));
+    }
+  }, [formData.status]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -113,6 +125,13 @@ export default function TradeJournal() {
     return Number((lots * COMMISSION_PER_LOT).toFixed(2));
   }, [formData.lotSize]);
 
+  const calculatedRealPL = useMemo(() => {
+    const profit = parseFloat(formData.profit) || 0;
+    const commission = Math.abs(parseFloat(formData.commission) || calculatedCommission);
+    const swap = Math.abs(parseFloat(formData.swap) || 0);
+    return Number((profit - commission - swap).toFixed(2));
+  }, [formData.profit, formData.commission, formData.swap, calculatedCommission]);
+
   const saveTrades = async (newTrades: Trade[]) => {
     setTrades(newTrades);
     // Note: We don't save each trade individually here as that would be inefficient
@@ -151,7 +170,15 @@ export default function TradeJournal() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) return;
+    if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) {
+      alert('Please fill in all required fields: Account, Pair, Entry Price, and Lot Size');
+      return;
+    }
+
+    if (formData.status === 'CLOSED' && (!formData.exitDate || !formData.exitPrice)) {
+      alert('Exit Date and Exit Price are required for CLOSED trades');
+      return;
+    }
 
     const account = accounts.find(a => a.id === formData.accountId);
     if (!account) return;
@@ -202,7 +229,7 @@ export default function TradeJournal() {
       entryPrice: parseFloat(formData.entryPrice),
       exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : undefined,
       lotSize: parseFloat(formData.lotSize),
-      commission: calculatedCommission,
+      commission: formData.commission ? parseFloat(formData.commission) : calculatedCommission,
       swap: formData.swap ? parseFloat(formData.swap) : 0,
       entryDate: entryDateISO,
       entryTime: formData.entryTime || undefined,
@@ -221,6 +248,7 @@ export default function TradeJournal() {
       model1: formData.model1,
       beforeScreenshot: formData.beforeScreenshot || undefined,
       afterScreenshot: formData.afterScreenshot || undefined,
+      realPL: calculatedRealPL,
     };
 
     try {
@@ -239,6 +267,11 @@ export default function TradeJournal() {
     
     if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) {
       alert('Please fill in all required fields: Account, Pair, Entry Price, and Lot Size');
+      return;
+    }
+
+    if (formData.status === 'CLOSED' && (!formData.exitDate || !formData.exitPrice)) {
+      alert('Exit Date and Exit Price are required for CLOSED trades');
       return;
     }
 
@@ -289,7 +322,7 @@ export default function TradeJournal() {
         entryPrice: parseFloat(formData.entryPrice),
         exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : undefined,
         lotSize: parseFloat(formData.lotSize),
-        commission: calculatedCommission,
+        commission: formData.commission ? parseFloat(formData.commission) : calculatedCommission,
         swap: formData.swap ? parseFloat(formData.swap) : 0,
         entryDate: entryDateISO,
         entryTime: formData.entryTime || undefined,
@@ -308,6 +341,7 @@ export default function TradeJournal() {
         model1: formData.model1,
         beforeScreenshot: formData.beforeScreenshot || undefined,
         afterScreenshot: formData.afterScreenshot || undefined,
+        realPL: calculatedRealPL,
       };
 
       console.log('Updating trade with:', updatedTrade);
@@ -382,6 +416,7 @@ export default function TradeJournal() {
       stopLoss: trade.stopLoss?.toString() || '',
       takeProfit: trade.takeProfit?.toString() || '',
       profit: trade.profit?.toString() || '',
+      commission: trade.commission?.toString() || '',
       swap: (trade as any).swap?.toString() || '',
       notes: trade.notes || '',
       session: trade.session || '',
@@ -414,6 +449,7 @@ export default function TradeJournal() {
       stopLoss: '',
       takeProfit: '',
       profit: '',
+      commission: '',
       swap: '',
       notes: '',
       session: 'LONDON',
@@ -656,11 +692,13 @@ export default function TradeJournal() {
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                         <Input
-                          className="bg-slate-50 cursor-not-allowed pl-7 border-slate-200"
+                          className="bg-slate-50 border-slate-200 focus:bg-white transition-colors pl-7"
                           type="number"
-                          value={calculatedCommission}
-                          readOnly
-                          title={`Commission: $${COMMISSION_PER_LOT} per lot`}
+                          placeholder={calculatedCommission.toString()}
+                          value={formData.commission}
+                          onChange={e => setFormData({ ...formData, commission: e.target.value })}
+                          step="0.01"
+                          title={`Auto-calculated: $${COMMISSION_PER_LOT} per lot. Edit to override.`}
                         />
                       </div>
                     </FormField>
@@ -676,6 +714,14 @@ export default function TradeJournal() {
                           onChange={e => setFormData({ ...formData, swap: e.target.value })}
                           step="0.01"
                         />
+                      </div>
+                    </FormField>
+
+                    <FormField label="Real Profit/Loss">
+                      <div className={`h-10 px-3 flex items-center bg-gray-100 rounded-md border font-semibold ${
+                        calculatedRealPL >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {calculatedRealPL >= 0 ? '+' : ''}${calculatedRealPL.toFixed(2)}
                       </div>
                     </FormField>
 
@@ -811,7 +857,7 @@ export default function TradeJournal() {
                     </FormField>
 
                     {/* Exit Details */}
-                    {formData.status === 'CLOSED' && (
+                    {formData.status === 'CLOSED' ? (
                       <>
                         <FormField label="Exit Price" required>
                           <Input
@@ -868,6 +914,67 @@ export default function TradeJournal() {
                             onChange={(val) => setFormData({ ...formData, exitTime: val })}
                           />
                         </FormField>
+                      </>
+                    ) : (
+                      <>
+                        <FormField label="Exit Price">
+                          <Input
+                            className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                            type="number"
+                            placeholder="1.0900"
+                            value={formData.exitPrice}
+                            onChange={e => setFormData({ ...formData, exitPrice: e.target.value })}
+                            step="0.00001"
+                          />
+                        </FormField>
+
+                        <FormField label="Exit Date">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal h-10 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors",
+                                  !formData.exitDate && "text-slate-400"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {formData.exitDate ? (
+                                  <span>{format(new Date(formData.exitDate + 'T00:00:00'), "MMM dd, yyyy")}</span>
+                                ) : (
+                                  <span>Select date</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={formData.exitDate ? new Date(formData.exitDate + 'T00:00:00') : undefined}
+                                onSelect={(date) => {
+                                  if (date) {
+                                    const year = date.getFullYear();
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    setFormData({ ...formData, exitDate: `${year}-${month}-${day}` });
+                                  } else {
+                                    setFormData({ ...formData, exitDate: '' });
+                                  }
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormField>
+
+                        <FormField label="Exit Time">
+                          <TimePicker
+                            value={formData.exitTime || ''}
+                            onChange={(val) => setFormData({ ...formData, exitTime: val })}
+                          />
+                        </FormField>
+                        <p className="text-sm text-gray-500 col-span-3">
+                          Exit details will be filled when trade is closed
+                        </p>
                       </>
                     )}
 
@@ -1117,12 +1224,12 @@ export default function TradeJournal() {
                               <span className="text-slate-300">-</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-sm text-right text-slate-500">
-                            {(trade as any).swap ? `$${(trade as any).swap.toFixed(2)}` : '-'}
+                          <td className="py-3 px-4 text-sm text-right text-red-500">
+                            {(trade as any).swap ? `-$${Math.abs((trade as any).swap).toFixed(2)}` : '-'}
                           </td>
                           <td className="py-3 px-4 text-sm text-right">
                             {(() => {
-                              const realPL = (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+                              const realPL = (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs((trade as any).swap || 0));
                               return (
                                 <span className={`font-semibold ${realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                   {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
@@ -1251,11 +1358,11 @@ export default function TradeJournal() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Commission</span>
-                    <span className="font-medium text-gray-900">${viewingTrade.commission?.toFixed(2) || '-'}</span>
+                    <span className="font-medium text-red-500">-${Math.abs(viewingTrade.commission || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Swap</span>
-                    <span className="font-medium text-gray-900">${(viewingTrade as any).swap?.toFixed(2) || '0.00'}</span>
+                    <span className="font-medium text-red-500">-${Math.abs((viewingTrade as any).swap || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Status</span>
@@ -1280,12 +1387,12 @@ export default function TradeJournal() {
                   <div className="text-center">
                     <p className="text-xs text-slate-500 uppercase tracking-wide">Real P/L</p>
                     <p className={`text-lg font-bold ${(() => {
-                      const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) + (viewingTrade.commission || 0) + ((viewingTrade as any).swap || 0));
+                      const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) - Math.abs(viewingTrade.commission || 0) - Math.abs((viewingTrade as any).swap || 0));
                       return realPL >= 0 ? 'text-green-600' : 'text-red-600';
                     })()}`}>
                       ${(() => {
-                        const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) + (viewingTrade.commission || 0) + ((viewingTrade as any).swap || 0));
-                        return realPL.toFixed(2);
+                        const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) - Math.abs(viewingTrade.commission || 0) - Math.abs((viewingTrade as any).swap || 0));
+                        return realPL >= 0 ? `+${realPL.toFixed(2)}` : realPL.toFixed(2);
                       })()}
                     </p>
                   </div>

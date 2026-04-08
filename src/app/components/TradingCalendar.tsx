@@ -125,11 +125,11 @@ export default function TradingCalendar() {
   }, [trades, selectedFirm, selectedAccount]);
 
   const getTradePnL = (trade: Trade): number => {
-    return (trade as any).realPL ?? ((trade.profit || 0) + (trade.commission || 0) + ((trade as any).swap || 0));
+    return (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs((trade as any).swap || 0));
   };
 
   const getRealPL = (t: Trade): number =>
-    (t as any).realPL ?? ((t.profit || 0) + (t.commission || 0) + ((t as any).swap || 0));
+    (t as any).realPL ?? ((t.profit || 0) - Math.abs(t.commission || 0) - Math.abs((t as any).swap || 0));
 
   const weeklyData = useMemo(() => {
     const year = currentDate.getFullYear();

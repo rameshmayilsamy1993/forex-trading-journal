@@ -202,9 +202,9 @@ const tradeSchema = new mongoose.Schema({
 
 const calculateRealPL = (profit, commission, swap) => {
   const p = parseFloat(profit) || 0;
-  const c = parseFloat(commission) || 0;
-  const s = parseFloat(swap) || 0;
-  return Number((p + c + s).toFixed(2));
+  const c = Math.abs(parseFloat(commission) || 0);
+  const s = Math.abs(parseFloat(swap) || 0);
+  return Number((p - c - s).toFixed(2));
 };
 
 const masterSchema = new mongoose.Schema({
@@ -764,8 +764,8 @@ app.post('/api/trades/import', isAuthenticated, uploadExcel.single('file'), asyn
           console.log(`Row ${i + 1} - RR calc:`, { entryPriceNum, stopLossNum, takeProfitNum, typeValue, rr });
         }
         
-        const commission = safeNumber(getValue(row, 'Commission', 'commission', 'Fee', 'fee')) || 0;
-        const swap = safeNumber(getValue(row, 'Swap', 'swap', 'Swaps', 'swaps')) || 0;
+        const commission = Math.abs(safeNumber(getValue(row, 'Commission', 'commission', 'Fee', 'fee')) || 0);
+        const swap = Math.abs(safeNumber(getValue(row, 'Swap', 'swap', 'Swaps', 'swaps')) || 0);
         const profit = safeNumber(getValue(row, 'Profit', 'profit', 'P/L', 'pl')) || 0;
         const realPL = calculateRealPL(profit, commission, swap);
 

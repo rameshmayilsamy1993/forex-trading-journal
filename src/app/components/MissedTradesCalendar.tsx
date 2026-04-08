@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { PageHeader, CardContainer } from './ui/DesignSystem';
 import { LoadingSpinner } from './ui/Loading';
 import { ErrorBoundary } from './ErrorBoundary';
+import DOMPurify from 'dompurify';
 
 interface DayData {
   date: Date;
@@ -101,7 +102,7 @@ export default function MissedTradesCalendar() {
   }, [missedTrades, selectedFirm, selectedAccount, selectedPair, accounts]);
 
   const getRealPL = (trade: MissedTrade): number => {
-    return trade.realPL ?? ((trade.profitLoss || 0) - (trade.commission || 0) - (trade.swap || 0));
+    return trade.realPL ?? ((trade.profitLoss || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
   };
 
   const formatDateKey = (date: Date | string | undefined): string => {
@@ -559,7 +560,15 @@ export default function MissedTradesCalendar() {
                         </div>
                       </div>
                       <div className="text-sm text-gray-500">
-                        <span className="text-orange-500">Reason:</span> {trade.reason || 'N/A'}
+                        <span className="text-orange-500">Reason:</span>{' '}
+                        {trade.reason || trade.missedReason ? (
+                          <span
+                            className="prose prose-sm max-w-none text-gray-700"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trade.missedReason || trade.reason || '') }}
+                          />
+                        ) : (
+                          <span className="text-gray-400">No reason provided</span>
+                        )}
                       </div>
                     </div>
                   ))}
