@@ -416,372 +416,423 @@ export default function MissedTradeJournal() {
             <>
               {/* Add/Edit Form */}
               {(isAdding || editingId) && (
-                <div className="mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="font-bold text-gray-900 mb-4">{editingId ? 'Edit Missed Trade' : 'New Missed Trade'}</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Account *</label>
-                      <Select value={formData.accountId} onValueChange={(value) => setFormData({ ...formData, accountId: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Account" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {accounts.map(account => (
-                            <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                <div className="mb-6 p-6 bg-white rounded-xl border border-slate-200">
+                  <h3 className="font-bold text-lg text-slate-900 mb-6 flex items-center gap-2">
+                    {editingId ? 'Edit Missed Trade' : 'New Missed Trade'}
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    {/* Section 1: Trade Basics */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">1</span>
+                        Trade Basics
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Account *</label>
+                          <Select value={formData.accountId} onValueChange={(value) => setFormData({ ...formData, accountId: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue placeholder="Select Account" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {accounts.map(account => (
+                                <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Pair *</label>
+                          <Select value={formData.pair} onValueChange={(value) => setFormData({ ...formData, pair: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue placeholder="Select Pair" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {pairs.length > 0 ? (
+                                pairs.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)
+                              ) : (
+                                <SelectItem value="EURUSD">EURUSD</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Type *</label>
+                          <Select value={formData.type} onValueChange={(value: 'BUY' | 'SELL') => setFormData({ ...formData, type: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="BUY">BUY</SelectItem>
+                              <SelectItem value="SELL">SELL</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Pair *</label>
-                      <Select value={formData.pair} onValueChange={(value) => setFormData({ ...formData, pair: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Pair" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {pairs.length > 0 ? (
-                            pairs.map(p => (
-                              <SelectItem key={p} value={p}>{p}</SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="EURUSD">EURUSD</SelectItem>
+                    {/* Section 2: Entry Details */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">2</span>
+                        Entry Details
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Entry Price *</label>
+                          <Input
+                            type="number"
+                            step="0.00001"
+                            placeholder="1.0850"
+                            className="bg-white border-slate-200"
+                            value={formData.entryPrice}
+                            onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Date *</label>
+                          <Input
+                            type="date"
+                            className="bg-white border-slate-200"
+                            value={formData.date}
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Time</label>
+                          <TimePicker
+                            value={formData.time}
+                            onChange={(val) => setFormData({ ...formData, time: val })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: Trade Setup */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">3</span>
+                        Trade Setup
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Stop Loss *</label>
+                          <Input
+                            type="number"
+                            step="0.00001"
+                            placeholder="1.0820"
+                            className="bg-white border-slate-200"
+                            value={formData.stopLoss}
+                            onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Take Profit *</label>
+                          <Input
+                            type="number"
+                            step="0.00001"
+                            placeholder="1.0950"
+                            className="bg-white border-slate-200"
+                            value={formData.takeProfit}
+                            onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">RR Ratio</label>
+                          <div className="h-10 px-3 flex items-center bg-slate-100 rounded-md border">
+                            <span className={calculatedRR !== null ? (calculatedRR >= 1 ? 'text-green-600 font-medium' : 'text-yellow-600 font-medium') : 'text-slate-400'}>
+                              {calculatedRR !== null ? `1:${calculatedRR.toFixed(2)}` : 'Auto'}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Strategy</label>
+                          <Select value={formData.strategy} onValueChange={(value) => setFormData({ ...formData, strategy: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue placeholder="Select Strategy" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {strategies.map(s => (
+                                <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Model #1</label>
+                          <Select value={formData.model1} onValueChange={(value) => setFormData({ ...formData, model1: value as Model1Type })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes (Both EUR and GBP)">Yes (Both EUR and GBP)</SelectItem>
+                              <SelectItem value="Yes (EUR)">Yes (EUR)</SelectItem>
+                              <SelectItem value="Yes (GBP)">Yes (GBP)</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">SMT</label>
+                          <Select value={formData.smt} onValueChange={(value) => setFormData({ ...formData, smt: value as SMTType })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="No">No</SelectItem>
+                              <SelectItem value="Yes with GBPUSD">Yes with GBPUSD</SelectItem>
+                              <SelectItem value="Yes with EURUSD">Yes with EURUSD</SelectItem>
+                              <SelectItem value="Yes with DXY">Yes with DXY</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 4: Trade Context */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">4</span>
+                        Trade Context
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Session</label>
+                          <Select value={formData.session} onValueChange={(value) => setFormData({ ...formData, session: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue placeholder="Select Session" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {sessions.map(s => (
+                                <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Key Level</label>
+                          <Select value={formData.keyLevel} onValueChange={(value) => setFormData({ ...formData, keyLevel: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue placeholder="Select Key Level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {keyLevels.map(k => (
+                                <SelectItem key={k.id} value={k.name}>{k.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Emotion</label>
+                          <Input
+                            placeholder="Optional"
+                            className="bg-white border-slate-200"
+                            value={formData.emotion}
+                            onChange={(e) => setFormData({ ...formData, emotion: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 5: Financials */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">5</span>
+                        Financials
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Profit/Loss</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="pl-7 bg-white border-slate-200"
+                              value={formData.profitLoss}
+                              onChange={(e) => setFormData({ ...formData, profitLoss: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Commission</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="pl-7 bg-white border-slate-200"
+                              value={formData.commission}
+                              onChange={(e) => setFormData({ ...formData, commission: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Swap</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="pl-7 bg-white border-slate-200"
+                              value={formData.swap}
+                              onChange={(e) => setFormData({ ...formData, swap: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Real P/L</label>
+                          <div className={`h-10 px-3 flex items-center bg-slate-100 rounded-md border font-semibold ${calculatedRealPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {calculatedRealPL >= 0 ? '+' : ''}${calculatedRealPL.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 6: Missed Trade Info */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">6</span>
+                        Missed Trade Info
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Reason Missed *</label>
+                          <Select value={formData.reason} onValueChange={(value) => setFormData({ ...formData, reason: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue placeholder="Select Reason" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {REASON_OPTIONS.map(r => (
+                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                          <Select value={formData.status} onValueChange={(value: 'MISSED' | 'REVIEWED') => setFormData({ ...formData, status: value })}>
+                            <SelectTrigger className="bg-white border-slate-200">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="MISSED">Missed</SelectItem>
+                              <SelectItem value="REVIEWED">Reviewed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 7: Notes & Screenshots */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm">7</span>
+                        Notes & Screenshots
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">Before Screenshot</label>
+                          <div className="modern-file-upload group relative border-2 border-dashed border-slate-200 rounded-lg p-4 hover:border-blue-400 transition-colors">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileUpload('before')}
+                              disabled={uploadingImage === 'before'}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <div className="flex flex-col items-center justify-center space-y-2">
+                              {uploadingImage === 'before' ? (
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                              ) : (
+                                <>
+                                  <div className="p-2 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                                    <ImageIcon className="w-5 h-5 text-blue-600" />
+                                  </div>
+                                  <span className="text-xs text-slate-500">Click to upload</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {formData.screenshots.before && (
+                            <div className="relative mt-2 inline-block">
+                              <img src={formData.screenshots.before} alt="Before" className="h-16 rounded object-cover border border-slate-200" />
+                              <button
+                                onClick={() => setFormData({ ...formData, screenshots: { ...formData.screenshots, before: '' } })}
+                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
                           )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                      <Select value={formData.type} onValueChange={(value: 'BUY' | 'SELL') => setFormData({ ...formData, type: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="BUY">BUY</SelectItem>
-                          <SelectItem value="SELL">SELL</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
-                      <Input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                      <TimePicker
-                        value={formData.time}
-                        onChange={(val) => setFormData({ ...formData, time: val })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Entry Price *</label>
-                      <Input
-                        type="number"
-                        step="0.00001"
-                        placeholder="1.0850"
-                        value={formData.entryPrice}
-                        onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Stop Loss *</label>
-                      <Input
-                        type="number"
-                        step="0.00001"
-                        placeholder="1.0820"
-                        value={formData.stopLoss}
-                        onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Take Profit *</label>
-                      <Input
-                        type="number"
-                        step="0.00001"
-                        placeholder="1.0950"
-                        value={formData.takeProfit}
-                        onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">RR Ratio</label>
-                      <div className="h-10 px-3 flex items-center bg-gray-100 rounded-md border">
-                        <span className={calculatedRR !== null ? (calculatedRR >= 1 ? 'text-green-600' : 'text-yellow-600') : 'text-gray-400'}>
-                          {calculatedRR !== null ? calculatedRR.toFixed(2) : 'Auto'}
-                        </span>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">After Screenshot</label>
+                          <div className="modern-file-upload group relative border-2 border-dashed border-slate-200 rounded-lg p-4 hover:border-blue-400 transition-colors">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileUpload('after')}
+                              disabled={uploadingImage === 'after'}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <div className="flex flex-col items-center justify-center space-y-2">
+                              {uploadingImage === 'after' ? (
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                              ) : (
+                                <>
+                                  <div className="p-2 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                                    <ImageIcon className="w-5 h-5 text-blue-600" />
+                                  </div>
+                                  <span className="text-xs text-slate-500">Click to upload</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {formData.screenshots.after && (
+                            <div className="relative mt-2 inline-block">
+                              <img src={formData.screenshots.after} alt="After" className="h-16 rounded object-cover border border-slate-200" />
+                              <button
+                                onClick={() => setFormData({ ...formData, screenshots: { ...formData.screenshots, after: '' } })}
+                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">Notes</label>
+                          <textarea
+                            placeholder="Add notes about why this trade was missed..."
+                            className="w-full h-24 p-3 bg-white border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            value={formData.notes}
+                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                          />
+                        </div>
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Session</label>
-                      <Select value={formData.session} onValueChange={(value) => setFormData({ ...formData, session: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Session" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sessions.map(s => (
-                            <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Strategy</label>
-                      <Select value={formData.strategy} onValueChange={(value) => setFormData({ ...formData, strategy: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Strategy" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {strategies.map(s => (
-                            <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Key Level</label>
-                      <Select value={formData.keyLevel} onValueChange={(value) => setFormData({ ...formData, keyLevel: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Key Level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {keyLevels.map(k => (
-                            <SelectItem key={k.id} value={k.name}>{k.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">SMT</label>
-                      <Select value={formData.smt} onValueChange={(value) => setFormData({ ...formData, smt: value as SMTType })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="No">No</SelectItem>
-                          <SelectItem value="Yes with GBPUSD">Yes with GBPUSD</SelectItem>
-                          <SelectItem value="Yes with EURUSD">Yes with EURUSD</SelectItem>
-                          <SelectItem value="Yes with DXY">Yes with DXY</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Model #1</label>
-                      <Select value={formData.model1} onValueChange={(value) => setFormData({ ...formData, model1: value as Model1Type })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes (Both EUR and GBP)">Yes (Both EUR and GBP)</SelectItem>
-                          <SelectItem value="Yes (EUR)">Yes (EUR)</SelectItem>
-                          <SelectItem value="Yes (GBP)">Yes (GBP)</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Profit/Loss</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-7"
-                          value={formData.profitLoss}
-                          onChange={(e) => setFormData({ ...formData, profitLoss: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-7"
-                          value={formData.commission}
-                          onChange={(e) => setFormData({ ...formData, commission: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Swap</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-7"
-                          value={formData.swap}
-                          onChange={(e) => setFormData({ ...formData, swap: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Real P/L</label>
-                      <div className={`h-10 px-3 flex items-center bg-gray-100 rounded-md border font-semibold ${calculatedRealPL >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                        {calculatedRealPL >= 0 ? '+' : ''}${calculatedRealPL.toFixed(2)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Reason Missed *</label>
-                      <Select value={formData.reason} onValueChange={(value) => setFormData({ ...formData, reason: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Reason" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {REASON_OPTIONS.map(r => (
-                            <SelectItem key={r} value={r}>{r}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Emotion</label>
-                      <Input
-                        placeholder="Optional"
-                        value={formData.emotion}
-                        onChange={(e) => setFormData({ ...formData, emotion: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                      <Select value={formData.status} onValueChange={(value: 'MISSED' | 'REVIEWED') => setFormData({ ...formData, status: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="MISSED">Missed</SelectItem>
-                          <SelectItem value="REVIEWED">Reviewed</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
-                  {/* Screenshots */}
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Before Screenshot</label>
-                      <div className="modern-file-upload group relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileUpload('before')}
-                          disabled={uploadingImage === 'before'}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        <div className="flex flex-col items-center justify-center space-y-2 py-4">
-                          {uploadingImage === 'before' ? (
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          ) : (
-                            <>
-                              <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                                <ImageIcon className="w-6 h-6 text-blue-600" />
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <span className="font-semibold text-blue-600">Click to upload</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      {formData.screenshots.before && (
-                        <div className="relative inline-block">
-                          <img src={formData.screenshots.before} alt="Before" className="h-20 rounded object-cover border border-gray-200" />
-                          <button
-                            onClick={() => setFormData({
-                              ...formData,
-                              screenshots: { ...formData.screenshots, before: '' }
-                            })}
-                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">After Screenshot</label>
-                      <div className="modern-file-upload group relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileUpload('after')}
-                          disabled={uploadingImage === 'after'}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        <div className="flex flex-col items-center justify-center space-y-2 py-4">
-                          {uploadingImage === 'after' ? (
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          ) : (
-                            <>
-                              <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                                <ImageIcon className="w-6 h-6 text-blue-600" />
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <span className="font-semibold text-blue-600">Click to upload</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      {formData.screenshots.after && (
-                        <div className="relative inline-block">
-                          <img src={formData.screenshots.after} alt="After" className="h-20 rounded object-cover border border-gray-200" />
-                          <button
-                            onClick={() => setFormData({
-                              ...formData,
-                              screenshots: { ...formData.screenshots, after: '' }
-                            })}
-                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 mt-4 justify-end">
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-slate-200">
                     <button
                       onClick={() => { setIsAdding(false); setEditingId(null); resetForm(); }}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                      className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 flex items-center gap-2"
                     >
+                      <X className="w-4 h-4" />
                       Cancel
                     </button>
                     <button
-                      onClick={handleSubmit}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                      onClick={editingId ? () => handleEdit(editingId) : handleSubmit}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-500/25"
                     >
                       <Check className="w-4 h-4" />
-                      Save
+                      {editingId ? 'Update' : 'Save'}
                     </button>
                   </div>
                 </div>

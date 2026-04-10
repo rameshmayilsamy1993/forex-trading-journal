@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn, Trash, AlertTriangle } from 'lucide-react';
+import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn, Trash, AlertTriangle, FileText } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm, TradingSession, MasterData, SMTType, Model1Type } from '../types/trading';
 import apiService from '../services/apiService';
 import { calculateTradeProfit, calculateRiskReward } from '../utils/calculations';
@@ -14,6 +14,7 @@ import ImageViewer from './ImageViewer';
 import { format } from 'date-fns';
 import { cn } from './ui/utils';
 import { getDateKey, getLocalDateString } from '../utils/dateUtils';
+import LossReasonModal from './LossReasonModal';
 
 
 
@@ -33,6 +34,15 @@ export default function TradeJournal() {
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Loss Analysis Modal State
+  const [lossAnalysisModal, setLossAnalysisModal] = useState<{
+    isOpen: boolean;
+    tradeId: string | null;
+    tradeData: { pair: string; type: string; entryPrice: number; exitPrice: number; profit: number; entryDate: string; exitDate: string } | null;
+    existingAnalysis: any | null;
+    mode: 'add' | 'view';
+  }>({ isOpen: false, tradeId: null, tradeData: null, existingAnalysis: null, mode: 'add' });
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     accountId: '',
@@ -363,6 +373,56 @@ export default function TradeJournal() {
       } catch (error) {
         console.error('Failed to delete trade:', error);
       }
+    }
+  };
+
+  const handleOpenLossAnalysis = async (trade: any, mode?: 'add' | 'view') => {
+    try {
+      console.log('=== OPEN LOSS ANALYSIS ===');
+      console.log('Trade ID:', trade.id);
+      console.log('Mode:', mode);
+      
+      // Always try to fetch existing analysis
+      const existingAnalysis = await apiService.lossAnalysis.get(trade.id);
+      console.log('Existing analysis:', existingAnalysis);
+      
+      // Auto-determine mode: if analysis exists, use 'view', otherwise 'add'
+      const finalMode = mode || (existingAnalysis ? 'view' : 'add');
+      console.log('Final mode:', finalMode);
+      
+      setLossAnalysisModal({
+        isOpen: true,
+        tradeId: trade.id,
+        tradeData: {
+          pair: trade.pair,
+          type: trade.type,
+          entryPrice: trade.entryPrice,
+          exitPrice: trade.exitPrice || 0,
+          profit: trade.profit || 0,
+          entryDate: trade.entryDate,
+          exitDate: trade.exitDate || ''
+        },
+        existingAnalysis,
+        mode: finalMode
+      });
+    } catch (error) {
+      console.error('Failed to load loss analysis:', error);
+      // If error, open in add mode
+      setLossAnalysisModal({
+        isOpen: true,
+        tradeId: trade.id,
+        tradeData: {
+          pair: trade.pair,
+          type: trade.type,
+          entryPrice: trade.entryPrice,
+          exitPrice: trade.exitPrice || 0,
+          profit: trade.profit || 0,
+          entryDate: trade.entryDate,
+          exitDate: trade.exitDate || ''
+        },
+        existingAnalysis: null,
+        mode: 'add'
+      });
     }
   };
 
@@ -1132,7 +1192,8 @@ export default function TradeJournal() {
 
                 {filteredTrades.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
-                    <table className="w-full">
+                    <div className="overflow-x-auto">
+                    <table className="w-full min-w-[1400px]">
                       <thead>
                         <tr className="border-b border-slate-200 bg-slate-50/50">
                           <th className="w-12 py-3 px-4">
@@ -1254,6 +1315,16 @@ export default function TradeJournal() {
                                   <Eye className="w-4 h-4" />
                                 </button>
                               )}
+                              {/* Loss Analysis Button - Only for losing trades */}
+                              {(trade.profit || 0) < 0 && (
+                                <button
+                                  onClick={() => handleOpenLossAnalysis(trade, 'add')}
+                                  className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-150 hover:scale-105"
+                                  title="Add Loss Reason"
+                                >
+                                  <FileText className="w-4 h-4" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => startEdit(trade)}
                                 className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all duration-150 hover:scale-105"
@@ -1274,6 +1345,7 @@ export default function TradeJournal() {
                       ))}
                     </tbody>
                   </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1585,6 +1657,16 @@ export default function TradeJournal() {
           </div>
         </div>
       )}
+
+      {/* Loss Analysis Modal */}
+      <LossReasonModal
+        isOpen={lossAnalysisModal.isOpen}
+        onClose={() => setLossAnalysisModal({ isOpen: false, tradeId: null, tradeData: null, existingAnalysis: null, mode: 'add' })}
+        tradeId={lossAnalysisModal.tradeId || ''}
+        tradeData={lossAnalysisModal.tradeData || undefined}
+        existingAnalysis={lossAnalysisModal.existingAnalysis}
+        mode={lossAnalysisModal.mode}
+      />
     </div>
   );
 }

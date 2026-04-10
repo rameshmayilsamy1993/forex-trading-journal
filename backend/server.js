@@ -58,11 +58,11 @@ const connectWithRetry = async (retries = 5, delay = 5000) => {
   for (let i = 0; i < retries; i++) {
     try {
       console.log(`Attempting to connect to MongoDB Atlas... (Attempt ${i + 1}/${retries})`);
-      
+
       await mongoose.connect(process.env.MONGODB_URI, mongoOptions);
-      
+
       console.log('MongoDB Atlas connected successfully');
-      
+
       mongoose.connection.on('error', (err) => {
         console.error('MongoDB connection error:', err);
       });
@@ -79,7 +79,7 @@ const connectWithRetry = async (retries = 5, delay = 5000) => {
       return true;
     } catch (err) {
       console.error(`MongoDB connection failed:`, err.message);
-      
+
       if (i < retries - 1) {
         console.log(`Retrying in ${delay / 1000} seconds...`);
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -200,6 +200,60 @@ const tradeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
+const LOSS_REASON_TYPES = [
+  // Mistake Reasons
+  'FOMO',
+  'Early Entry',
+  'Late Entry',
+  'No Confirmation',
+  'Overtrading',
+  'Revenge Trading',
+  'Fear of Missing Out',
+  'Overconfidence',
+  'Lack of Patience',
+  'Poor Risk Management',
+  'Custom'
+];
+
+const VALID_LOSS_REASONS = [
+  'Followed Plan',
+  'Valid Setup (4HR + 15MIN Confirmed)',
+  'SL Hit Before Target',
+  'Market Structure Shift',
+  'News Spike (Unavoidable)',
+  'Liquidity Sweep Loss',
+  'Spread/Slippage Issue'
+];
+
+const ALL_LOSS_REASONS = [...LOSS_REASON_TYPES, ...VALID_LOSS_REASONS];
+
+const lossAnalysisSchema = new mongoose.Schema({
+  tradeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trade', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: String,
+  reasonType: { type: String, enum: ALL_LOSS_REASONS, required: true },
+  isValidTrade: { type: Boolean, default: false },
+  description: { type: String, default: '' },
+  images: [{
+    url: String,
+    timeframe: { type: String, enum: ['4HR', '15MIN'], default: '4HR' },
+    publicId: String
+  }],
+  tags: [String],
+  checklist: [{
+    rule: String,
+    broken: { type: Boolean, default: false }
+  }],
+  disciplineScore: { type: Number, min: 1, max: 5 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, schemaOptions);
+
+lossAnalysisSchema.index({ tradeId: 1 }, { unique: true });
+lossAnalysisSchema.index({ userId: 1 });
+
+const LossAnalysis = mongoose.model('LossAnalysis', lossAnalysisSchema);
+
 const calculateRealPL = (profit, commission, swap) => {
   const p = parseFloat(profit) || 0;
   const c = Math.abs(parseFloat(commission) || 0);
@@ -271,13 +325,13 @@ const getCachedPairs = async () => {
   if (pairCache.data && pairCache.timestamp && (now - pairCache.timestamp < pairCache.ttl)) {
     return pairCache.data;
   }
-  
+
   const settings = await Settings.findOne({ key: 'pairs' });
   const pairs = settings ? settings.value : ['EURUSD', 'GBPUSD', 'USDJPY', 'XAUUSD'];
-  
+
   pairCache.data = pairs;
   pairCache.timestamp = now;
-  
+
   return pairs;
 };
 
@@ -287,6 +341,11 @@ const invalidatePairCache = () => {
 };
 
 const isAuthenticated = (req, res, next) => {
+  console.log('=== AUTH DEBUG ===');
+  console.log('Session:', req.session?.userId ? 'exists' : 'missing');
+  console.log('Cookies:', req.headers.cookie);
+  console.log('Path:', req.path);
+
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ message: 'Unauthorized - Please login' });
   }
@@ -321,35 +380,35 @@ app.get('/api/settings/pairs', isAuthenticated, async (req, res) => {
 app.post('/api/settings/pairs', isAuthenticated, async (req, res) => {
   try {
     const { pairs } = req.body;
-    
+
     if (!Array.isArray(pairs)) {
       return res.status(400).json({ message: 'Pairs must be an array' });
     }
-    
+
     const cleanedPairs = pairs
       .map(p => String(p).trim().toUpperCase())
       .filter(p => p.length > 0)
       .filter((p, index, arr) => arr.indexOf(p) === index);
-    
+
     if (cleanedPairs.length === 0) {
       return res.status(400).json({ message: 'At least one pair is required' });
     }
-    
+
     const settings = await Settings.findOneAndUpdate(
       { key: 'pairs' },
-      { 
+      {
         key: 'pairs',
         value: cleanedPairs,
         updatedAt: new Date()
       },
       { upsert: true, new: true }
     );
-    
+
     invalidatePairCache();
-    
-    res.json({ 
+
+    res.json({
       message: 'Pairs updated successfully',
-      pairs: settings.value 
+      pairs: settings.value
     });
   } catch (error) {
     console.error('Error updating pairs:', error);
@@ -361,13 +420,13 @@ app.get('/api/settings', isAuthenticated, async (req, res) => {
   try {
     const { key } = req.query;
     let settings;
-    
+
     if (key) {
       settings = await Settings.findOne({ key });
     } else {
       settings = await Settings.find({});
     }
-    
+
     res.json(settings || []);
   } catch (error) {
     console.error('Error fetching settings:', error);
@@ -378,21 +437,21 @@ app.get('/api/settings', isAuthenticated, async (req, res) => {
 app.post('/api/settings', isAuthenticated, async (req, res) => {
   try {
     const { key, value } = req.body;
-    
+
     if (!key) {
       return res.status(400).json({ message: 'Key is required' });
     }
-    
+
     const settings = await Settings.findOneAndUpdate(
       { key },
       { key, value, updatedAt: new Date() },
       { upsert: true, new: true }
     );
-    
+
     if (key === 'pairs') {
       invalidatePairCache();
     }
-    
+
     res.json(settings);
   } catch (error) {
     console.error('Error saving settings:', error);
@@ -443,8 +502,8 @@ const seedAdminUser = async () => {
 };
 
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     authenticated: !!req.session?.userId
@@ -484,15 +543,41 @@ app.delete('/api/upload/:publicId', isAuthenticated, async (req, res) => {
 });
 
 const memoryStorage = multer.memoryStorage();
-const uploadExcel = multer({ 
+const uploadExcel = multer({
   storage: memoryStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
-        file.mimetype === 'application/vnd.ms-excel') {
+    const allowedMimes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'application/octet-stream',
+      'text/csv',
+      'text/plain',
+      'application/csv'
+    ];
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const ext = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf('.'));
+
+    if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Only Excel files (.xlsx, .xls) are allowed'));
+      cb(new Error('Only Excel files (.xlsx, .xls) or CSV files (.csv) are allowed'));
+    }
+  }
+});
+
+const uploadCSV = multer({
+  storage: memoryStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['text/csv', 'text/plain', 'application/csv', 'application/octet-stream'];
+    const allowedExtensions = ['.csv'];
+    const ext = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf('.'));
+
+    if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files (.csv) are allowed'));
     }
   }
 });
@@ -521,74 +606,80 @@ function safeString(value, defaultValue = '') {
   return String(value).trim() || defaultValue;
 }
 
-function safeNumber(value, defaultValue = 0) {
-  if (value === undefined || value === null || value === '') return defaultValue;
+function safeNumber(value) {
+  if (value === undefined || value === null || value === '') return null;
   const num = parseFloat(value);
-  return isNaN(num) ? defaultValue : num;
+  return isNaN(num) ? null : num;
+}
+
+function parseDDMMYYYYDate(dateStr) {
+  const match = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (match) {
+    const [, dd, mm, yyyy] = match;
+    return new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+  }
+  return null;
 }
 
 function parseDateTime(dateTimeValue) {
-  const result = { date: new Date(), time: null };
-  
-  if (!dateTimeValue) return result;
-  
-  if (typeof dateTimeValue === 'number') {
-    const date = XLSX.SSF.parse_date_code(dateTimeValue);
-    result.date = new Date(date.y, date.m - 1, date.d, date.H || 0, date.M || 0, date.S || 0);
-    const h = String(date.H || 0).padStart(2, '0');
-    const m = String(date.M || 0).padStart(2, '0');
-    result.time = `${h}:${m}`;
-    return result;
+  const dateStr = String(dateTimeValue || '').trim();
+  if (!dateStr) return { date: new Date(), time: null };
+
+  console.log('=== PARSE DATETIME ===');
+  console.log('INPUT:', dateStr);
+
+  // Handle ISO format already (2026-04-09T14:03:00) - DO NOT manipulate
+  if (dateStr.includes('T') && !dateStr.includes('.')) {
+    console.log('ISO format detected');
+    const [datePart, timePart] = dateStr.split('T');
+    const time = timePart ? timePart.slice(0, 5) : null;
+    return { date: new Date(dateStr), time };
   }
-  
-  const dateStr = String(dateTimeValue).trim();
-  if (!dateStr) return result;
-  
+
   // Handle MT4/MT5 format: "2026.03.31 09:41:43" (dots, space, seconds)
   const dotFormatMatch = dateStr.match(/^(\d{4})\.(\d{2})\.(\d{2})[\sT]+(\d{2}):(\d{2})(?::(\d{2}))?/);
   if (dotFormatMatch) {
     const [, year, month, day, hour, minute, second] = dotFormatMatch;
-    result.date = new Date(
-      parseInt(year),
-      parseInt(month) - 1,
-      parseInt(day),
-      parseInt(hour),
-      parseInt(minute),
-      parseInt(second || '0')
-    );
-    result.time = `${hour}:${minute}`;
-    return result;
+    const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second || '00'}`;
+    console.log('DOT FORMAT:', isoString);
+    return {
+      date: new Date(isoString),
+      time: `${hour}:${minute}`
+    };
   }
-  
-  // Handle combined date-time: "03/31/2026 09:41:43" or "03-31-2026 09:41"
-  const combinedDateTimeRegex = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})[\sT]+(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AaPp][Mm])?)/;
-  const match = dateStr.match(combinedDateTimeRegex);
-  
-  if (match) {
-    const datePart = new Date(match[1]);
-    if (!isNaN(datePart.getTime())) {
-      result.date = datePart;
-    }
-    const timePart = match[2];
-    const time24 = convertTo24Hour(timePart);
-    if (time24) {
-      result.time = time24.slice(0, 5);
-    }
-  } else {
-    const dateOnly = new Date(dateStr);
-    if (!isNaN(dateOnly.getTime())) {
-      result.date = dateOnly;
-      const timeMatch = dateStr.match(/(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AaPp][Mm])?)/);
-      if (timeMatch) {
-        result.time = convertTo24Hour(timeMatch[1]);
-        if (result.time) {
-          result.time = result.time.slice(0, 5);
-        }
-      }
-    }
+
+  // Handle dash format
+  const dashFormatMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[\sT]+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (dashFormatMatch) {
+    const [, year, month, day, hour, minute, second] = dashFormatMatch;
+    const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second || '00'}`;
+    return {
+      date: new Date(isoString),
+      time: `${hour}:${minute}`
+    };
   }
-  
-  return result;
+
+  // Handle number (Excel serial date)
+  if (typeof dateTimeValue === 'number') {
+    const date = XLSX.SSF.parse_date_code(dateTimeValue);
+    const isoString = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}T${String(date.H || 0).padStart(2, '0')}:${String(date.M || 0).padStart(2, '0')}:${String(date.S || 0).padStart(2, '0')}`;
+    return {
+      date: new Date(isoString),
+      time: `${String(date.H || 0).padStart(2, '0')}:${String(date.M || 0).padStart(2, '0')}`
+    };
+  }
+
+  // Try as ISO string directly
+  const asDate = new Date(dateStr);
+  if (!isNaN(asDate.getTime())) {
+    const iso = asDate.toISOString();
+    return {
+      date: asDate,
+      time: iso.split('T')[1]?.slice(0, 5) || null
+    };
+  }
+
+  return { date: new Date(), time: null };
 }
 
 function convertTo24Hour(timeStr) {
@@ -596,26 +687,26 @@ function convertTo24Hour(timeStr) {
   const cleanTime = timeStr.trim().toUpperCase();
   const isPM = cleanTime.includes('PM');
   const isAM = cleanTime.includes('AM');
-  
+
   let [hours, minutes, seconds] = cleanTime.replace(/[APM]/gi, '').trim().split(':');
-  
+
   if (isNaN(parseInt(hours)) || isNaN(parseInt(minutes))) return null;
-  
+
   let h = parseInt(hours);
   const m = minutes || '00';
   const s = seconds || '00';
-  
+
   if (isPM && h !== 12) h += 12;
   if (isAM && h === 12) h = 0;
-  
+
   return `${String(h).padStart(2, '0')}:${m}:${s}`;
 }
 
 function calculateRR(entry, sl, tp, type) {
   if (!entry || !sl || !tp) return null;
-  
+
   let risk, reward;
-  
+
   if (type === 'BUY') {
     risk = entry - sl;
     reward = tp - entry;
@@ -623,28 +714,208 @@ function calculateRR(entry, sl, tp, type) {
     risk = sl - entry;
     reward = entry - tp;
   }
-  
+
   if (risk <= 0) return null;
-  
+
   return Number((reward / risk).toFixed(2));
+}
+
+function mapTrade(row) {
+  const positionId = safeString(getValue(row, 'Position', 'positionId', 'position_id', 'Ticket'));
+  const type = safeString(getValue(row, 'Type', 'type', 'Direction', 'Action')).toUpperCase();
+  const pair = safeString(getValue(row, 'Symbol', 'pair', 'Pair', 'Currency', 'instrument'));
+  const volume = safeNumber(getValue(row, 'Volume', 'volume', 'Lots', 'lots', 'lotSize'));
+  const entryPrice = safeNumber(getValue(row, 'Entry Price', 'Price', 'price', 'Open Price', 'Open', 'entryPrice'));
+  const exitPrice = safeNumber(getValue(row, 'Exit Price', 'Close Price', 'Close', 'closePrice', 'Close Price', 'Exit', 'exitPrice'));
+  const stopLoss = safeNumber(getValue(row, 'S / L', 'S/L', 'Stop Loss', 'stopLoss', 'sl'));
+  const takeProfit = safeNumber(getValue(row, 'T / P', 'T/P', 'Take Profit', 'takeProfit', 'tp'));
+  const commission = Math.abs(safeNumber(getValue(row, 'Commission', 'commission', 'Fee', 'fee')) || 0);
+  const swap = Math.abs(safeNumber(getValue(row, 'Swap', 'swap', 'Swaps', 'swaps')) || 0);
+  const profit = safeNumber(getValue(row, 'Profit', 'profit', 'P/L', 'pl')) || 0;
+
+  const entryDateTime = getValue(row, 'Time', 'Entry Time', 'Open Time', 'Entry Date Time', 'Date', 'entryDate', 'date');
+  const exitDateTime = getValue(row, 'Exit Time', 'Close Time', 'Exit Date Time', 'exitDate');
+  const parsedEntry = parseDateTime(entryDateTime);
+  const parsedExit = parseDateTime(exitDateTime);
+
+  const entryDate = parsedEntry.date ? parsedEntry.date.toISOString().split('T')[0] : null;
+  const entryTime = parsedEntry.time;
+  const exitDate = parsedExit.date ? parsedExit.date.toISOString().split('T')[0] : null;
+  const exitTime = parsedExit.time;
+
+  return {
+    positionId,
+    type,
+    pair,
+    lotSize: volume,
+    entryPrice,
+    exitPrice,
+    stopLoss,
+    takeProfit,
+    commission,
+    swap,
+    profit,
+    entryDate,
+    entryTime,
+    exitDate,
+    exitTime
+  };
+}
+
+function normalizeKey(key) {
+  if (!key) return '';
+  return String(key)
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function extractValue(row, aliases) {
+  for (const key of Object.keys(row)) {
+    const normalized = normalizeKey(key);
+    if (aliases.includes(normalized)) {
+      const val = row[key];
+      if (val !== undefined && val !== null && val !== '') {
+        return val;
+      }
+    }
+  }
+  return null;
+}
+
+function parseBrokerDate(value) {
+  if (!value) return null;
+  const str = String(value).trim();
+  if (!str) return null;
+
+  console.log('=== PARSE BROKER DATE ===');
+  console.log('INPUT:', str);
+
+  // Extract date and time parts
+  const dotMatch = str.match(/^(\d{4})\.(\d{2})\.(\d{2})[\sT]+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (dotMatch) {
+    const [, year, month, day, hour, minute, second] = dotMatch;
+    const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second || '00'}`;
+
+    console.log('ISO STRING:', isoString);
+
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${hour}:${minute}`,
+      iso: isoString,
+      raw: isoString
+    };
+  }
+
+  // Handle dash format 2026-04-09 14:03:00
+  const dashMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})[\sT]+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (dashMatch) {
+    const [, year, month, day, hour, minute, second] = dashMatch;
+    const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second || '00'}`;
+
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${hour}:${minute}`,
+      iso: isoString,
+      raw: isoString
+    };
+  }
+
+  // Handle slash format 2026/04/09 14:03:00
+  const slashMatch = str.match(/^(\d{4})\/(\d{2})\/(\d{2})[\sT]+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (slashMatch) {
+    const [, year, month, day, hour, minute, second] = slashMatch;
+    const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second || '00'}`;
+
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${hour}:${minute}`,
+      iso: isoString,
+      raw: isoString
+    };
+  }
+
+  console.log('NO MATCH, returning null');
+  return null;
+}
+
+function convertTrade(row) {
+  const entryTime = extractValue(row, ['entrydatetime', 'entry_time', 'time', 'opentime', 'opentime']);
+  const exitTime = extractValue(row, ['exitdatetime', 'exit_time', 'timeexit', 'closetime', 'extime']);
+
+  const symbol = extractValue(row, ['symbol', 'pair', 'currency']);
+  const type = extractValue(row, ['type', 'direction', 'action']);
+  const position = extractValue(row, ['position', 'ticket', 'order', 'positionid']);
+  const volume = extractValue(row, ['volume', 'lots', 'lot', 'volume']);
+  const entryPrice = extractValue(row, ['entryprice', 'price', 'openprice', 'open', 'entry_price']);
+  const exitPrice = extractValue(row, ['exitprice', 'closeprice', 'close', 'exit_price']);
+  const commission = extractValue(row, ['commission', 'fee', 'comm']);
+  const swap = extractValue(row, ['swap', 'swaps', 'rollover']);
+  const profit = extractValue(row, ['profit', 'pl', 'profit']);
+
+  const stopLoss = extractValue(row, ['sl', 'stop', 'stoploss', 'stop_loss', 's/l', 's l']);
+  const takeProfit = extractValue(row, ['tp', 'take', 'takeprofit', 'take_profit', 't/p', 't p']);
+
+  return {
+    positionId: position || '',
+    entryDate: entryTime ? parseBrokerDate(entryTime)?.date : null,
+    entryTime: entryTime ? parseBrokerDate(entryTime)?.time : null,
+    exitDate: exitTime ? parseBrokerDate(exitTime)?.date : null,
+    exitTime: exitTime ? parseBrokerDate(exitTime)?.time : null,
+    pair: symbol ? String(symbol).trim() : '',
+    type: type ? String(type).toUpperCase() : '',
+    lot: parseFloat(volume) || 0,
+    entryPrice: parseFloat(entryPrice) || 0,
+    exitPrice: parseFloat(exitPrice) || 0,
+    stopLoss: stopLoss != null ? parseFloat(stopLoss) : null,
+    takeProfit: takeProfit != null ? parseFloat(takeProfit) : null,
+    commission: parseFloat(commission) || 0,
+    swap: parseFloat(swap) || 0,
+    profit: parseFloat(profit) || 0
+  };
+}
+
+function convertMT5Row(row) {
+  return convertTrade(row);
+}
+
+function validateMT5Row(row) {
+  const errors = [];
+  console.log('=== VALIDATE ROW ===');
+  console.log('VALIDATE INPUT:', JSON.stringify(row));
+
+  const hasSymbol = (row.pair && row.pair.trim() !== '') || (row.symbol && row.symbol.trim() !== '');
+  const hasVolume = row.lot != null || row.volume != null;
+  const hasEntryPrice = row.entryPrice != null;
+
+  if (!hasSymbol) errors.push('Symbol is required');
+  if (!row.type) errors.push('Type is required');
+  if (!hasVolume) errors.push('Volume is required');
+  if (!hasEntryPrice) errors.push('Entry price is required');
+
+  if (errors.length > 0) {
+    console.log('VALIDATION ERRORS:', errors);
+  }
+
+  return errors;
 }
 
 function parseExcelWithDynamicHeaders(sheet) {
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
   console.log('Total rows found:', rawData.length);
   console.log('First 10 rows (to find headers):', rawData.slice(0, 10).map(r => r.slice(0, 5)));
-  
+
   const headerKeywords = ['Position', 'Symbol', 'Type'];
   let headerIndex = -1;
-  
+
   for (let i = 0; i < rawData.length; i++) {
     const row = rawData[i];
     if (!Array.isArray(row) || row.length === 0) continue;
-    
+
     const rowStr = row.map(cell => String(cell || '')).join(' ');
     const hasAllKeywords = headerKeywords.every(kw => rowStr.includes(kw));
-    
+
     if (hasAllKeywords) {
       headerIndex = i;
       console.log('Found header row at index:', headerIndex);
@@ -652,18 +923,18 @@ function parseExcelWithDynamicHeaders(sheet) {
       break;
     }
   }
-  
+
   if (headerIndex === -1) {
     console.log('No header row found, using default sheet_to_json parsing');
     return XLSX.utils.sheet_to_json(sheet);
   }
-  
+
   const headers = rawData[headerIndex].map(h => String(h || '').trim());
   console.log('Extracted headers:', headers);
-  
+
   const dataRows = rawData.slice(headerIndex + 1);
   console.log('Data rows count:', dataRows.length);
-  
+
   const data = dataRows.map(row => {
     if (!Array.isArray(row) || row.length === 0) return null;
     const obj = {};
@@ -674,15 +945,15 @@ function parseExcelWithDynamicHeaders(sheet) {
     });
     return obj;
   }).filter(row => row && Object.keys(row).length > 0);
-  
+
   const cleanData = data.filter(row => {
     const hasPosition = row['Position'] || row['Ticket'] || row['Order'];
     return hasPosition !== undefined && hasPosition !== null && hasPosition !== '';
   });
-  
+
   console.log('Clean data rows (with Position):', cleanData.length);
   console.log('First clean row:', JSON.stringify(cleanData[0], null, 2));
-  
+
   return cleanData;
 }
 
@@ -722,7 +993,7 @@ app.post('/api/trades/import', isAuthenticated, uploadExcel.single('file'), asyn
     for (let i = 0; i < data.length; i++) {
       const rawRow = data[i];
       const row = normalizeRow(rawRow);
-      
+
       try {
         const positionId = safeString(getValue(row, 'Position', 'positionId', 'position_id', 'Ticket'));
 
@@ -743,27 +1014,29 @@ app.post('/api/trades/import', isAuthenticated, uploadExcel.single('file'), asyn
 
         const entryDateTime = getValue(row, 'Time', 'Entry Time', 'Open Time', 'Entry Date Time', 'Date', 'entryDate', 'date');
         const exitDateTime = getValue(row, 'Exit Time', 'Close Time', 'Exit Date Time', 'exitDate');
-        
+
         const parsedEntry = parseDateTime(entryDateTime);
         const parsedExit = parseDateTime(exitDateTime);
 
         const typeValue = safeString(getValue(row, 'Type', 'type', 'Direction', 'Action'));
-        
+
         const entryPriceValue = getValue(row, 'Entry Price', 'Price', 'price', 'Open Price', 'Open', 'entryPrice');
         const exitPriceValue = getValue(row, 'Exit Price', 'Close Price', 'Close', 'closePrice', 'Close Price', 'Exit', 'exitPrice');
         const stopLossValue = getValue(row, 'S / L', 'S/L', 'Stop Loss', 'stopLoss', 'sl');
         const takeProfitValue = getValue(row, 'T / P', 'T/P', 'Take Profit', 'takeProfit', 'tp');
-        
+
         const entryPriceNum = safeNumber(entryPriceValue);
         const stopLossNum = safeNumber(stopLossValue);
         const takeProfitNum = safeNumber(takeProfitValue);
-        
+
         const rr = calculateRR(entryPriceNum, stopLossNum, takeProfitNum, typeValue.toUpperCase());
-        
+
         if (i < 3) {
-          console.log(`Row ${i + 1} - RR calc:`, { entryPriceNum, stopLossNum, takeProfitNum, typeValue, rr });
+          console.log(`=== DEBUG IMPORT ROW ${i + 1} ===`);
+          console.log('RAW ROW:', JSON.stringify(row));
+          console.log('Positions:', { positionId, typeValue, entryPriceNum, stopLossNum, takeProfitNum, rr });
         }
-        
+
         const commission = Math.abs(safeNumber(getValue(row, 'Commission', 'commission', 'Fee', 'fee')) || 0);
         const swap = Math.abs(safeNumber(getValue(row, 'Swap', 'swap', 'Swaps', 'swaps')) || 0);
         const profit = safeNumber(getValue(row, 'Profit', 'profit', 'P/L', 'pl')) || 0;
@@ -898,7 +1171,7 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
     for (let i = 0; i < Math.min(data.length, 100); i++) {
       const rawRow = data[i];
       const row = normalizeRow(rawRow);
-      
+
       const positionId = safeString(getValue(row, 'Position', 'positionId', 'position_id', 'Ticket'));
       positionIds.push(positionId);
 
@@ -911,7 +1184,7 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
       const typeValue = safeString(getValue(row, 'Type', 'type', 'Direction', 'Action'));
       const entryDateTime = getValue(row, 'Time', 'Entry Time', 'Open Time', 'Entry Date Time', 'Date', 'entryDate', 'date');
       const parsedEntry = parseDateTime(entryDateTime);
-      
+
       const entryPriceValue = getValue(row, 'Entry Price', 'Price', 'price', 'Open Price', 'Open', 'entryPrice');
       const exitPriceValue = getValue(row, 'Exit Price', 'Close Price', 'Close', 'closePrice', 'Close Price', 'Exit', 'exitPrice');
       const exitDateTime = getValue(row, 'Exit Time', 'Close Time', 'Exit Date Time', 'exitDate');
@@ -932,6 +1205,18 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
       };
       const ssmtType = ssmtTypeMap[ssmtRaw] || 'NO';
 
+      const commission = Math.abs(safeNumber(getValue(row, 'Commission', 'commission', 'Fee', 'fee')) || 0);
+      const swap = Math.abs(safeNumber(getValue(row, 'Swap', 'swap', 'Swaps', 'swaps')) || 0);
+      const stopLoss = safeNumber(getValue(row, 'S / L', 'S/L', 'Stop Loss', 'stopLoss', 'sl'));
+      const takeProfit = safeNumber(getValue(row, 'T / P', 'T/P', 'Take Profit', 'takeProfit', 'tp'));
+
+      // Debug first row
+      if (i === 0) {
+        console.log('=== DEBUG PREVIEW ROW ===');
+        console.log('RAW ROW:', JSON.stringify(row));
+        console.log('Commission:', commission, 'Swap:', swap, 'StopLoss:', stopLoss, 'TakeProfit:', takeProfit);
+      }
+
       preview.push({
         positionId,
         pair: safeString(getValue(row, 'Symbol', 'pair', 'Pair', 'Currency', 'instrument')),
@@ -939,11 +1224,15 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
         lotSize: safeNumber(getValue(row, 'Volume', 'volume', 'Lots', 'lots', 'lotSize')),
         entryPrice: safeNumber(entryPriceValue),
         exitPrice: safeNumber(exitPriceValue),
+        stopLoss: stopLoss,
+        takeProfit: takeProfit,
+        commission: commission,
+        swap: swap,
         profit: safeNumber(getValue(row, 'Profit', 'profit', 'P/L', 'pl')),
         ssmtType: ssmtType,
         entryDate: parsedEntry.date.toISOString().split('T')[0],
         entryTime: parsedEntry.time,
-        exitDate: exitDateTime ? parsedExit.date.toISOString().split('T')[0] : null,
+        exitDate: parsedExit.date ? parsedExit.date.toISOString().split('T')[0] : null,
         exitTime: parsedExit.time,
         isDuplicate
       });
@@ -969,6 +1258,206 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
   }
 });
 
+app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No CSV file uploaded' });
+    }
+
+    const csvContent = req.file.buffer.toString('utf-8');
+    const lines = csvContent.split(/\r?\n/).filter(line => line.trim());
+
+    if (lines.length < 2) {
+      return res.status(400).json({ message: 'CSV file is empty or has no data' });
+    }
+
+    const headers = lines[0].split(',').map(h => h.trim());
+    console.log('=== MT5 CONVERSION DEBUG ===');
+    console.log('RAW HEADERS:', headers);
+    console.log('NORMALIZED HEADERS:', headers.map(normalizeKey));
+
+    const hasPosition = headers.some(h => h.toLowerCase().includes('position'));
+    if (!hasPosition) {
+      return res.status(400).json({ message: 'Invalid MT5 format: Position column not found' });
+    }
+
+    const convertedRows = [];
+    const errors = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const row = lines[i].split(',').map(cell => cell.trim());
+      if (row.length < 13 || !row[0]) continue;
+
+      try {
+        const rowObj = {};
+        headers.forEach((h, idx) => {
+          rowObj[h.trim()] = row[idx];
+        });
+
+        console.log(`=== STEP ${i}: PROCESSING ===`);
+        console.log(`STEP ${i} RAW HEADERS:`, headers.map(normalizeKey));
+        console.log(`STEP ${i} RAW:`, JSON.stringify(rowObj));
+
+        const converted = convertMT5Row(rowObj);
+
+        console.log(`STEP ${i} CONVERTED:`, JSON.stringify(converted));
+
+        const rowErrors = validateMT5Row(converted);
+
+        if (rowErrors.length > 0) {
+          errors.push({ row: i + 1, errors: rowErrors });
+          continue;
+        }
+
+        convertedRows.push(converted);
+      } catch (err) {
+        errors.push({ row: i + 1, errors: [err.message] });
+      }
+    }
+
+    console.log('CONVERSION RESULT:', {
+      total: lines.length - 1,
+      converted: convertedRows.length,
+      errors: errors.length
+    });
+
+    res.json({
+      total: lines.length - 1,
+      converted: convertedRows.length,
+      errors: errors.slice(0, 20),
+      data: convertedRows
+    });
+  } catch (error) {
+    console.error('MT5 Convert error:', error);
+    res.status(500).json({ message: 'Failed to convert MT5 CSV: ' + error.message });
+  }
+});
+
+app.post('/api/trades/import-converted', isAuthenticated, async (req, res) => {
+  console.log('=== IMPORT-CONVERTED HIT ===');
+  console.log('Session:', req.session?.userId || 'NONE');
+  console.log('Body keys:', Object.keys(req.body || {}));
+
+  try {
+    const { trades, accountId } = req.body;
+
+    if (!trades || !Array.isArray(trades) || trades.length === 0) {
+      return res.status(400).json({ message: 'No trades provided' });
+    }
+
+    if (!accountId) {
+      return res.status(400).json({ message: 'Account ID is required' });
+    }
+
+    const account = await Account.findOne({ _id: accountId, userId: req.session.userId });
+    if (!account) {
+      return res.status(404).json({ message: 'Account not found' });
+    }
+
+    const defaultStrategy = await Master.findOne({ userId: req.session.userId, type: 'strategy' });
+
+    let inserted = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (let i = 0; i < trades.length; i++) {
+      const trade = trades[i];
+
+      try {
+        const positionId = trade.positionId;
+
+        if (!positionId) {
+          errors.push({ row: i + 1, error: 'Missing Position ID' });
+          continue;
+        }
+
+        const exists = await Trade.findOne({ positionId, accountId });
+        if (exists) {
+          skipped++;
+          continue;
+        }
+
+        const entryDateTime = trade.entryDate ? `${trade.entryDate} ${trade.entryTime || ''}`.trim() : null;
+        const exitDateTime = trade.exitDate ? `${trade.exitDate} ${trade.exitTime || ''}`.trim() : null;
+
+        const parsedEntry = parseDateTime(entryDateTime);
+        const parsedExit = parseDateTime(exitDateTime);
+
+        const typeValue = (trade.type || '').toUpperCase();
+        const entryPriceNum = parseFloat(trade.entryPrice) || 0;
+        const stopLossNum = trade.stopLoss ? parseFloat(trade.stopLoss) : null;
+        const takeProfitNum = trade.takeProfit ? parseFloat(trade.takeProfit) : null;
+
+        const rr = calculateRR(entryPriceNum, stopLossNum, takeProfitNum, typeValue);
+
+        const commission = Math.abs(parseFloat(trade.commission) || 0);
+        const swap = Math.abs(parseFloat(trade.swap) || 0);
+        const profit = parseFloat(trade.profit) || 0;
+        const realPL = parseFloat(trade.profit) || 0;//calculateRealPL(profit, commission, swap);
+
+        const allowedPairs = await getCachedPairs();
+        const validatedPair = allowedPairs.includes(trade.pair?.toUpperCase()) ? trade.pair.toUpperCase() : null;
+
+        if (!validatedPair) {
+          errors.push({ row: i + 1, error: `Invalid pair: ${trade.pair}` });
+          continue;
+        }
+
+        const newTrade = {
+          userId: req.session.userId,
+          accountId: accountId,
+          propFirmId: account.propFirmId || null,
+          positionId,
+          pair: validatedPair,
+          type: typeValue,
+          status: 'CLOSED',
+          entryPrice: entryPriceNum,
+          exitPrice: parseFloat(trade.exitPrice) || undefined,
+          lotSize: parseFloat(trade.lot) || 0,
+          commission,
+          swap,
+          profit,
+          realPL,
+          stopLoss: stopLossNum || undefined,
+          takeProfit: takeProfitNum || undefined,
+          riskRewardRatio: rr,
+          strategy: defaultStrategy?.name || undefined,
+          session: trade.session || 'LONDON',
+          keyLevel: trade.keyLevel || 'No Key Level',
+          ssmtType: 'NO',
+          smt: 'No',
+          model1: 'Yes (EUR)',
+          entryDate: entryDateTime ? parsedEntry.date : new Date(),
+          entryTime: entryDateTime ? parsedEntry.time : undefined,
+          exitDate: exitDateTime ? parsedExit.date : undefined,
+          exitTime: exitDateTime ? parsedExit.time : undefined,
+          notes: trade.notes || '',
+        };
+
+        if (newTrade.type !== 'BUY' && newTrade.type !== 'SELL') {
+          errors.push({ row: i + 1, error: `Invalid trade type: ${typeValue}` });
+          continue;
+        }
+
+        await Trade.create(newTrade);
+        inserted++;
+      } catch (rowError) {
+        errors.push({ row: i + 1, error: rowError.message });
+      }
+    }
+
+    res.json({
+      total: trades.length,
+      inserted,
+      skipped,
+      errors: errors.slice(0, 10)
+    });
+  } catch (error) {
+    console.error('Import converted error:', error);
+    res.status(500).json({ message: 'Failed to import converted trades: ' + error.message });
+  }
+});
+
 app.get('/api/auth/me', isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.session.userId).select('-password');
@@ -984,7 +1473,7 @@ app.get('/api/auth/me', isAuthenticated, async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    
+
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' });
     }
@@ -1003,9 +1492,9 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     await user.save();
-    
+
     req.session.userId = user._id;
-    
+
     const userResponse = user.toObject();
     delete userResponse.password;
 
@@ -1019,7 +1508,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
@@ -1035,11 +1524,11 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     req.session.userId = user._id;
-    
+
     const userResponse = user.toObject();
     delete userResponse.password;
 
-    res.json({ 
+    res.json({
       message: 'Login successful',
       user: userResponse
     });
@@ -1062,7 +1551,7 @@ app.post('/api/auth/logout', (req, res) => {
 app.post('/api/auth/change-password', isAuthenticated, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    
+
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ message: 'Current and new password are required' });
     }
@@ -1128,9 +1617,9 @@ app.put('/api/prop-firms/:id', isAuthenticated, async (req, res) => {
 
 app.delete('/api/prop-firms/:id', isAuthenticated, async (req, res) => {
   try {
-    const firm = await PropFirm.findOneAndDelete({ 
-      _id: req.params.id, 
-      userId: req.session.userId 
+    const firm = await PropFirm.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.session.userId
     });
     if (!firm) {
       return res.status(404).json({ message: 'Prop firm not found' });
@@ -1178,9 +1667,9 @@ app.put('/api/accounts/:id', isAuthenticated, async (req, res) => {
 
 app.delete('/api/accounts/:id', isAuthenticated, async (req, res) => {
   try {
-    const account = await Account.findOneAndDelete({ 
-      _id: req.params.id, 
-      userId: req.session.userId 
+    const account = await Account.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.session.userId
     });
     if (!account) {
       return res.status(404).json({ message: 'Account not found' });
@@ -1197,15 +1686,15 @@ app.get('/api/trades', isAuthenticated, async (req, res) => {
     let filter = { userId: req.session.userId };
     if (accountId) filter.accountId = accountId;
     if (firmId) filter.propFirmId = firmId;
-    
+
     if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
       filter.ssmtType = ssmtType;
     }
-    
+
     const trades = await Trade.find(filter)
       .populate('accountId')
       .populate('propFirmId')
-      .sort({ createdAt: -1 });
+      .sort({ entryDate: -1, createdAt: -1 });
     res.json(trades);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1215,7 +1704,7 @@ app.get('/api/trades', isAuthenticated, async (req, res) => {
 app.post('/api/trades', isAuthenticated, async (req, res) => {
   try {
     const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, ...rest } = req.body;
-    
+
     console.log('=== BACKEND CREATE DEBUG ===');
     console.log('entryDate:', entryDate);
     console.log('entryTime:', entryTime);
@@ -1223,35 +1712,35 @@ app.post('/api/trades', isAuthenticated, async (req, res) => {
     console.log('exitTime:', exitTime);
     console.log('ssmtType:', ssmtType);
     console.log('pair:', pair);
-    
+
     const allowedPairs = await getCachedPairs();
     const finalPair = allowedPairs.includes(pair) ? pair : null;
-    
+
     if (!finalPair) {
-      return res.status(400).json({ 
-        message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}` 
+      return res.status(400).json({
+        message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}`
       });
     }
-    
+
     const realPL = calculateRealPL(profit, commission, swap);
-    
+
     let finalEntryDate = entryDate ? new Date(entryDate) : new Date();
     if (isNaN(finalEntryDate.getTime())) {
       finalEntryDate = new Date();
     }
-    
+
     let finalExitDate = exitDate ? new Date(exitDate) : undefined;
     if (finalExitDate && isNaN(finalExitDate.getTime())) {
       finalExitDate = undefined;
     }
-    
+
     const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
-    
+
     console.log('finalEntryDate:', finalEntryDate);
     console.log('finalExitDate:', finalExitDate);
     console.log('finalSsmtType:', finalSsmtType);
     console.log('finalPair:', finalPair);
-    
+
     const trade = new Trade({
       ...rest,
       pair: finalPair,
@@ -1278,34 +1767,39 @@ app.post('/api/trades', isAuthenticated, async (req, res) => {
 
 app.put('/api/trades/:id', isAuthenticated, async (req, res) => {
   try {
-    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, ...rest } = req.body;
-    
+    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, highLowTime, ...rest } = req.body;
+
+    console.log('=== BACKEND PUT DEBUG ===');
+    console.log('entryDate:', entryDate, 'entryTime:', entryTime);
+    console.log('exitDate:', exitDate, 'exitTime:', exitTime);
+    console.log('highLowTime:', highLowTime);
+
     const allowedPairs = await getCachedPairs();
     let finalPair = undefined;
-    
+
     if (pair !== undefined) {
       finalPair = allowedPairs.includes(pair) ? pair : null;
       if (!finalPair) {
-        return res.status(400).json({ 
-          message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}` 
+        return res.status(400).json({
+          message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}`
         });
       }
     }
-    
+
     const realPL = calculateRealPL(profit, commission, swap);
-    
+
     let finalEntryDate = entryDate ? new Date(entryDate) : undefined;
     if (finalEntryDate && isNaN(finalEntryDate.getTime())) {
       finalEntryDate = undefined;
     }
-    
+
     let finalExitDate = exitDate ? new Date(exitDate) : undefined;
     if (finalExitDate && isNaN(finalExitDate.getTime())) {
       finalExitDate = undefined;
     }
-    
+
     const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
-    
+
     const updateData = {
       ...rest,
       profit,
@@ -1316,13 +1810,14 @@ app.put('/api/trades/:id', isAuthenticated, async (req, res) => {
       entryDate: finalEntryDate,
       entryTime: entryTime || undefined,
       exitDate: finalExitDate,
-      exitTime: exitTime || undefined
+      exitTime: exitTime || undefined,
+      highLowTime: highLowTime || undefined,
     };
-    
+
     if (finalPair) {
       updateData.pair = finalPair;
     }
-    
+
     const trade = await Trade.findOneAndUpdate(
       { _id: req.params.id, userId: req.session.userId },
       updateData,
@@ -1331,6 +1826,13 @@ app.put('/api/trades/:id', isAuthenticated, async (req, res) => {
     if (!trade) {
       return res.status(404).json({ message: 'Trade not found' });
     }
+    console.log('Updated trade returned:', {
+      entryDate: trade.entryDate,
+      entryTime: trade.entryTime,
+      exitDate: trade.exitDate,
+      exitTime: trade.exitTime,
+      highLowTime: trade.highLowTime
+    });
     res.json(trade);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -1339,9 +1841,9 @@ app.put('/api/trades/:id', isAuthenticated, async (req, res) => {
 
 app.delete('/api/trades/:id', isAuthenticated, async (req, res) => {
   try {
-    const trade = await Trade.findOne({ 
-      _id: req.params.id, 
-      userId: req.session.userId 
+    const trade = await Trade.findOne({
+      _id: req.params.id,
+      userId: req.session.userId
     });
     if (!trade) {
       return res.status(404).json({ message: 'Trade not found' });
@@ -1377,7 +1879,7 @@ app.delete('/api/trades/:id', isAuthenticated, async (req, res) => {
 app.post('/api/trades/bulk-delete', isAuthenticated, async (req, res) => {
   try {
     const { ids } = req.body;
-    
+
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ message: 'No trade IDs provided' });
     }
@@ -1431,14 +1933,14 @@ app.get('/api/masters', isAuthenticated, async (req, res) => {
     const { type } = req.query;
     let filter = { userId: req.session.userId };
     if (type) filter.type = type;
-    
+
     let masters = await Master.find(filter);
-    
+
     if (masters.length === 0) {
       await seedMasters(req.session.userId);
       masters = await Master.find(filter);
     }
-    
+
     res.json(masters);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1457,9 +1959,9 @@ app.post('/api/masters', isAuthenticated, async (req, res) => {
 
 app.delete('/api/masters/:id', isAuthenticated, async (req, res) => {
   try {
-    const master = await Master.findOneAndDelete({ 
-      _id: req.params.id, 
-      userId: req.session.userId 
+    const master = await Master.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.session.userId
     });
     if (!master) {
       return res.status(404).json({ message: 'Master entry not found' });
@@ -1478,7 +1980,7 @@ app.get('/api/missed-trades', isAuthenticated, async (req, res) => {
     if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
       filter.ssmtType = ssmtType;
     }
-    
+
     const missedTrades = await MissedTrade.find(filter)
       .populate('accountId')
       .sort({ date: -1 });
@@ -1492,34 +1994,34 @@ app.post('/api/missed-trades', isAuthenticated, async (req, res) => {
   try {
     console.log('=== CREATE MISSED TRADE DEBUG ===');
     console.log('Incoming payload:', JSON.stringify(req.body, null, 2));
-    
+
     const { missedReason, reason, ssmtType, pair, profitLoss, commission, swap, ...rest } = req.body;
-    
+
     const sanitizedReason = sanitizeMissedReason(missedReason);
-    
+
     if (!sanitizedReason) {
-      return res.status(400).json({ 
-        message: 'Missed reason is required and must be between 10-2000 characters' 
+      return res.status(400).json({
+        message: 'Missed reason is required and must be between 10-2000 characters'
       });
     }
-    
+
     const allowedPairs = await getCachedPairs();
     const finalPair = allowedPairs.includes(pair) ? pair : null;
-    
+
     if (!finalPair) {
-      return res.status(400).json({ 
-        message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}` 
+      return res.status(400).json({
+        message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}`
       });
     }
-    
+
     const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
     const finalProfitLoss = Number(profitLoss || 0);
     const finalCommission = Number(commission || 0);
     const finalSwap = Number(swap || 0);
     const finalRealPL = finalProfitLoss - finalCommission - finalSwap;
-    
-    const missedTrade = new MissedTrade({ 
-      ...rest, 
+
+    const missedTrade = new MissedTrade({
+      ...rest,
       pair: finalPair,
       reason: sanitizedReason,
       missedReason: sanitizedReason,
@@ -1528,18 +2030,18 @@ app.post('/api/missed-trades', isAuthenticated, async (req, res) => {
       commission: finalCommission,
       swap: finalSwap,
       realPL: finalRealPL,
-      userId: req.session.userId 
+      userId: req.session.userId
     });
-    
+
     console.log('Sanitized missed reason:', sanitizedReason);
     console.log('SsmtType:', finalSsmtType);
     console.log('Pair:', finalPair);
     console.log('Real PL:', finalRealPL);
     console.log('Saving missed trade...');
-    
+
     const savedMissedTrade = await missedTrade.save();
     console.log('Saved missed trade:', savedMissedTrade);
-    
+
     res.status(201).json(savedMissedTrade);
   } catch (error) {
     console.error('Create missed trade error:', error);
@@ -1551,30 +2053,30 @@ app.put('/api/missed-trades/:id', isAuthenticated, async (req, res) => {
   try {
     console.log('=== UPDATE MISSED TRADE DEBUG ===');
     console.log('Incoming payload:', JSON.stringify(req.body, null, 2));
-    
+
     const { missedReason, reason, ssmtType, profitLoss, commission, swap, ...rest } = req.body;
-    
+
     let updateData = { ...rest };
-    
+
     if (missedReason !== undefined) {
       const sanitizedReason = sanitizeMissedReason(missedReason);
-      
+
       if (!sanitizedReason) {
-        return res.status(400).json({ 
-          message: 'Missed reason must be between 10-2000 characters' 
+        return res.status(400).json({
+          message: 'Missed reason must be between 10-2000 characters'
         });
       }
-      
+
       updateData.reason = sanitizedReason;
       updateData.missedReason = sanitizedReason;
       console.log('Sanitized missed reason:', sanitizedReason);
     }
-    
+
     if (ssmtType !== undefined) {
       updateData.ssmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
       console.log('SsmtType:', updateData.ssmtType);
     }
-    
+
     if (profitLoss !== undefined || commission !== undefined || swap !== undefined) {
       const finalProfitLoss = Number(profitLoss ?? updateData.profitLoss ?? 0);
       const finalCommission = Number(commission ?? updateData.commission ?? 0);
@@ -1585,17 +2087,17 @@ app.put('/api/missed-trades/:id', isAuthenticated, async (req, res) => {
       updateData.realPL = finalProfitLoss - finalCommission - finalSwap;
       console.log('Real PL recalculated:', updateData.realPL);
     }
-    
+
     const missedTrade = await MissedTrade.findOneAndUpdate(
       { _id: req.params.id, userId: req.session.userId },
       updateData,
       { new: true, runValidators: true }
     );
-    
+
     if (!missedTrade) {
       return res.status(404).json({ message: 'Missed trade not found' });
     }
-    
+
     console.log('Updated missed trade:', missedTrade);
     res.json(missedTrade);
   } catch (error) {
@@ -1606,9 +2108,9 @@ app.put('/api/missed-trades/:id', isAuthenticated, async (req, res) => {
 
 app.delete('/api/missed-trades/:id', isAuthenticated, async (req, res) => {
   try {
-    const missedTrade = await MissedTrade.findOne({ 
-      _id: req.params.id, 
-      userId: req.session.userId 
+    const missedTrade = await MissedTrade.findOne({
+      _id: req.params.id,
+      userId: req.session.userId
     });
     if (!missedTrade) {
       return res.status(404).json({ message: 'Missed trade not found' });
@@ -1643,10 +2145,144 @@ app.delete('/api/missed-trades/:id', isAuthenticated, async (req, res) => {
   }
 });
 
+// Loss Analysis Endpoints
+app.post('/api/loss-analysis', isAuthenticated, async (req, res) => {
+  try {
+    const { tradeId, title, reasonType, description, images, tags, checklist, disciplineScore } = req.body;
+    
+    if (!tradeId) {
+      return res.status(400).json({ message: 'Trade ID is required' });
+    }
+    
+    if (!reasonType) {
+      return res.status(400).json({ message: 'Reason type is required' });
+    }
+    
+    const trade = await Trade.findOne({ _id: tradeId, userId: req.session.userId });
+    if (!trade) {
+      return res.status(404).json({ message: 'Trade not found' });
+    }
+    
+    const existing = await LossAnalysis.findOne({ tradeId, userId: req.session.userId });
+    if (existing) {
+      return res.status(400).json({ message: 'Analysis already exists for this trade' });
+    }
+    
+    const isValidTrade = VALID_LOSS_REASONS.includes(reasonType);
+    
+    const analysis = await LossAnalysis.create({
+      tradeId,
+      userId: req.session.userId,
+      title,
+      reasonType,
+      isValidTrade,
+      description: description || '',
+      images: images || [],
+      tags: tags || [],
+      checklist: checklist || [],
+      disciplineScore
+    });
+    
+    res.status(201).json(analysis);
+  } catch (error) {
+    console.error('Loss analysis create error:', error);
+    res.status(500).json({ message: 'Failed to create loss analysis' });
+  }
+});
+
+app.get('/api/loss-analysis/:tradeId', isAuthenticated, async (req, res) => {
+  try {
+    const { tradeId } = req.params;
+    
+    const trade = await Trade.findOne({ _id: tradeId, userId: req.session.userId });
+    if (!trade) {
+      return res.status(404).json({ message: 'Trade not found' });
+    }
+    
+    const analysis = await LossAnalysis.findOne({ tradeId, userId: req.session.userId });
+    
+    if (!analysis) {
+      return res.json(null);
+    }
+    
+    res.json(analysis);
+  } catch (error) {
+    console.error('Loss analysis get error:', error);
+    res.status(500).json({ message: 'Failed to get loss analysis' });
+  }
+});
+
+app.put('/api/loss-analysis/:id', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, reasonType, description, images, tags, checklist, disciplineScore } = req.body;
+    
+    const analysis = await LossAnalysis.findOne({
+      _id: id,
+      userId: req.session.userId
+    });
+    
+    if (!analysis) {
+      return res.status(404).json({ message: 'Analysis not found' });
+    }
+    
+    if (title !== undefined) analysis.title = title;
+    if (reasonType) analysis.reasonType = reasonType;
+    if (description !== undefined) analysis.description = description;
+    if (images) analysis.images = images;
+    if (tags) analysis.tags = tags;
+    if (checklist) analysis.checklist = checklist;
+    if (disciplineScore !== undefined) analysis.disciplineScore = disciplineScore;
+    analysis.updatedAt = new Date();
+    
+    await analysis.save();
+    
+    res.json(analysis);
+  } catch (error) {
+    console.error('Loss analysis update error:', error);
+    res.status(500).json({ message: 'Failed to update loss analysis' });
+  }
+});
+
+app.get('/api/loss-analysis-list', isAuthenticated, async (req, res) => {
+  try {
+    const { accountId, startDate, endDate, page = 1, limit = 50 } = req.query;
+    
+    const filter = { userId: req.session.userId };
+    
+    if (accountId) {
+      const tradeIds = await Trade.find({
+        userId: req.session.userId,
+        accountId,
+        profit: { $lt: 0 }
+      }).select('_id');
+      filter.tradeId = { $in: tradeIds.map(t => t._id) };
+    }
+    
+    const analyses = await LossAnalysis.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate('tradeId');
+    
+    const total = await LossAnalysis.countDocuments(filter);
+    
+    res.json({
+      analyses,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit)
+    });
+  } catch (error) {
+    console.error('Loss analysis list error:', error);
+    res.status(500).json({ message: 'Failed to get loss analyses' });
+  }
+});
+
 const startServer = async () => {
   await connectWithRetry();
   await seedAdminUser();
-  
+
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);

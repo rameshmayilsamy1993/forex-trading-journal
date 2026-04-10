@@ -1,3 +1,4 @@
+import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { cn } from './utils';
 import { Button } from './button';
@@ -148,20 +149,25 @@ interface CardContainerProps {
   hover?: boolean;
 }
 
-export function CardContainer({ children, className, hover = true }: CardContainerProps) {
-  return (
-    <div
-      className={cn(
-        'bg-white p-5 rounded-xl shadow-sm',
-        'border border-gray-100',
-        hover && 'hover:shadow-md transition-all duration-200',
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}
+export const CardContainer = React.forwardRef<HTMLDivElement, CardContainerProps>(
+  ({ children, className, hover = true }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'bg-white p-5 rounded-xl shadow-sm',
+          'border border-gray-100',
+          hover && 'hover:shadow-md transition-all duration-200',
+          className
+        )}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+CardContainer.displayName = 'CardContainer';
 
 interface SectionCardProps {
   title?: string;

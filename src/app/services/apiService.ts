@@ -298,6 +298,18 @@ const apiService = {
     return handleResponse(response);
   },
 
+  convertMT5: async (file: File): Promise<{ total: number; converted: number; errors: any[]; data: any[] }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/import/convert-mt5`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    return handleResponse(response);
+  },
+
   upload: {
     single: async (file: File): Promise<{ url: string; publicId: string; originalName: string }> => {
       const formData = new FormData();
@@ -328,6 +340,81 @@ const apiService = {
     delete: async (publicId: string): Promise<void> => {
       const response = await fetch(`${API_BASE_URL}/upload/${encodeURIComponent(publicId)}`, {
         method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+  },
+
+  lossAnalysis: {
+    create: async (data: {
+      tradeId: string;
+      title?: string;
+      reasonType: string;
+      description?: string;
+      images?: { url: string; timeframe: string; publicId?: string }[];
+      tags?: string[];
+      checklist?: { rule: string; broken: boolean }[];
+      disciplineScore?: number;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/loss-analysis`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+
+    get: async (tradeId: string) => {
+      const response = await fetch(`${API_BASE_URL}/loss-analysis/${tradeId}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (response.status === 404) {
+        return null;
+      }
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || 'Request failed');
+      }
+      return response.json();
+    },
+
+    update: async (id: string, data: {
+      title?: string;
+      reasonType?: string;
+      description?: string;
+      images?: { url: string; timeframe: string; publicId?: string }[];
+      tags?: string[];
+      checklist?: { rule: string; broken: boolean }[];
+      disciplineScore?: number;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/loss-analysis/${id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+
+    list: async (options?: {
+      accountId?: string;
+      startDate?: string;
+      endDate?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      const params = new URLSearchParams();
+      if (options?.accountId) params.set('accountId', options.accountId);
+      if (options?.startDate) params.set('startDate', options.startDate);
+      if (options?.endDate) params.set('endDate', options.endDate);
+      if (options?.page) params.set('page', options.page.toString());
+      if (options?.limit) params.set('limit', options.limit.toString());
+
+      const response = await fetch(`${API_BASE_URL}/loss-analysis-list?${params}`, {
+        method: 'GET',
         credentials: 'include',
       });
       return handleResponse(response);

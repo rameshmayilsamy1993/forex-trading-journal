@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, AlertTriangle, FileUp } from 'lucide-react';
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, AlertTriangle, FileUp, FileText } from 'lucide-react';
 import apiService, { TradingAccount } from '../services/apiService';
 import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
 
@@ -9,9 +9,35 @@ interface PreviewTrade {
   type: string;
   lotSize: number;
   entryPrice: number;
+  exitPrice: number;
   profit: number;
   entryDate: string;
+  entryTime: string;
+  exitDate: string;
+  exitTime: string;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  commission: number;
+  swap: number;
   isDuplicate: boolean;
+}
+
+interface ConvertedTrade {
+  entryDate: string;
+  entryTime: string;
+  positionId: string;
+  pair: string;
+  type: string;
+  lot: number;
+  entryPrice: number;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  exitDate: string;
+  exitTime: string;
+  exitPrice: number;
+  commission: number;
+  swap: number;
+  profit: number;
 }
 
 interface ImportResult {
@@ -26,15 +52,28 @@ export default function TradeImport() {
   const [selectedAccount, setSelectedAccount] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<PreviewTrade[]>([]);
+  const [convertedData, setConvertedData] = useState<ConvertedTrade[]>([]);
   const [previewStats, setPreviewStats] = useState<{ duplicates: number; potentialDuplicates: number; newTrades: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fileFormat, setFileFormat] = useState<'excel' | 'mt5' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadAccounts();
+    
+    const storedData = localStorage.getItem('convertedTrades');
+    if (storedData) {
+      try {
+        const data = JSON.parse(storedData);
+        setConvertedData(data);
+        localStorage.removeItem('convertedTrades');
+      } catch (err) {
+        console.error('Failed to parse converted trades:', err);
+      }
+    }
   }, []);
 
   const loadAccounts = async () => {
@@ -49,34 +88,76 @@ export default function TradeImport() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (!selectedFile.name.match(/\.(xlsx|xls)$/i)) {
-        setError('Please select an Excel file (.xlsx or .xls)');
+      const isExcel = selectedFile.name.match(/\.(xlsx|xls)$/i);
+      const isCSV = selectedFile.name.toLowerCase().endsWith('.csv');
+      
+      if (!isExcel && !isCSV) {
+        setError('Please select an Excel file (.xlsx, .xls) or CSV file (.csv)');
         setFile(null);
         setPreview([]);
+        setConvertedData([]);
+        setFileFormat(null);
         return;
       }
+
       setFile(selectedFile);
       setError(null);
       setResult(null);
+      setFileFormat(null);
+      setPreview([]);
+      setConvertedData([]);
+
+      if (isCSV) {
+        try {
+          const text = await selectedFile.text();
+          const firstLine = text.split('\n')[0].toLowerCase();
+          if (firstLine.includes('position')) {
+            setFileFormat('mt5');
+          }
+        } catch (err) {
+          console.error('Error reading CSV:', err);
+        }
+      }
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
-      if (!droppedFile.name.match(/\.(xlsx|xls)$/i)) {
-        setError('Please select an Excel file (.xlsx or .xls)');
+      const isExcel = droppedFile.name.match(/\.(xlsx|xls)$/i);
+      const isCSV = droppedFile.name.toLowerCase().endsWith('.csv');
+      
+      if (!isExcel && !isCSV) {
+        setError('Please select an Excel file (.xlsx, .xls) or CSV file (.csv)');
         setFile(null);
         setPreview([]);
+        setConvertedData([]);
+        setFileFormat(null);
         return;
       }
+
       setFile(droppedFile);
       setError(null);
       setResult(null);
+      setFileFormat(null);
+      setPreview([]);
+      setConvertedData([]);
+
+      if (isCSV) {
+        try {
+          const text = await droppedFile.text();
+          const firstLine = text.split('\n')[0].toLowerCase();
+          if (firstLine.includes('position')) {
+            setFileFormat('mt5');
+          }
+        } catch (err) {
+          console.error('Error reading CSV:', err);
+        }
+      }
     }
   };
 
@@ -94,12 +175,18 @@ export default function TradeImport() {
     setError(null);
 
     try {
-      const data = await apiService.previewTrades(file, selectedAccount);
-      setPreview(data.preview);
-      setPreviewStats(data.stats);
+      if (fileFormat === 'mt5') {
+        const data = await apiService.convertMT5(file);
+        setConvertedData(data.data);
+      } else {
+        const data = await apiService.previewTrades(file, selectedAccount);
+        setPreview(data.preview);
+        setPreviewStats(data.stats);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to preview file');
       setPreview([]);
+      setConvertedData([]);
       setPreviewStats(null);
     } finally {
       setIsPreviewing(false);
@@ -107,6 +194,49 @@ export default function TradeImport() {
   };
 
   const handleImport = async () => {
+    if (!selectedAccount) {
+      setError('Please select an account');
+      return;
+    }
+
+    if (convertedData.length > 0) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        console.log('=== IMPORT CONVERTED DEBUG ===');
+        console.log('Account:', selectedAccount);
+        console.log('Data keys:', Object.keys(convertedData[0] || {}));
+        
+        const response = await fetch(`/api/trades/import-converted`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            trades: convertedData,
+            accountId: selectedAccount
+          })
+        });
+        
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.message || 'Import failed');
+        }
+        
+        const data = await response.json();
+        setResult(data);
+        if (data.inserted > 0) {
+          setConvertedData([]);
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to import trades');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     if (!file || !selectedAccount) {
       setError('Please select a file and account');
       return;
@@ -132,9 +262,11 @@ export default function TradeImport() {
   const handleReset = () => {
     setFile(null);
     setPreview([]);
+    setConvertedData([]);
     setPreviewStats(null);
     setResult(null);
     setError(null);
+    setFileFormat(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -233,7 +365,7 @@ export default function TradeImport() {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-3">
-              Upload Excel File
+              Upload File
             </label>
             <div
               onDrop={handleDrop}
@@ -247,7 +379,7 @@ export default function TradeImport() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,.xls"
+                accept=".xlsx,.xls,.csv"
                 onChange={handleFileChange}
                 className="hidden"
                 id="file-upload"
@@ -256,9 +388,18 @@ export default function TradeImport() {
                 {file ? (
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center">
-                      <FileSpreadsheet className="w-8 h-8 text-emerald-600" />
+                      {fileFormat === 'mt5' ? (
+                        <FileText className="w-8 h-8 text-emerald-600" />
+                      ) : (
+                        <FileSpreadsheet className="w-8 h-8 text-emerald-600" />
+                      )}
                     </div>
                     <p className="text-emerald-700 font-semibold">{file.name}</p>
+                    {fileFormat === 'mt5' && (
+                      <span className="px-3 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
+                        MT5 Format Detected
+                      </span>
+                    )}
                     <p className="text-sm text-slate-500">
                       {(file.size / 1024).toFixed(1)} KB
                     </p>
@@ -279,11 +420,11 @@ export default function TradeImport() {
                       <Upload className="w-8 h-8 text-slate-400" />
                     </div>
                     <p className="text-slate-600 font-medium">
-                      Drag and drop your Excel file here, or{' '}
+                      Drag and drop your file here, or{' '}
                       <span className="text-blue-600 font-semibold hover:underline">browse</span>
                     </p>
                     <p className="text-sm text-slate-400">
-                      Supports .xlsx and .xls files
+                      Supports .xlsx, .xls (Excel) and .csv (MT5) files
                     </p>
                   </div>
                 )}
@@ -340,28 +481,40 @@ export default function TradeImport() {
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
                   <thead className="bg-slate-50/50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Position ID
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Pair
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Type
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Lots
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Entry
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        S/L
+                      </th>
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        T/P
+                      </th>
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Exit
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Comm
+                      </th>
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Swap
+                      </th>
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Profit
                       </th>
                     </tr>
@@ -372,7 +525,7 @@ export default function TradeImport() {
                         key={idx}
                         className={`hover:bg-slate-50/50 transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-50/50' : ''}`}
                       >
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-3">
                           {trade.isDuplicate ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-lg">
                               Duplicate
@@ -383,13 +536,13 @@ export default function TradeImport() {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-slate-700 font-mono text-xs">
+                        <td className="px-3 py-3 text-slate-700 font-mono text-xs">
                           {trade.positionId || '-'}
                         </td>
-                        <td className="px-4 py-3 text-slate-900 font-semibold">
+                        <td className="px-3 py-3 text-slate-900 font-semibold">
                           {trade.pair || '-'}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-3">
                           <span
                             className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg ${
                               trade.type === 'BUY'
@@ -402,14 +555,136 @@ export default function TradeImport() {
                             {trade.type || '-'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700">
+                        <td className="px-3 py-3 text-right text-slate-700">
                           {trade.lotSize != null && trade.lotSize !== 0 ? trade.lotSize.toFixed(2) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
                           {trade.entryPrice != null && trade.entryPrice !== 0 ? trade.entryPrice.toFixed(5) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
+                          {trade.stopLoss != null && trade.stopLoss !== 0 ? trade.stopLoss.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
+                          {trade.takeProfit != null && trade.takeProfit !== 0 ? trade.takeProfit.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
                           {trade.exitPrice != null && trade.exitPrice !== 0 ? trade.exitPrice.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-slate-700">
+                          {trade.commission != null && trade.commission !== 0 ? trade.commission.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-slate-700">
+                          {trade.swap != null && trade.swap !== 0 ? trade.swap.toFixed(2) : '-'}
+                        </td>
+                        <td className={`px-3 py-3 text-right font-semibold ${
+                          (trade.profit ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                        }`}>
+                          {trade.profit != null ? trade.profit.toFixed(2) : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {convertedData.length > 0 && (
+            <div className="mt-6">
+              <h3 className="font-semibold text-slate-900 mb-3">
+                Converted MT5 Data (first {convertedData.length} rows)
+              </h3>
+              <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-200/50">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Position ID
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Pair
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Lots
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Entry Date Time
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Entry Price
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Exit Date Time
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Exit Price
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        S/L
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        T/P
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Commission
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Swap
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Profit
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {convertedData.map((trade, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/50 transition-colors duration-150">
+                        <td className="px-4 py-3 text-slate-700 font-mono text-xs">
+                          {trade.positionId || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-slate-900 font-semibold">
+                          {trade.pair || '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg ${
+                            trade.type === 'BUY'
+                              ? 'text-emerald-700 bg-emerald-100'
+                              : trade.type === 'SELL'
+                              ? 'text-rose-700 bg-rose-100'
+                              : 'text-slate-700 bg-slate-100'
+                          }`}>
+                            {trade.type || '-'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700">
+                          {trade.lot != null ? trade.lot.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-slate-700">
+                          {trade.entryDate ? `${trade.entryDate} ${trade.entryTime}` : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                          {trade.entryPrice != null ? trade.entryPrice.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-slate-700">
+                          {trade.exitDate ? `${trade.exitDate} ${trade.exitTime}` : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                          {trade.exitPrice != null ? trade.exitPrice.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                          {trade.stopLoss != null ? trade.stopLoss.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                          {trade.takeProfit != null ? trade.takeProfit.toFixed(5) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700">
+                          {trade.commission != null ? trade.commission.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-700">
+                          {trade.swap != null ? trade.swap.toFixed(2) : '-'}
                         </td>
                         <td className={`px-4 py-3 text-right font-semibold ${
                           (trade.profit ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
@@ -425,22 +700,47 @@ export default function TradeImport() {
           )}
 
           <div className="mt-6 p-5 bg-slate-50 rounded-2xl border border-slate-200/50">
-            <h4 className="font-semibold text-slate-700 mb-3">Expected Excel Columns:</h4>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Type</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Volume</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Entry Price</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Exit Price</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">S / L</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">T / P</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Profit</span>
-              <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time</span>
-            </div>
-            <p className="mt-4 text-xs text-slate-500">
-              Column names are case-insensitive. Position column is used for duplicate detection. Default strategy "LONDON" and key level "No Key Level" will be assigned.
-            </p>
+            {fileFormat === 'mt5' ? (
+              <>
+                <h4 className="font-semibold text-slate-700 mb-3">Expected MT5 CSV Columns:</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-4">
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time (Entry)</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Type</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Volume</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Price</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">S/L</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">T/P</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time (Exit)</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Price (Exit)</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Commission</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Swap</span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Commission is automatically converted to positive values. Empty S/L and T/P are set to null.
+                </p>
+              </>
+            ) : (
+              <>
+                <h4 className="font-semibold text-slate-700 mb-3">Expected Excel Columns:</h4>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Type</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Volume</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Entry Price</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Exit Price</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">S / L</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">T / P</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Profit</span>
+                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time</span>
+                </div>
+                <p className="mt-4 text-xs text-slate-500">
+                  Column names are case-insensitive. Position column is used for duplicate detection. Default strategy "LONDON" and key level "No Key Level" will be assigned.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </CardContainer>

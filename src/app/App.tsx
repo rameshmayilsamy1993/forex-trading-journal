@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Building2, Wallet, BarChart3, EyeOff, Calendar, Settings as SettingsIcon, User, FileUp, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Building2, Wallet, BarChart3, EyeOff, Calendar, Settings as SettingsIcon, User, FileUp, LogOut, Activity, FileSpreadsheet } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import TradeJournal from './components/TradeJournal';
 import PropFirms from './components/PropFirms';
@@ -11,15 +11,17 @@ import MissedTradeJournal from './components/MissedTradeJournal';
 import MissedTradesCalendar from './components/MissedTradesCalendar';
 import TradingCalendar from './components/TradingCalendar';
 import TradeImport from './components/TradeImport';
+import ConvertCsv from './pages/ConvertCsv';
 import apiService, { User as UserType } from './services/apiService';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
-type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import';
+type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert';
 
 const tabs = [
   { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard },
   { id: 'journal' as Tab, label: 'Trade Journal', icon: BookOpen },
   { id: 'import' as Tab, label: 'Import', icon: FileUp },
+  { id: 'convert' as Tab, label: 'Convert CSV', icon: FileSpreadsheet },
   { id: 'calendar' as Tab, label: 'Calendar', icon: Calendar },
   { id: 'missed' as Tab, label: 'Missed Trades', icon: EyeOff },
   { id: 'missed-calendar' as Tab, label: 'Missed Calendar', icon: Calendar },
@@ -36,6 +38,12 @@ export default function App() {
 
   useEffect(() => {
     setCurrentUser(apiService.auth.getStoredUser());
+    
+    const handleNavigation = (e: CustomEvent) => {
+      setActiveTab(e.detail as Tab);
+    };
+    window.addEventListener('navigate-to-tab', handleNavigation as EventListener);
+    return () => window.removeEventListener('navigate-to-tab', handleNavigation as EventListener);
   }, []);
 
   const handleLogout = async () => {
@@ -135,6 +143,7 @@ export default function App() {
             {activeTab === 'dashboard' && <Dashboard />}
             {activeTab === 'journal' && <TradeJournal />}
             {activeTab === 'import' && <TradeImport />}
+            {activeTab === 'convert' && <ConvertCsv />}
             {activeTab === 'calendar' && <TradingCalendar />}
             {activeTab === 'missed' && <MissedTradeJournal />}
             {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
