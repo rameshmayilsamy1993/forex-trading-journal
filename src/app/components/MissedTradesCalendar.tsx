@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, CalendarDays, X } from 'lucide-react';
-import { MissedTrade, TradingAccount, PropFirm } from '../types/trading';
+import { MissedTrade } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PageHeader, CardContainer } from './ui/DesignSystem';
@@ -19,10 +19,6 @@ interface DayData {
 
 export default function MissedTradesCalendar() {
   const [missedTrades, setMissedTrades] = useState<MissedTrade[]>([]);
-  const [firms, setFirms] = useState<PropFirm[]>([]);
-  const [accounts, setAccounts] = useState<TradingAccount[]>([]);
-  const [selectedFirm, setSelectedFirm] = useState<string>('all');
-  const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [selectedPair, setSelectedPair] = useState<string>('all');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
@@ -32,21 +28,15 @@ export default function MissedTradesCalendar() {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [missedData, firmsData, accountsData, pairsData] = await Promise.all([
+        const [missedData, pairsData] = await Promise.all([
           apiService.getMissedTrades().catch(() => []),
-          apiService.getPropFirms().catch(() => []),
-          apiService.getAccounts().catch(() => []),
           apiService.settings.getPairs().catch(() => [])
         ]);
         
         setMissedTrades(Array.isArray(missedData) ? missedData : []);
-        setFirms(Array.isArray(firmsData) ? firmsData : []);
-        setAccounts(Array.isArray(accountsData) ? accountsData : []);
       } catch (error) {
         console.error('Failed to load data:', error);
         setMissedTrades([]);
-        setFirms([]);
-        setAccounts([]);
       } finally {
         setIsLoading(false);
       }
@@ -60,26 +50,6 @@ export default function MissedTradesCalendar() {
     return d;
   }, []);
 
-  const getAccountFirmId = (account: TradingAccount): string => {
-    if (typeof account.propFirmId === 'object' && account.propFirmId !== null) {
-      return (account.propFirmId as PropFirm).id || '';
-    }
-    return String(account.propFirmId || '');
-  };
-
-  const getTradeAccountId = (trade: MissedTrade): string => {
-    if (typeof trade.accountId === 'object' && trade.accountId !== null) {
-      return String((trade.accountId as any).id || '');
-    }
-    return String(trade.accountId || '');
-  };
-
-  const filteredAccounts = useMemo(() => {
-    if (!Array.isArray(accounts)) return [];
-    if (selectedFirm === 'all') return accounts;
-    return accounts.filter(acc => getAccountFirmId(acc) === selectedFirm);
-  }, [accounts, selectedFirm]);
-
   const availablePairs = useMemo(() => {
     const pairs = new Set<string>();
     missedTrades.forEach(t => {
@@ -90,16 +60,10 @@ export default function MissedTradesCalendar() {
 
   const filteredMissedTrades = useMemo(() => {
     return missedTrades.filter(trade => {
-      const tradeAccountId = getTradeAccountId(trade);
-      const tradeAccount = accounts.find(a => a.id === tradeAccountId);
-      const tradeFirmId = tradeAccount ? getAccountFirmId(tradeAccount) : '';
-      
-      if (selectedFirm !== 'all' && tradeFirmId !== selectedFirm) return false;
-      if (selectedAccount !== 'all' && tradeAccountId !== selectedAccount) return false;
       if (selectedPair !== 'all' && trade.pair !== selectedPair) return false;
       return true;
     });
-  }, [missedTrades, selectedFirm, selectedAccount, selectedPair, accounts]);
+  }, [missedTrades, selectedPair]);
 
   const getRealPL = (trade: MissedTrade): number => {
     return trade.realPL ?? ((trade.profitLoss || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
@@ -199,11 +163,6 @@ export default function MissedTradesCalendar() {
 
   const goToToday = () => {
     setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
-  };
-
-  const handleFirmChange = (value: string) => {
-    setSelectedFirm(value);
-    setSelectedAccount('all');
   };
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -337,34 +296,6 @@ export default function MissedTradesCalendar() {
           <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-red-50/50 to-pink-50/50">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
-                <Select value={selectedFirm} onValueChange={handleFirmChange}>
-                  <SelectTrigger className="w-[160px] bg-white">
-                    <SelectValue placeholder="All Firms" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Prop Firms</SelectItem>
-                    {(firms || []).map(firm => (
-                      <SelectItem key={firm.id} value={firm.id}>{firm.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select 
-                  value={selectedAccount} 
-                  onValueChange={setSelectedAccount}
-                  disabled={filteredAccounts.length === 0}
-                >
-                  <SelectTrigger className="w-[180px] bg-white">
-                    <SelectValue placeholder="All Accounts" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Accounts</SelectItem>
-                    {filteredAccounts.map(account => (
-                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
                 <Select value={selectedPair} onValueChange={setSelectedPair}>
                   <SelectTrigger className="w-[140px] bg-white">
                     <SelectValue placeholder="All Pairs" />

@@ -13,7 +13,7 @@ import FormField from './ui/FormField';
 import ImageViewer from './ImageViewer';
 import { format } from 'date-fns';
 import { cn } from './ui/utils';
-import { getDateKey, getLocalDateString } from '../utils/dateUtils';
+import { getDateKey, getLocalDateString, convertTo24Hour } from '../utils/dateUtils';
 import LossReasonModal from './LossReasonModal';
 
 
@@ -194,14 +194,17 @@ export default function TradeJournal() {
     if (!account) return;
 
     // Combine date + time into ISO datetime string
-    const entryDateISO = formData.entryDate && formData.entryTime
-      ? new Date(`${formData.entryDate}T${formData.entryTime}:00`).toISOString()
+    const entryTime24 = formData.entryTime ? convertTo24Hour(formData.entryTime) : '';
+    const exitTime24 = formData.exitTime ? convertTo24Hour(formData.exitTime) : '';
+
+    const entryDateISO = formData.entryDate && entryTime24
+      ? new Date(`${formData.entryDate}T${entryTime24}:00`).toISOString()
       : formData.entryDate
         ? new Date(`${formData.entryDate}T00:00:00`).toISOString()
         : new Date().toISOString();
 
-    const exitDateISO = formData.exitDate && formData.exitTime
-      ? new Date(`${formData.exitDate}T${formData.exitTime}:00`).toISOString()
+    const exitDateISO = formData.exitDate && exitTime24
+      ? new Date(`${formData.exitDate}T${exitTime24}:00`).toISOString()
       : formData.exitDate
         ? new Date(`${formData.exitDate}T00:00:00`).toISOString()
         : undefined;
@@ -292,17 +295,25 @@ export default function TradeJournal() {
     }
 
     // Combine date + time into ISO datetime string
-    const entryDateISO = formData.entryDate && formData.entryTime
-      ? new Date(`${formData.entryDate}T${formData.entryTime}:00`).toISOString()
-      : formData.entryDate
-        ? new Date(`${formData.entryDate}T00:00:00`).toISOString()
-        : undefined;
+    const entryDateISO = (() => {
+      if (!formData.entryDate) return undefined;
+      const dateStr = formData.entryTime
+        ? `${formData.entryDate}T${formData.entryTime}:00`
+        : `${formData.entryDate}T00:00:00`;
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? undefined : date.toISOString();
+    })();
 
-    const exitDateISO = formData.exitDate && formData.exitTime
-      ? new Date(`${formData.exitDate}T${formData.exitTime}:00`).toISOString()
-      : formData.exitDate
-        ? new Date(`${formData.exitDate}T00:00:00`).toISOString()
-        : undefined;
+    const exitTime24 = formData.exitTime ? convertTo24Hour(formData.exitTime) : '';
+
+    const exitDateISO = (() => {
+      if (!formData.exitDate) return undefined;
+      const dateStr = exitTime24
+        ? `${formData.exitDate}T${exitTime24}:00`
+        : `${formData.exitDate}T00:00:00`;
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? undefined : date.toISOString();
+    })();
 
     let profit = formData.profit ? parseFloat(formData.profit) : 0;
     if (!formData.profit && formData.status === 'CLOSED' && formData.exitPrice) {

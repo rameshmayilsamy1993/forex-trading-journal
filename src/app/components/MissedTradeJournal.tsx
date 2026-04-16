@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn, Eye as ViewIcon } from 'lucide-react';
-import { MissedTrade, TradingAccount, MasterData, SMTType, Model1Type } from '../types/trading';
+import { MissedTrade, MasterData, SMTType, Model1Type } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
@@ -25,7 +25,6 @@ const REASON_OPTIONS = [
 const SAMPLE_MISSED_TRADES: MissedTrade[] = [
   {
     id: '1',
-    accountId: 'acc1',
     pair: 'EUR/USD',
     type: 'BUY',
     entryPrice: 1.0850,
@@ -44,7 +43,6 @@ const SAMPLE_MISSED_TRADES: MissedTrade[] = [
   },
   {
     id: '2',
-    accountId: 'acc1',
     pair: 'GBP/JPY',
     type: 'SELL',
     entryPrice: 188.50,
@@ -64,20 +62,17 @@ const SAMPLE_MISSED_TRADES: MissedTrade[] = [
 
 export default function MissedTradeJournal() {
   const [missedTrades, setMissedTrades] = useState<MissedTrade[]>(SAMPLE_MISSED_TRADES);
-  const [accounts, setAccounts] = useState<TradingAccount[]>([]);
   const [masters, setMasters] = useState<MasterData[]>([]);
   const [pairs, setPairs] = useState<string[]>([]);
-  const [filterAccount, setFilterAccount] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [viewingId, setViewingId] = useState<string | null>(null);
+  const [viewingTrade, setViewingTrade] = useState<MissedTrade | null>(null);
   const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
   const [viewingImageIndex, setViewingImageIndex] = useState(0);
   const [viewingReason, setViewingReason] = useState<{ title: string; content: string } | null>(null);
 
   const [formData, setFormData] = useState({
-    accountId: '',
     pair: '',
     type: 'BUY' as 'BUY' | 'SELL',
     date: '',
@@ -97,27 +92,25 @@ export default function MissedTradeJournal() {
     swap: '',
     realPL: 0,
     status: 'MISSED' as 'MISSED' | 'REVIEWED',
-    screenshots: { before: '', after: '' }
+    screenshots: { before: '', after: '' },
+    notes: ''
   });
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [missedTradesData, accountsData, mastersData, pairsData] = await Promise.all([
+        const [missedTradesData, mastersData, pairsData] = await Promise.all([
           apiService.getMissedTrades(),
-          apiService.getAccounts(),
           apiService.getMasters(),
           apiService.settings.getPairs()
         ]);
         if (missedTradesData.length > 0) {
           setMissedTrades(missedTradesData);
         }
-        setAccounts(accountsData);
         setMasters(mastersData);
         setPairs(pairsData || []);
       } catch (error) {
         console.error('Failed to load data:', error);
-        setAccounts([]);
         setMasters([]);
         setPairs([]);
       }
@@ -156,26 +149,12 @@ export default function MissedTradeJournal() {
     return profit - comm - swp;
   }, [formData.profitLoss, formData.commission, formData.swap]);
 
-  const getTradeAccountId = (trade: MissedTrade): string => {
-    if (typeof trade.accountId === 'object' && trade.accountId !== null) {
-      return String((trade.accountId as any).id || '');
-    }
-    return String(trade.accountId || '');
-  };
-
-  const getAccountName = (accountId: string): string => {
-    const id = typeof accountId === 'object' ? (accountId as any).id : accountId;
-    const account = accounts.find(a => a.id === id);
-    return account?.name || 'Unknown';
-  };
-
   const filteredMissedTrades = useMemo(() => {
     return missedTrades.filter(trade => {
-      if (filterAccount !== 'all' && getTradeAccountId(trade) !== filterAccount) return false;
       if (filterStatus !== 'all' && trade.status !== filterStatus) return false;
       return true;
     });
-  }, [missedTrades, filterAccount, filterStatus]);
+  }, [missedTrades, filterStatus]);
 
   const stats = useMemo(() => {
     const total = filteredMissedTrades.length;
@@ -193,7 +172,6 @@ export default function MissedTradeJournal() {
 
   const resetForm = () => {
     setFormData({
-      accountId: '',
       pair: '',
       type: 'BUY',
       date: '',
@@ -207,15 +185,14 @@ export default function MissedTradeJournal() {
       reason: '',
       emotion: '',
       status: 'MISSED',
-      screenshots: { before: '', after: '' }
+      screenshots: { before: '', after: '' },
+      notes: ''
     });
   };
 
   const startEdit = (trade: MissedTrade) => {
     setEditingId(trade.id);
-    const accountId = getTradeAccountId(trade);
     setFormData({
-      accountId,
       pair: trade.pair,
       type: trade.type,
       date: trade.date.split('T')[0],
@@ -235,13 +212,14 @@ export default function MissedTradeJournal() {
       swap: trade.swap?.toString() || '',
       realPL: trade.realPL || 0,
       status: trade.status,
-      screenshots: trade.screenshots || { before: '', after: '' }
+      screenshots: trade.screenshots || { before: '', after: '' },
+      notes: (trade as any).notes || ''
     });
     setIsAdding(false);
   };
 
   const handleSubmit = async () => {
-    if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.stopLoss || !formData.takeProfit || !formData.date || !formData.reason) {
+    if (!formData.pair || !formData.entryPrice || !formData.stopLoss || !formData.takeProfit || !formData.date || !formData.reason) {
       alert('Please fill in all required fields');
       return;
     }
@@ -252,7 +230,6 @@ export default function MissedTradeJournal() {
     const rr = calculateRR(entry, sl, tp, formData.type);
 
     const missedTradeData = {
-      accountId: formData.accountId,
       pair: formData.pair,
       type: formData.type,
       date: formData.date,
@@ -264,6 +241,7 @@ export default function MissedTradeJournal() {
       session: formData.session,
       strategy: formData.strategy,
       keyLevel: formData.keyLevel,
+      missedReason: formData.reason,
       reason: formData.reason,
       emotion: formData.emotion,
       smt: formData.smt,
@@ -273,7 +251,8 @@ export default function MissedTradeJournal() {
       swap: parseFloat(formData.swap) || 0,
       realPL: calculatedRealPL,
       status: formData.status,
-      screenshots: formData.screenshots
+      screenshots: formData.screenshots,
+      notes: formData.notes
     };
 
     try {
@@ -342,12 +321,11 @@ export default function MissedTradeJournal() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Missed Trade Journal</h2>
-              <p className="text-sm text-gray-500 mt-1">Track missed trading opportunities</p>
+              <p className="text-sm text-gray-500 mt-1">Track missed trading opportunities - no account required</p>
             </div>
             <button
               onClick={() => { setIsAdding(true); resetForm(); setEditingId(null); }}
-              disabled={accounts.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add Missed Trade
@@ -379,18 +357,6 @@ export default function MissedTradeJournal() {
 
           {/* Filters */}
           <div className="flex gap-3">
-            <Select value={filterAccount || 'all'} onValueChange={(value) => setFilterAccount(value)}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Accounts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Accounts</SelectItem>
-                {accounts.map(account => (
-                  <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             <Select value={filterStatus || 'all'} onValueChange={(value) => setFilterStatus(value)}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="All Status" />
@@ -405,15 +371,6 @@ export default function MissedTradeJournal() {
         </div>
 
         <div className="p-6">
-          {accounts.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <p>Please add an account first</p>
-              <p className="text-sm">Go to "Accounts" tab to create one</p>
-            </div>
-          )}
-
-          {accounts.length > 0 && (
-            <>
               {/* Add/Edit Form */}
               {(isAdding || editingId) && (
                 <div className="mb-6 p-6 bg-white rounded-xl border border-slate-200">
@@ -429,19 +386,6 @@ export default function MissedTradeJournal() {
                         Trade Basics
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Account *</label>
-                          <Select value={formData.accountId} onValueChange={(value) => setFormData({ ...formData, accountId: value })}>
-                            <SelectTrigger className="bg-white border-slate-200">
-                              <SelectValue placeholder="Select Account" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {accounts.map(account => (
-                                <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
                         <div>
                           <label className="block text-sm font-medium text-slate-700 mb-1">Pair *</label>
                           <Select value={formData.pair} onValueChange={(value) => setFormData({ ...formData, pair: value })}>
@@ -852,7 +796,6 @@ export default function MissedTradeJournal() {
                     <thead>
                       <tr className="border-b border-gray-200">
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Account</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Pair</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Type</th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Entry</th>
@@ -873,7 +816,6 @@ export default function MissedTradeJournal() {
                         return (
                           <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
                             <td className="py-3 px-4 text-sm">{new Date(trade.date).toLocaleDateString()}</td>
-                            <td className="py-3 px-4 text-sm">{getAccountName(trade.accountId)}</td>
                             <td className="py-3 px-4 text-sm font-medium">{trade.pair}</td>
                             <td className="py-3 px-4 text-sm">
                               <span className={`px-2 py-1 rounded text-xs font-medium ${trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -929,6 +871,13 @@ export default function MissedTradeJournal() {
                                   </button>
                                 )}
                                 <button
+                                  onClick={() => setViewingTrade(trade)}
+                                  className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
+                                  title="View details"
+                                >
+                                  <ViewIcon className="w-4 h-4" />
+                                </button>
+                                <button
                                   onClick={() => startEdit(trade)}
                                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                 >
@@ -949,8 +898,6 @@ export default function MissedTradeJournal() {
                   </table>
                 </div>
               )}
-            </>
-          )}
         </div>
       </div>
 
@@ -961,6 +908,210 @@ export default function MissedTradeJournal() {
           initialIndex={viewingImageIndex}
           onClose={() => setViewingImages([])}
         />
+      )}
+
+      {/* Missed Trade Details Modal */}
+      {viewingTrade && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200"
+          onClick={() => setViewingTrade(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-gray-900">{viewingTrade.pair}</h2>
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      viewingTrade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {viewingTrade.type}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {new Date(viewingTrade.date).toLocaleDateString()} {viewingTrade.time && `at ${viewingTrade.time}`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setViewingTrade(null)}
+                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5">
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4">
+                  <p className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">Entry Price</p>
+                  <p className="text-xl font-bold text-gray-900">{viewingTrade.entryPrice?.toFixed(5) || '-'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-4">
+                  <p className="text-xs text-purple-600 font-medium uppercase tracking-wide mb-1">Stop Loss</p>
+                  <p className="text-xl font-bold text-red-600">{viewingTrade.stopLoss?.toFixed(5) || '-'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-4">
+                  <p className="text-xs text-green-600 font-medium uppercase tracking-wide mb-1">Take Profit</p>
+                  <p className="text-xl font-bold text-green-600">{viewingTrade.takeProfit?.toFixed(5) || '-'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-4">
+                  <p className="text-xs text-orange-600 font-medium uppercase tracking-wide mb-1">Risk / Reward</p>
+                  <p className="text-xl font-bold text-gray-900">{viewingTrade.rr ? `1:${viewingTrade.rr.toFixed(2)}` : '-'}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
+                  Financials
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Profit/Loss</span>
+                    <span className={`font-medium ${(viewingTrade.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {(viewingTrade.profitLoss || 0) >= 0 ? '+' : ''}${viewingTrade.profitLoss?.toFixed(2) || '0.00'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Commission</span>
+                    <span className="font-medium text-red-500">-${Math.abs(viewingTrade.commission || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Swap</span>
+                    <span className="font-medium text-red-500">-${Math.abs(viewingTrade.swap || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Real P/L</span>
+                    <span className={`font-bold ${(viewingTrade.realPL || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {(viewingTrade.realPL || 0) >= 0 ? '+' : ''}${viewingTrade.realPL?.toFixed(2) || '0.00'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-purple-500 rounded-full"></span>
+                  Session & Strategy
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Session</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.session || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Strategy</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.strategy || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Key Level</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.keyLevel || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">SMT</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.smt || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Model #1</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.model1 || '-'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-orange-500 rounded-full"></span>
+                  Missed Trade Info
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Reason</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.reason || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Emotion</span>
+                    <span className="font-medium text-gray-900">{viewingTrade.emotion || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Status</span>
+                    <span className={`font-medium ${viewingTrade.status === 'REVIEWED' ? 'text-green-600' : 'text-orange-600'}`}>
+                      {viewingTrade.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {(viewingTrade.screenshots?.before || viewingTrade.screenshots?.after) && (
+                <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    Screenshots
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {viewingTrade.screenshots?.before && (
+                      <div className="relative group rounded-lg overflow-hidden">
+                        <img
+                          src={viewingTrade.screenshots.before}
+                          alt="Before trade"
+                          className="w-full h-40 object-cover cursor-pointer"
+                          onClick={() => {
+                            const images = [];
+                            if (viewingTrade.screenshots?.before) images.push({ url: viewingTrade.screenshots.before, label: 'Before Screenshot' });
+                            if (viewingTrade.screenshots?.after) images.push({ url: viewingTrade.screenshots.after, label: 'After Screenshot' });
+                            setViewingImages(images);
+                            setViewingImageIndex(0);
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
+                          <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          Before
+                        </span>
+                      </div>
+                    )}
+                    {viewingTrade.screenshots?.after && (
+                      <div className="relative group rounded-lg overflow-hidden">
+                        <img
+                          src={viewingTrade.screenshots.after}
+                          alt="After trade"
+                          className="w-full h-40 object-cover cursor-pointer"
+                          onClick={() => {
+                            const images = [];
+                            if (viewingTrade.screenshots?.before) images.push({ url: viewingTrade.screenshots.before, label: 'Before Screenshot' });
+                            if (viewingTrade.screenshots?.after) images.push({ url: viewingTrade.screenshots.after, label: 'After Screenshot' });
+                            setViewingImages(images);
+                            setViewingImageIndex(viewingTrade.screenshots?.before ? 1 : 0);
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
+                          <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          After
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {(viewingTrade as any).notes && (
+                <div className="bg-amber-50/50 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                    <span className="w-1 h-4 rounded-full bg-amber-500"></span>
+                    Notes
+                  </h4>
+                  <p className="text-sm text-gray-700 leading-relaxed">{(viewingTrade as any).notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Missed Reason Viewer Modal */}

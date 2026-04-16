@@ -4,7 +4,7 @@ const cors = require('cors');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const { upload, deleteImage } = require('./config/cloudinary');
 require('dotenv').config();
 
@@ -33,7 +33,7 @@ const sanitizeOptions = {
 const sanitizeMissedReason = (html) => {
   if (!html || typeof html !== 'string') return '';
   const stripped = html.replace(/<[^>]*>/g, '');
-  if (stripped.trim().length < 10) {
+  if (stripped.trim().length < 3) {
     return null;
   }
   if (stripped.length > 2000) {
@@ -269,7 +269,6 @@ const masterSchema = new mongoose.Schema({
 
 const missedTradeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
   pair: String,
   type: { type: String, enum: ['BUY', 'SELL'] },
   entryPrice: Number,
@@ -282,7 +281,8 @@ const missedTradeSchema = new mongoose.Schema({
   strategy: String,
   keyLevel: String,
   reason: String,
-  missedReason: { type: String, required: true },
+  missedReason: String,
+  notes: String,
   ssmtType: { type: String, enum: SSMT_TYPES, default: 'NO' },
   smt: { type: String, enum: ['No', 'Yes with GBPUSD', 'Yes with EURUSD', 'Yes with DXY'], default: 'No' },
   model1: { type: String, enum: ['Yes (Both EUR and GBP)', 'Yes (EUR)', 'Yes (GBP)', 'No'], default: 'Yes (EUR)' },
@@ -661,8 +661,14 @@ function parseDateTime(dateTimeValue) {
 
   // Handle number (Excel serial date)
   if (typeof dateTimeValue === 'number') {
-    const date = XLSX.SSF.parse_date_code(dateTimeValue);
-    const isoString = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}T${String(date.H || 0).padStart(2, '0')}:${String(date.M || 0).padStart(2, '0')}:${String(date.S || 0).padStart(2, '0')}`;
+    const excelDate = new Date(Math.round((dateTimeValue - 25569) * 86400 * 1000));
+    const year = excelDate.getFullYear();
+    const month = excelDate.getMonth() + 1;
+    const day = excelDate.getDate();
+    const hours = excelDate.getHours();
+    const minutes = excelDate.getMinutes();
+    const seconds = excelDate.getSeconds();
+    const isoString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     return {
       date: new Date(isoString),
       time: `${String(date.H || 0).padStart(2, '0')}:${String(date.M || 0).padStart(2, '0')}`
@@ -900,8 +906,11 @@ function validateMT5Row(row) {
   return errors;
 }
 
-function parseExcelWithDynamicHeaders(sheet) {
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+function parseExcelWithDynamicHeaders(worksheet) {
+  const rawData = [];
+  worksheet.eachRow({ includeEmpty: true }, (row, rowNum) => {
+    rawData.push(row.values);
+  });
 
   console.log('Total rows found:', rawData.length);
   console.log('First 10 rows (to find headers):', rawData.slice(0, 10).map(r => r.slice(0, 5)));
@@ -925,8 +934,12 @@ function parseExcelWithDynamicHeaders(sheet) {
   }
 
   if (headerIndex === -1) {
-    console.log('No header row found, using default sheet_to_json parsing');
-    return XLSX.utils.sheet_to_json(sheet);
+    console.log('No header row found, using default row parsing');
+    return rawData.slice(1).map(row => {
+      const obj = {};
+      row.forEach((cell, i) => { obj[`col${i}`] = cell; });
+      return obj;
+    });
   }
 
   const headers = rawData[headerIndex].map(h => String(h || '').trim());
@@ -973,9 +986,9 @@ app.post('/api/trades/import', isAuthenticated, uploadExcel.single('file'), asyn
       return res.status(404).json({ message: 'Account not found' });
     }
 
-    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = parseExcelWithDynamicHeaders(sheet);
+    const workbook = await new ExcelJS.Workbook().xlsx.load(req.file.buffer);
+    const worksheet = workbook.getWorksheet(1);
+    const data = parseExcelWithDynamicHeaders(worksheet);
 
     if (!data || data.length === 0) {
       return res.status(400).json({ message: 'Excel file is empty or has no valid data' });
@@ -1155,9 +1168,9 @@ app.post('/api/trades/preview', isAuthenticated, uploadExcel.single('file'), asy
       return res.status(400).json({ message: 'Account ID is required' });
     }
 
-    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = parseExcelWithDynamicHeaders(sheet);
+    const workbook = await new ExcelJS.Workbook().xlsx.load(req.file.buffer);
+    const worksheet = workbook.getWorksheet(1);
+    const data = parseExcelWithDynamicHeaders(worksheet);
 
     console.log('Preview parsed data:', JSON.stringify(data[0], null, 2));
 
@@ -1974,15 +1987,13 @@ app.delete('/api/masters/:id', isAuthenticated, async (req, res) => {
 
 app.get('/api/missed-trades', isAuthenticated, async (req, res) => {
   try {
-    const { accountId, ssmtType } = req.query;
+    const { ssmtType } = req.query;
     let filter = { userId: req.session.userId };
-    if (accountId) filter.accountId = accountId;
     if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
       filter.ssmtType = ssmtType;
     }
 
     const missedTrades = await MissedTrade.find(filter)
-      .populate('accountId')
       .sort({ date: -1 });
     res.json(missedTrades);
   } catch (error) {
@@ -1997,11 +2008,11 @@ app.post('/api/missed-trades', isAuthenticated, async (req, res) => {
 
     const { missedReason, reason, ssmtType, pair, profitLoss, commission, swap, ...rest } = req.body;
 
-    const sanitizedReason = sanitizeMissedReason(missedReason);
+    const sanitizedReason = sanitizeMissedReason(missedReason || reason);
 
     if (!sanitizedReason) {
       return res.status(400).json({
-        message: 'Missed reason is required and must be between 10-2000 characters'
+        message: 'Missed reason is required and must be between 3-2000 characters'
       });
     }
 

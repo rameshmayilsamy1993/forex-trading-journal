@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { Upload, FileText, AlertCircle, X, Download, Send, FileSpreadsheet, FileOutput } from 'lucide-react';
 import { PageHeader, CardContainer } from '../components/ui/DesignSystem';
 
@@ -505,7 +505,7 @@ export default function ConvertCsv() {
     }
   };
 
-  const handleExportMT5Excel = () => {
+  const handleExportMT5Excel = async () => {
     const worksheetData = convertedData.map(row => [
       row.entryDate ? formatToMT5DateTime(`${row.entryDate} ${row.entryTime}`) : '',
       row.positionId,
@@ -538,10 +538,11 @@ export default function ConvertCsv() {
       'Profit'
     ];
 
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...worksheetData]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'MT5');
-    XLSX.writeFile(wb, 'MT5_Converted.xlsx');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('MT5');
+    worksheet.addRow(headers);
+    worksheetData.forEach(row => worksheet.addRow(row));
+    await workbook.xlsx.writeFile('MT5_Converted.xlsx');
   };
 
   const handleSendToImport = () => {

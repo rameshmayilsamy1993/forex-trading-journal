@@ -60,3 +60,14 @@ export function getDaysInMonth(year: number, month: number): number {
 export function getFirstDayOfMonth(year: number, month: number): number {
   return new Date(year, month, 1).getDay();
 }
+
+export function convertTo24Hour(time12Hour: string): string {
+  if (!time12Hour) return '';
+  const [time, modifier] = time12Hour.split(' ');
+  if (!time || !modifier) return time12Hour;
+  let [hours, minutes] = time.split(':');
+  hours = parseInt(hours, 10);
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+  return `${String(hours).padStart(2, '0')}:${minutes}`;
+}
