@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "lint": "echo 'No linter configured'",
+    "typecheck": "echo 'No type checker configured'"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
