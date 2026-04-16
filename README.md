@@ -109,7 +109,8 @@ fx-journal/
 │       │   ├── accounts/
 │       │   ├── propfirms/
 │       │   ├── settings/
-│       │   └── masters/
+│       │   ├── masters/
+│       │   └── reports/        # Document export
 │       └── services/       # Shared business logic
 ├── package.json
 ├── pnpm-workspace.yaml
@@ -140,6 +141,7 @@ module/
 | `masters` | Strategies, sessions, key levels |
 | `settings` | Application settings |
 | `upload` | Image upload handling |
+| `reports` | Word document export |
 
 ## ⚙️ Installation
 
@@ -251,6 +253,7 @@ npm run build
 | Settings | `/api/settings`, `/api/settings/pairs` |
 | Masters | `/api/masters` (strategies, sessions, key levels) |
 | Upload | `/api/upload`, `/api/upload/multiple` |
+| Reports | `/api/reports/trades`, `/api/reports/missed-trades` |
 
 ## 🔐 Security Notes
 

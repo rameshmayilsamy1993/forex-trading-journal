@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { cn } from './ui/utils';
 import { getDateKey, getLocalDateString, convertTo24Hour } from '../utils/dateUtils';
 import LossReasonModal from './LossReasonModal';
-
+import ExportMenu from './ExportMenu';
 
 
 export default function TradeJournal() {
@@ -577,14 +577,19 @@ export default function TradeJournal() {
           <h1 className="text-2xl font-bold text-slate-900">Trade Journal</h1>
           <p className="text-sm text-slate-500 mt-1">Record and track your trading activity</p>
         </div>
-        <button
-          onClick={() => setIsAdding(true)}
-          disabled={accounts.length === 0}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/40 hover:-translate-y-0.5"
-        >
-          <Plus className="w-5 h-5" />
-          Add Trade
-        </button>
+        <div className="flex items-center gap-3">
+          <ExportMenu 
+            accountId={filterAccount !== 'all' ? filterAccount : undefined} 
+          />
+          <button
+            onClick={() => setIsAdding(true)}
+            disabled={accounts.length === 0}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/40 hover:-translate-y-0.5"
+          >
+            <Plus className="w-5 h-5" />
+            Add Trade
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-slate-200/50">

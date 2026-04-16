@@ -346,6 +346,54 @@ const apiService = {
     },
   },
 
+  reports: {
+    exportTrades: async (options?: { 
+      period?: 'daily' | 'weekly' | 'monthly' | 'all';
+      date?: string;
+      accountId?: string;
+      firmId?: string;
+    }): Promise<Blob> => {
+      const params = new URLSearchParams();
+      if (options?.period) params.append('period', options.period);
+      if (options?.date) params.append('date', options.date);
+      if (options?.accountId) params.append('accountId', options.accountId);
+      if (options?.firmId) params.append('firmId', options.firmId);
+
+      const response = await fetch(`${API_BASE_URL}/reports/trades?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Export failed' }));
+        throw new Error(error.message || 'Export failed');
+      }
+
+      return response.blob();
+    },
+
+    exportMissedTrades: async (options?: {
+      period?: 'daily' | 'weekly' | 'monthly' | 'all';
+      date?: string;
+    }): Promise<Blob> => {
+      const params = new URLSearchParams();
+      if (options?.period) params.append('period', options.period);
+      if (options?.date) params.append('date', options.date);
+
+      const response = await fetch(`${API_BASE_URL}/reports/missed-trades?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Export failed' }));
+        throw new Error(error.message || 'Export failed');
+      }
+
+      return response.blob();
+    },
+  },
+
   lossAnalysis: {
     create: async (data: {
       tradeId: string;

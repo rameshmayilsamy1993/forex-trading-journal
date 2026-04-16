@@ -7,6 +7,7 @@ import { Input } from './ui/input';
 import TimePicker from './ui/TimePicker';
 import { Button } from './ui/button';
 import ImageViewer from './ImageViewer';
+import ExportMenu from './ExportMenu';
 import { cn } from './ui/utils';
 import { truncateText, stripHTML, decodeHtml, hasHTML } from '../utils/htmlUtils';
 import DOMPurify from 'dompurify';
@@ -323,13 +324,16 @@ export default function MissedTradeJournal() {
               <h2 className="text-xl font-bold text-gray-900">Missed Trade Journal</h2>
               <p className="text-sm text-gray-500 mt-1">Track missed trading opportunities - no account required</p>
             </div>
-            <button
-              onClick={() => { setIsAdding(true); resetForm(); setEditingId(null); }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add Missed Trade
-            </button>
+            <div className="flex items-center gap-3">
+              <ExportMenu type="missed-trades" />
+              <button
+                onClick={() => { setIsAdding(true); resetForm(); setEditingId(null); }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Missed Trade
+              </button>
+            </div>
           </div>
 
           {/* Stats */}
