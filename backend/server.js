@@ -39,6 +39,7 @@ const lossAnalysisRoutes = require('./src/modules/lossAnalysis/lossAnalysis.rout
 const settingsRoutes = require('./src/modules/settings/settings.routes');
 const uploadRoutes = require('./src/modules/upload/upload.routes');
 const reportRoutes = require('./src/modules/reports/report.routes');
+const checklistRoutes = require('./src/modules/checklists/checklist.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -85,6 +86,7 @@ app.use('/api/loss-analysis', isAuthenticated, lossAnalysisRoutes);
 app.use('/api/settings', isAuthenticated, settingsRoutes);
 app.use('/api/upload', isAuthenticated, uploadRoutes);
 app.use('/api/reports', isAuthenticated, reportRoutes);
+app.use('/api/checklists', isAuthenticated, checklistRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
 app.use(notFoundMiddleware);

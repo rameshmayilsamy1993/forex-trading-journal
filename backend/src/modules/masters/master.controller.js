@@ -30,6 +30,26 @@ const create = async (req, res, next) => {
   }
 };
 
+const update = async (req, res, next) => {
+  try {
+    const { name, type, checklist, isActive } = req.body;
+    
+    const master = await Master.findOneAndUpdate(
+      { _id: req.params.id, userId: req.session.userId },
+      { name, type, checklist, isActive },
+      { new: true, runValidators: true }
+    );
+    
+    if (!master) {
+      return res.status(404).json({ message: 'Master entry not found' });
+    }
+    
+    res.json(master);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const remove = async (req, res, next) => {
   try {
     const master = await Master.findOneAndDelete({
@@ -45,4 +65,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, remove };
+module.exports = { getAll, create, update, remove };

@@ -237,6 +237,13 @@ const apiService = {
     });
   },
 
+  updateMaster: async (id: string, master: Partial<MasterData>): Promise<MasterData> => {
+    return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(master),
+    });
+  },
+
   deleteMaster: async (id: string): Promise<void> => {
     return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
       method: 'DELETE',
@@ -343,6 +350,83 @@ const apiService = {
         credentials: 'include',
       });
       return handleResponse(response);
+    },
+  },
+
+  checklists: {
+    getAll: async (options?: { tradeId?: string; page?: number; limit?: number }) => {
+      const params = new URLSearchParams();
+      if (options?.tradeId) params.append('tradeId', options.tradeId);
+      if (options?.page) params.append('page', options.page.toString());
+      if (options?.limit) params.append('limit', options.limit.toString());
+      
+      const queryString = params.toString();
+      const url = `${API_BASE_URL}/checklists${queryString ? `?${queryString}` : ''}`;
+      return fetchWithAuth(url);
+    },
+
+    getActiveSessions: async () => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/active`);
+    },
+
+    getActiveList: async () => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/active-list`);
+    },
+
+    linkToTrades: async (checklistId: string, tradeIds: string[]) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/link`, {
+        method: 'POST',
+        body: JSON.stringify({ checklistId, tradeIds }),
+      });
+    },
+
+    unlinkFromTrades: async (checklistId: string, tradeIds: string[]) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/unlink`, {
+        method: 'POST',
+        body: JSON.stringify({ checklistId, tradeIds }),
+      });
+    },
+
+    getById: async (id: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}`);
+    },
+
+    create: async (data: {
+      strategyId: string;
+      items: Array<{ label: string; checked: boolean; required: boolean }>;
+      notes?: string;
+      pair?: string;
+      tradeType?: string;
+      entryPrice?: number;
+    }) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    update: async (id: string, data: {
+      items?: Array<{ label: string; checked: boolean; required: boolean }>;
+      notes?: string;
+      tradeId?: string;
+    }) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    linkToTrade: async (id: string, tradeId: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}/link-trade`, {
+        method: 'POST',
+        body: JSON.stringify({ tradeId }),
+      });
+    },
+
+    delete: async (id: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}`, {
+        method: 'DELETE',
+      });
     },
   },
 

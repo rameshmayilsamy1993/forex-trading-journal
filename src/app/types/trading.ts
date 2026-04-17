@@ -24,10 +24,41 @@ export type Model1Type = 'Yes (Both EUR and GBP)' | 'Yes (EUR)' | 'Yes (GBP)' | 
 
 export type MasterType = 'strategy' | 'keyLevel' | 'session';
 
+export interface ChecklistItem {
+  label: string;
+  required: boolean;
+  order?: number;
+}
+
 export interface MasterData {
   id: string;
   name: string;
   type: MasterType;
+  checklist?: ChecklistItem[];
+  isActive?: boolean;
+}
+
+export interface ChecklistItemResult {
+  label: string;
+  checked: boolean;
+  required: boolean;
+}
+
+export interface ChecklistSession {
+  id: string;
+  sessionId: string;
+  strategyId: string;
+  strategyName: string;
+  items: ChecklistItemResult[];
+  isValid: boolean;
+  missingRequired: string[];
+  notes?: string;
+  linkedTrades: string[];
+  pair?: string;
+  tradeType?: string;
+  entryPrice?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Trade {
@@ -59,6 +90,8 @@ export interface Trade {
   model1?: Model1Type;
   beforeScreenshot?: string;
   afterScreenshot?: string;
+  checklistId?: string;
+  checklistSession?: string;
 }
 
 export interface TradeStats {

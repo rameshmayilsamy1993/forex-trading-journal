@@ -33,6 +33,8 @@ const tradeSchema = new mongoose.Schema({
   entryTime: String,
   exitDate: Date,
   exitTime: String,
+  checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'ChecklistSession' },
+  checklistSession: String,
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 

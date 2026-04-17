@@ -53,6 +53,12 @@ The application is built with a focus on discipline tracking and continuous impr
 - Monthly performance tracking
 - Profit factor analysis
 
+### Pre-Trade Checklist
+- Dynamic strategy-specific checklists
+- Required items must be completed before trade entry
+- Progress tracking and validation
+- Link checklist results to trades
+
 ## 🧠 Key Concepts
 
 | Concept | Description |
@@ -254,6 +260,7 @@ npm run build
 | Masters | `/api/masters` (strategies, sessions, key levels) |
 | Upload | `/api/upload`, `/api/upload/multiple` |
 | Reports | `/api/reports/trades`, `/api/reports/missed-trades` |
+| Checklists | `/api/checklists` (CRUD), `/api/checklists/:id/link-trade` |
 
 ## 🔐 Security Notes
 
