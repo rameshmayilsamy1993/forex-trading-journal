@@ -24,6 +24,16 @@ export default function ChecklistExecutionPage() {
     loadData();
   }, []);
 
+  const handleDeleteChecklist = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this checklist?')) return;
+    try {
+      await apiService.checklists.delete(id);
+      loadData();
+    } catch (error) {
+      console.error('Failed to delete checklist:', error);
+    }
+  };
+
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -437,14 +447,26 @@ export default function ChecklistExecutionPage() {
                       )}
                     </div>
                   </div>
-                  <span className={cn(
-                    "px-3 py-1 rounded-full text-sm font-medium",
-                    checklist.isValid
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  )}>
-                    {checklist.isValid ? 'Valid' : 'Invalid'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-sm font-medium",
+                      checklist.isValid
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    )}>
+                      {checklist.isValid ? 'Valid' : 'Invalid'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        console.log('Delete clicked:', checklist.id);
+                        handleDeleteChecklist(checklist.id);
+                      }}
+                      className="px-3 py-1 text-sm text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-slate-200"
+                      title="Delete"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">

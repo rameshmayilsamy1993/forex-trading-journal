@@ -223,6 +223,8 @@ export default function TradeJournal() {
     }
   };
 
+  const isEditMode = !!editingId;
+
   const handleSubmit = async () => {
     if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) {
       alert('Please fill in all required fields: Account, Pair, Entry Price, and Lot Size');
@@ -234,8 +236,8 @@ export default function TradeJournal() {
       return;
     }
 
-    // Check if strategy has a checklist
-    if (selectedStrategyHasChecklist && !checklistModal.completedChecklistId && !selectedChecklistId) {
+    // Check if strategy has a checklist - ONLY required in create mode
+    if (!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId && !selectedChecklistId) {
       setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null });
       return;
     }
@@ -738,6 +740,8 @@ export default function TradeJournal() {
       model1: trade.model1 || 'Yes (EUR)',
       beforeScreenshot: trade.beforeScreenshot || '',
       afterScreenshot: trade.afterScreenshot || '',
+      checklistId: (trade as any).checklistId || '',
+      checklistSession: (trade as any).checklistSession || '',
     });
     setIsAdding(false);
   };
@@ -1394,16 +1398,31 @@ export default function TradeJournal() {
                     </div>
                   </div>
                   <div className="flex gap-2 justify-end mt-4">
-                    {selectedStrategyHasChecklist && !checklistModal.completedChecklistId && (
+                    {isEditMode && (trades.find(t => t.id === editingId) as any)?.checklistSession && (
+                      <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-2">
+                        <ClipboardCheck className="w-4 h-4" />
+                        Linked: {(trades.find(t => t.id === editingId) as any)?.checklistSession}
+                      </span>
+                    )}
+                    {isEditMode && (
                       <button
-                        onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null })}
+                        onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null })}
+                        className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 flex items-center gap-2"
+                      >
+                        <Link2 className="w-4 h-4" />
+                        Change Checklist
+                      </button>
+                    )}
+                    {!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId && (
+                      <button
+                        onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null })}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-lg shadow-blue-500/25"
                       >
                         <ClipboardCheck className="w-4 h-4" />
                         Complete Checklist
                       </button>
                     )}
-                    {selectedStrategyHasChecklist && checklistModal.completedChecklistId && (
+                    {!isEditMode && selectedStrategyHasChecklist && checklistModal.completedChecklistId && (
                       <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg flex items-center gap-2">
                         <Check className="w-4 h-4" />
                         Checklist Completed
@@ -1411,7 +1430,7 @@ export default function TradeJournal() {
                     )}
                     <button
                       onClick={editingId ? () => handleEdit(editingId) : handleSubmit}
-                      disabled={selectedStrategyHasChecklist && !checklistModal.completedChecklistId}
+                      disabled={!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Check className="w-4 h-4" />
