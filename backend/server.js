@@ -40,6 +40,12 @@ const settingsRoutes = require('./src/modules/settings/settings.routes');
 const uploadRoutes = require('./src/modules/upload/upload.routes');
 const reportRoutes = require('./src/modules/reports/report.routes');
 const checklistRoutes = require('./src/modules/checklists/checklist.routes');
+const biasRoutes = require('./src/modules/biases/bias.routes');
+const biasHistoryRoutes = require('./src/modules/biases/biasHistory.routes');
+const biasEventRoutes = require('./src/modules/biases/biasEvent.routes');
+const liquidityRoutes = require('./src/modules/liquidity/liquidity.routes');
+const h4Routes = require('./src/modules/h4/h4.routes');
+const crtRoutes = require('./src/modules/crt/crtEvent.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,6 +93,12 @@ app.use('/api/settings', isAuthenticated, settingsRoutes);
 app.use('/api/upload', isAuthenticated, uploadRoutes);
 app.use('/api/reports', isAuthenticated, reportRoutes);
 app.use('/api/checklists', isAuthenticated, checklistRoutes);
+app.use('/api/biases', isAuthenticated, biasRoutes);
+app.use('/api/bias', isAuthenticated, biasHistoryRoutes);
+app.use('/api/bias', isAuthenticated, biasEventRoutes);
+app.use('/api/liquidity', isAuthenticated, liquidityRoutes);
+app.use('/api/h4', isAuthenticated, h4Routes);
+app.use('/api/crt-events', isAuthenticated, crtRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
 app.use(notFoundMiddleware);

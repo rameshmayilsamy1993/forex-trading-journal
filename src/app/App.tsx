@@ -15,6 +15,13 @@ import TradeImport from './components/TradeImport';
 import ConvertCsv from './pages/ConvertCsv';
 import ChecklistExecutionPage from './components/ChecklistExecutionPage';
 import MasterStrategyPage from './components/MasterStrategyPage';
+import BiasMapping from './components/BiasMapping';
+import BiasInput from './components/BiasInput';
+import BiasHistory from './components/BiasHistory';
+import LiquidityInput from './components/LiquidityInput';
+import LiquidityHistory from './components/LiquidityHistory';
+import CRTInput from './components/CRTInput';
+import CRTHistory from './components/CRTHistory';
 import apiService, { User as UserType } from './services/apiService';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -89,6 +96,13 @@ export default function App() {
               {activeTab === 'accounts' && <Accounts />}
               {activeTab === 'reports' && <Reports />}
               {activeTab === 'strategy-master' && <MasterStrategyPage />}
+              {activeTab === 'bias' && <BiasMapping />}
+              {activeTab === 'bias-input' && <BiasInput />}
+              {activeTab === 'bias-history' && <BiasHistory />}
+              {activeTab === 'liquidity-input' && <LiquidityInput />}
+              {activeTab === 'liquidity-history' && <LiquidityHistory />}
+              {activeTab === 'crt-input' && <CRTInput />}
+              {activeTab === 'crt-history' && <CRTHistory />}
               {activeTab === 'settings' && <Settings />}
             </ErrorBoundary>
           </div>

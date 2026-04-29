@@ -551,6 +551,362 @@ const apiService = {
       });
       return handleResponse(response);
     },
+  },
+
+  biases: {
+    getAll: async () => {
+      const response = await fetch(`${API_BASE_URL}/biases`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    save: async (bias: {
+      pair: string;
+      monthlyBias: string;
+      weeklyBias: string;
+      dailyBias: string;
+      notes?: string;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/biases/manual`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(bias),
+      });
+      return handleResponse(response);
+    },
+    update: async (bias: {
+      pair: string;
+      monthlyBias: string;
+      weeklyBias: string;
+      dailyBias: string;
+      notes?: string;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/biases/manual`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(bias),
+      });
+      return handleResponse(response);
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/biases/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+  },
+
+  biasHistory: {
+    save: async (data: {
+      pair?: string;
+      date?: string;
+      h1Cisd: string;
+      h4Cisd: string;
+      dailyCisd: string;
+      notes?: string;
+      pairs?: string[];
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/bias/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+    getHistory: async (filters?: {
+      pair?: string;
+      startDate?: string;
+      endDate?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.startDate) params.set('startDate', filters.startDate);
+      if (filters?.endDate) params.set('endDate', filters.endDate);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+
+      const response = await fetch(`${API_BASE_URL}/bias/history?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getLatest: async (pair?: string) => {
+      const params = pair ? new URLSearchParams({ pair }) : '';
+      const response = await fetch(`${API_BASE_URL}/bias/latest${params ? '?' + params : ''}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getByDate: async (date: string, pair?: string) => {
+      const params = new URLSearchParams({ date });
+      if (pair) params.set('pair', pair);
+
+      const response = await fetch(`${API_BASE_URL}/bias/by-date?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/bias/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+  },
+
+  biasEvents: {
+    create: async (data: {
+      pair?: string;
+      h1Cisd: string;
+      h4Cisd: string;
+      dailyCisd: string;
+      notes?: string;
+      pairs?: string[];
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/bias/event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+    getAll: async (filters?: {
+      pair?: string;
+      startDate?: string;
+      endDate?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.startDate) params.set('startDate', filters.startDate);
+      if (filters?.endDate) params.set('endDate', filters.endDate);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+
+      const response = await fetch(`${API_BASE_URL}/bias/events?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getByPair: async (pair: string) => {
+      const response = await fetch(`${API_BASE_URL}/bias/events/${pair}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getLatest: async (pair?: string) => {
+      const params = pair ? new URLSearchParams({ pair }) : '';
+      const response = await fetch(`${API_BASE_URL}/bias/latest-events${params ? '?' + params : ''}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getTimeline: async (pair?: string, date?: string) => {
+      const params = new URLSearchParams();
+      if (pair) params.set('pair', pair);
+      if (date) params.set('date', date);
+
+      const response = await fetch(`${API_BASE_URL}/bias/timeline?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/bias/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+  },
+
+  liquidity: {
+    save: async (data: {
+      pair?: string;
+      monthlyLiquidity: string;
+      weeklyLiquidity: string;
+      dailyLiquidity: string;
+      notes?: string;
+      pairs?: string[];
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/liquidity/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+    getAll: async (filters?: {
+      pair?: string;
+      startDate?: string;
+      endDate?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.startDate) params.set('startDate', filters.startDate);
+      if (filters?.endDate) params.set('endDate', filters.endDate);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+
+      const response = await fetch(`${API_BASE_URL}/liquidity?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getLatest: async (pair?: string) => {
+      const params = pair ? new URLSearchParams({ pair }) : '';
+      const response = await fetch(`${API_BASE_URL}/liquidity/latest${params ? '?' + params : ''}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/liquidity/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+  },
+
+  h4: {
+    save: async (data: {
+      pair: string;
+      date: string;
+      candles: Array<{
+        time: string;
+        direction: string;
+        prevHighTaken: boolean;
+        prevLowTaken: boolean;
+        notes?: string;
+      }>;
+      notes?: string;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/h4/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+    getAll: async (filters?: {
+      pair?: string;
+      startDate?: string;
+      endDate?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.startDate) params.set('startDate', filters.startDate);
+      if (filters?.endDate) params.set('endDate', filters.endDate);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+
+      const response = await fetch(`${API_BASE_URL}/h4?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getByDate: async (date: string, pair?: string) => {
+      const params = new URLSearchParams({ date });
+      if (pair) params.set('pair', pair);
+
+      const response = await fetch(`${API_BASE_URL}/h4/by-date?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/h4/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+  },
+
+  crtEvents: {
+    getAll: async (filters?: {
+      pair?: string;
+      month?: string;
+      timeframe?: string;
+    }) => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.month) params.set('month', filters.month);
+      if (filters?.timeframe) params.set('timeframe', filters.timeframe);
+
+      const response = await fetch(`${API_BASE_URL}/crt-events?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    create: async (data: {
+      pair: string;
+      timeframe: string;
+      date: string;
+      time?: string;
+      isCRT?: boolean;
+      image?: string;
+      notes?: string;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/crt-events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+    update: async (id: string, data: {
+      date?: string;
+      time?: string;
+      isCRT?: boolean;
+      image?: string;
+      notes?: string;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/crt-events/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/crt-events/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
   }
 };
 

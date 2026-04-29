@@ -3,12 +3,13 @@ import {
   LayoutDashboard, BookOpen, Building2, Wallet, BarChart3, 
   EyeOff, Calendar, Settings as SettingsIcon, User, FileUp, 
   LogOut, Activity, FileSpreadsheet, ClipboardCheck, Settings2,
-  ChevronLeft, ChevronRight, X, ActivitySquare
+  ChevronLeft, ChevronRight, X, ActivitySquare, TrendingUp,
+  TrendingDown, History, Layers
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history';
 
 interface NavItem {
   id: Tab;
@@ -41,6 +42,12 @@ const navigationGroups: NavGroup[] = [
     title: 'Discipline',
     items: [
       { id: 'checklist', label: 'Pre-Trade Checklist', icon: ClipboardCheck },
+      { id: 'bias-input', label: 'Bias Input (CISD)', icon: TrendingDown },
+      { id: 'bias-history', label: 'Bias History', icon: History },
+      { id: 'liquidity-input', label: 'Liquidity Input', icon: Layers },
+      { id: 'liquidity-history', label: 'Liquidity History', icon: History },
+      { id: 'crt-input', label: 'CRT Tracker', icon: Activity },
+      { id: 'crt-history', label: 'CRT History', icon: History },
     ],
   },
   {

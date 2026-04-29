@@ -58,3 +58,6 @@ backend/build/
 *.tmp
 *.temp
 *.bak
+
+#code
+AGENTS.md
