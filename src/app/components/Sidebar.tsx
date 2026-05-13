@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { 
-  LayoutDashboard, BookOpen, Building2, Wallet, BarChart3, 
-  EyeOff, Calendar, Settings as SettingsIcon, User, FileUp, 
-  LogOut, Activity, FileSpreadsheet, ClipboardCheck, Settings2,
+import {
+  LayoutDashboard, BookOpen, Building2, Wallet, BarChart3,
+  EyeOff, Calendar, Settings as SettingsIcon, FileUp,
+  Activity, FileSpreadsheet, ClipboardCheck, Settings2,
   ChevronLeft, ChevronRight, X, ActivitySquare, TrendingUp,
-  TrendingDown, History, Layers
+  TrendingDown, History, Layers, AlertTriangle, Bell
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'reminders';
 
 interface NavItem {
   id: Tab;
@@ -48,6 +48,7 @@ const navigationGroups: NavGroup[] = [
       { id: 'liquidity-history', label: 'Liquidity History', icon: History },
       { id: 'crt-input', label: 'CRT Tracker', icon: Activity },
       { id: 'crt-history', label: 'CRT History', icon: History },
+      { id: 'reminders', label: 'Reminders', icon: Bell },
     ],
   },
   {
@@ -56,6 +57,7 @@ const navigationGroups: NavGroup[] = [
       { id: 'missed', label: 'Missed Trades', icon: EyeOff },
       { id: 'missed-calendar', label: 'Missed Calendar', icon: Calendar },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
+      { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
     ],
   },
   {
@@ -176,39 +178,6 @@ export default function Sidebar({
             </div>
           ))}
         </nav>
-
-        {/* User Section */}
-        <div className="border-t border-slate-100 p-3">
-          {currentUser ? (
-            <div className={cn(
-              "flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors",
-              isCollapsed && "justify-center"
-            )}>
-              <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">{currentUser.name}</p>
-                  {currentUser.role === 'admin' && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">Admin</span>
-                  )}
-                </div>
-              )}
-              {!isCollapsed && (
-                <button
-                  onClick={onLogout}
-                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  title="Sign out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="h-12" />
-          )}
-        </div>
 
         {/* Collapse Toggle (Desktop) */}
         <button

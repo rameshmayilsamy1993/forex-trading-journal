@@ -13,6 +13,7 @@ export default function Reports() {
   const [firms, setFirms] = useState<PropFirm[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [selectedFirm, setSelectedFirm] = useState<string>('all');
+  const [includeBreached, setIncludeBreached] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadAccountsAndFirms = async () => {
@@ -35,10 +36,11 @@ export default function Reports() {
 
   const loadTrades = async () => {
     try {
-      const filters: { accountId?: string; firmId?: string } = {};
+      const filters: { accountId?: string; firmId?: string; accountState?: string; includeBreached?: boolean } = {};
       if (selectedAccount !== 'all') filters.accountId = selectedAccount;
       if (selectedFirm !== 'all') filters.firmId = selectedFirm;
-      
+      if (includeBreached) filters.includeBreached = true;
+
       const tradesData = await apiService.getTrades(Object.keys(filters).length > 0 ? filters : undefined);
       setTrades(tradesData);
     } catch (error) {
@@ -52,7 +54,7 @@ export default function Reports() {
 
   useEffect(() => {
     loadTrades();
-  }, [selectedAccount, selectedFirm]);
+  }, [selectedAccount, selectedFirm, includeBreached]);
 
   const getAccountFirmId = (account: TradingAccount): string => {
     if (typeof account.propFirmId === 'object' && account.propFirmId !== null) {
@@ -194,25 +196,44 @@ export default function Reports() {
               </SelectContent>
             </Select>
 
-            <Select 
-              value={selectedAccount || 'all'}
-              onValueChange={(value: string) => setSelectedAccount(value)}
-            >
-              <SelectTrigger className="w-[200px] bg-white">
-                <SelectValue placeholder="All Accounts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Accounts</SelectItem>
-                {accounts
-                  .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
-                  .map(account => (
-                    <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+              <Select
+                value={selectedAccount || 'all'}
+                onValueChange={(value: string) => setSelectedAccount(value)}
+              >
+                <SelectTrigger className="w-[200px] bg-white">
+                  <SelectValue placeholder="All Accounts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Accounts</SelectItem>
+                  {accounts
+                    .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
+                    .map(account => (
+                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeBreached}
+                    onChange={(e) => setIncludeBreached(e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  Include Breached Accounts
+                </label>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  includeBreached 
+                    ? 'bg-amber-100 text-amber-700' 
+                    : 'bg-green-100 text-green-700'
+                }`}>
+                  {includeBreached ? 'Including Breached' : 'Active Only'}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      </CardContainer>
+        </CardContainer>
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">

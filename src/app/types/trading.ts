@@ -5,6 +5,8 @@ export interface PropFirm {
   createdAt: string;
 }
 
+export type AccountStatus = 'ACTIVE' | 'BREACHED' | 'PASSED_1' | 'PASSED_2' | 'FUNDED' | 'DISABLED';
+
 export interface TradingAccount {
   id: string;
   name: string;
@@ -12,7 +14,11 @@ export interface TradingAccount {
   initialBalance: number;
   currentBalance: number;
   currency: string;
+  status: AccountStatus;
+  breachedAt?: string;
   createdAt: string;
+  isActive: boolean;
+  canTrade: boolean;
 }
 
 export type TradeType = 'BUY' | 'SELL';
@@ -92,6 +98,7 @@ export interface Trade {
   afterScreenshot?: string;
   checklistId?: string;
   checklistSession?: string;
+  isBreachedAccountTrade?: boolean;
 }
 
 export interface TradeStats {

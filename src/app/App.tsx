@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, User, LogOut } from 'lucide-react';
 import Sidebar, { Tab } from './components/Sidebar';
+import LiveISTClock from './components/common/LiveISTClock';
+import NotificationDropdown from './components/common/NotificationDropdown';
 import Dashboard from './components/Dashboard';
 import TradeJournal from './components/TradeJournal';
 import PropFirms from './components/PropFirms';
@@ -22,6 +24,8 @@ import LiquidityInput from './components/LiquidityInput';
 import LiquidityHistory from './components/LiquidityHistory';
 import CRTInput from './components/CRTInput';
 import CRTHistory from './components/CRTHistory';
+import BreachedTrades from './components/BreachedTrades';
+import Reminders from './components/Reminders';
 import apiService, { User as UserType } from './services/apiService';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -77,7 +81,37 @@ export default function App() {
               </button>
               <h1 className="text-lg font-bold text-slate-900">FX Journal</h1>
             </div>
+            <div className="flex items-center gap-2">
+              <NotificationDropdown onNavigateToReminders={() => setActiveTab('reminders')} />
+              <LiveISTClock />
+            </div>
           </div>
+        </header>
+
+        {/* Desktop Header Bar */}
+        <header className="hidden lg:flex sticky top-0 z-20 h-14 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/60 items-center justify-end px-6 gap-4">
+          <NotificationDropdown onNavigateToReminders={() => setActiveTab('reminders')} />
+          <LiveISTClock />
+          {currentUser && (
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-200/60">
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{currentUser.name}</span>
+                {currentUser.role === 'admin' && (
+                  <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium w-fit">Admin</span>
+                )}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </header>
 
         {/* Page Content */}
@@ -103,6 +137,8 @@ export default function App() {
               {activeTab === 'liquidity-history' && <LiquidityHistory />}
               {activeTab === 'crt-input' && <CRTInput />}
               {activeTab === 'crt-history' && <CRTHistory />}
+              {activeTab === 'breached-trades' && <BreachedTrades />}
+              {activeTab === 'reminders' && <Reminders />}
               {activeTab === 'settings' && <Settings />}
             </ErrorBoundary>
           </div>

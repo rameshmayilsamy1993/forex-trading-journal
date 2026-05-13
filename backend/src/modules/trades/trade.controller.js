@@ -1,14 +1,30 @@
 const { Trade, SSMT_TYPES } = require('./trade.model');
-const Account = require('../accounts/account.model');
+const { Account } = require('../accounts/account.model');
 const Master = require('../masters/master.model');
 const { getCachedPairs, calculateRealPL } = require('../../services/tradeService');
 const { deleteImage } = require('../../config/cloudinary');
 
 const getAll = async (req, res, next) => {
   try {
-    const { accountId, firmId, ssmtType } = req.query;
+    const { accountId, firmId, ssmtType, includeBreached } = req.query;
     let filter = { userId: req.session.userId };
-    if (accountId) filter.accountId = accountId;
+
+    if (accountId) {
+      filter.accountId = accountId;
+    } else {
+      let accountQuery = { userId: req.session.userId };
+      if (includeBreached !== 'true') {
+        accountQuery.status = { $ne: 'BREACHED' };
+      }
+      const accounts = await Account.find(accountQuery).select('_id');
+      const accountIds = accounts.map(a => a._id);
+      if (accountIds.length > 0) {
+        filter.accountId = { $in: accountIds };
+      } else {
+        filter.accountId = { $in: [] };
+      }
+    }
+
     if (firmId) filter.propFirmId = firmId;
 
     if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
@@ -27,7 +43,7 @@ const getAll = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, ...rest } = req.body;
+    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, accountId, ...rest } = req.body;
 
     const allowedPairs = await getCachedPairs();
     const finalPair = allowedPairs.includes(pair) ? pair : null;
@@ -36,6 +52,16 @@ const create = async (req, res, next) => {
       return res.status(400).json({
         message: `Invalid pair. Allowed pairs: ${allowedPairs.join(', ')}`
       });
+    }
+
+    if (accountId) {
+      const account = await Account.findOne({ _id: accountId, userId: req.session.userId });
+      if (!account) {
+        return res.status(404).json({ message: 'Account not found' });
+      }
+      if (account.status === 'BREACHED') {
+        return res.status(403).json({ message: 'Cannot create trades on a breached account' });
+      }
     }
 
     const realPL = calculateRealPL(profit, commission, swap);
@@ -64,7 +90,8 @@ const create = async (req, res, next) => {
       entryTime: entryTime || undefined,
       exitDate: finalExitDate,
       exitTime: exitTime || undefined,
-      userId: req.session.userId
+      userId: req.session.userId,
+      isBreachedAccountTrade: accountId ? (await Account.findById(accountId))?.status === 'BREACHED' : false
     });
     const savedTrade = await trade.save();
     res.status(201).json(savedTrade);

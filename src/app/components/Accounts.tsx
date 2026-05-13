@@ -1,20 +1,39 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Building2, Wallet } from 'lucide-react';
-import { TradingAccount, PropFirm, Trade } from '../types/trading';
+import { Plus, Trash2, Edit2, X, Check, Building2, Wallet, AlertTriangle } from 'lucide-react';
+import { TradingAccount, PropFirm, Trade, AccountStatus } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
 import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
 
+const STATUS_COLORS: Record<AccountStatus, string> = {
+  ACTIVE: 'bg-green-100 text-green-800',
+  BREACHED: 'bg-red-100 text-red-800',
+  PASSED_1: 'bg-yellow-100 text-yellow-800',
+  PASSED_2: 'bg-orange-100 text-orange-800',
+  FUNDED: 'bg-purple-100 text-purple-800',
+  DISABLED: 'bg-slate-100 text-slate-600',
+};
+
+const STATUS_LABELS: Record<AccountStatus, string> = {
+  ACTIVE: 'Active',
+  BREACHED: 'Breached',
+  PASSED_1: 'Passed P1',
+  PASSED_2: 'Passed P2',
+  FUNDED: 'Funded',
+  DISABLED: 'Disabled',
+};
+
 interface FormFieldsProps {
-  formData: { name: string; propFirmId: string; initialBalance: string; currency: string };
-  setFormData: React.Dispatch<React.SetStateAction<{ name: string; propFirmId: string; initialBalance: string; currency: string }>>;
+  formData: { name: string; propFirmId: string; initialBalance: string; currency: string; status: AccountStatus };
+  setFormData: React.Dispatch<React.SetStateAction<{ name: string; propFirmId: string; initialBalance: string; currency: string; status: AccountStatus }>>;
   firms: PropFirm[];
   onSubmit: () => void;
   onCancel: () => void;
+  isEditing?: boolean;
 }
 
-function FormFields({ formData, setFormData, firms, onSubmit, onCancel }: FormFieldsProps) {
+function FormFields({ formData, setFormData, firms, onSubmit, onCancel, isEditing }: FormFieldsProps) {
   return (
     <div className="grid grid-cols-2 gap-3">
       <Input
@@ -24,8 +43,8 @@ function FormFields({ formData, setFormData, firms, onSubmit, onCancel }: FormFi
         onChange={e => setFormData({ ...formData, name: e.target.value })}
         autoFocus
       />
-      <Select 
-        value={formData.propFirmId} 
+      <Select
+        value={formData.propFirmId}
         onValueChange={value => setFormData({ ...formData, propFirmId: value })}
       >
         <SelectTrigger>
@@ -46,8 +65,8 @@ function FormFields({ formData, setFormData, firms, onSubmit, onCancel }: FormFi
         step="0.01"
       />
 
-      <Select 
-        value={formData.currency} 
+      <Select
+        value={formData.currency}
         onValueChange={value => setFormData({ ...formData, currency: value })}
       >
         <SelectTrigger>
@@ -59,6 +78,23 @@ function FormFields({ formData, setFormData, firms, onSubmit, onCancel }: FormFi
           <SelectItem value="GBP">GBP</SelectItem>
         </SelectContent>
       </Select>
+
+      {isEditing && (
+        <Select
+          value={formData.status}
+          onValueChange={value => setFormData({ ...formData, status: value as AccountStatus })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(STATUS_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
       <div className="col-span-2 flex gap-2 justify-end">
         <button
           onClick={onSubmit}
@@ -90,6 +126,7 @@ export default function Accounts() {
     propFirmId: '',
     initialBalance: '',
     currency: 'USD',
+    status: 'ACTIVE' as AccountStatus,
   });
 
   useEffect(() => {
@@ -115,18 +152,19 @@ export default function Accounts() {
     if (!formData.name.trim() || !formData.propFirmId || !formData.initialBalance) return;
 
     const balance = parseFloat(formData.initialBalance);
-    const newAccount: Omit<TradingAccount, 'id' | 'createdAt'> = {
+    const newAccount = {
       name: formData.name,
       propFirmId: formData.propFirmId,
       initialBalance: balance,
       currentBalance: balance,
       currency: formData.currency,
+      status: 'ACTIVE' as AccountStatus,
     };
 
     try {
       const savedAccount = await apiService.createAccount(newAccount);
       setAccounts([...accounts, savedAccount]);
-      setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD' });
+      setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD', status: 'ACTIVE' });
       setIsAdding(false);
     } catch (error) {
       console.error('Failed to create account:', error);
@@ -142,13 +180,14 @@ export default function Accounts() {
       propFirmId: formData.propFirmId,
       initialBalance: balance,
       currency: formData.currency,
+      status: formData.status,
     };
 
     try {
       const savedAccount = await apiService.updateAccount(id, updatedAccount);
       setAccounts(accounts.map(account => account.id === id ? savedAccount : account));
       setEditingId(null);
-      setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD' });
+      setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD', status: 'ACTIVE' });
     } catch (error) {
       console.error('Failed to update account:', error);
     }
@@ -173,6 +212,7 @@ export default function Accounts() {
       propFirmId: firmId,
       initialBalance: account.initialBalance.toString(),
       currency: account.currency,
+      status: account.status || 'ACTIVE',
     });
     setIsAdding(false);
   };
@@ -180,7 +220,7 @@ export default function Accounts() {
   const cancelEdit = () => {
     setEditingId(null);
     setIsAdding(false);
-    setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD' });
+    setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD', status: 'ACTIVE' });
   };
 
   const getFirmName = (firm: any) => {
@@ -281,12 +321,25 @@ export default function Accounts() {
                   const getRealPL = (t: any) => t.realPL ?? ((t.profit || 0) + (t.commission || 0) + (t.swap || 0));
                   const pl = accountTrades.reduce((sum, t) => sum + getRealPL(t), 0);
                   const currentBalance = account.initialBalance + pl;
+                  const isBreached = account.status === 'BREACHED';
 
                   return (
                     <div
                       key={account.id ?? i}
-                      className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md hover:border-teal-200 transition-all duration-200"
+                      className={`border rounded-xl p-5 transition-all duration-200 relative ${
+                        isBreached
+                          ? 'bg-gray-100 border-gray-300 opacity-75'
+                          : 'bg-white border-gray-100 hover:shadow-md hover:border-teal-200'
+                      }`}
                     >
+                      {isBreached && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                          <span className="text-red-500 text-6xl font-bold opacity-20 transform rotate-12 select-none">
+                            BREACHED
+                          </span>
+                        </div>
+                      )}
+
                       {editingId === account.id ? (
                         <FormFields
                           formData={formData}
@@ -294,27 +347,35 @@ export default function Accounts() {
                           firms={firms}
                           onSubmit={() => handleEdit(account.id)}
                           onCancel={cancelEdit}
+                          isEditing={true}
                         />
                       ) : (
                         <>
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <h3 className="font-bold text-gray-900">{account.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className={`font-bold ${isBreached ? 'text-gray-500' : 'text-gray-900'}`}>{account.name}</h3>
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[account.status || 'ACTIVE']}`}>
+                                  {STATUS_LABELS[account.status || 'ACTIVE']}
+                                </span>
+                              </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div
                                   className="w-3 h-3 rounded-full"
                                   style={{ backgroundColor: getFirmColor(account.propFirmId) }}
                                 />
-                                <span className="text-sm text-gray-600">{getFirmName(account.propFirmId)}</span>
+                                <span className={`text-sm ${isBreached ? 'text-gray-400' : 'text-gray-600'}`}>{getFirmName(account.propFirmId)}</span>
                               </div>
                             </div>
                             <div className="flex gap-1">
-                              <button
-                                onClick={() => startEdit(account)}
-                                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
+                              {!isBreached && (
+                                <button
+                                  onClick={() => startEdit(account)}
+                                  className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleDelete(account.id)}
                                 className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -326,14 +387,14 @@ export default function Accounts() {
 
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Initial:</span>
-                              <span className="font-medium text-gray-900">
+                              <span className={isBreached ? 'text-gray-400' : 'text-gray-600'}>Initial:</span>
+                              <span className={`font-medium ${isBreached ? 'text-gray-400' : 'text-gray-900'}`}>
                                 {formatCurrency(account.initialBalance, account.currency)}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Current:</span>
-                              <span className={`font-bold ${currentBalance >= account.initialBalance
+                              <span className={isBreached ? 'text-gray-400' : 'text-gray-600'}>Current:</span>
+                              <span className={`font-bold ${isBreached ? 'text-gray-400' : currentBalance >= account.initialBalance
                                   ? 'text-green-600'
                                   : 'text-red-600'
                                 }`}>
@@ -341,8 +402,8 @@ export default function Accounts() {
                               </span>
                             </div>
                             <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
-                              <span className="text-gray-600">P/L:</span>
-                              <span className={`font-bold ${pl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={isBreached ? 'text-gray-400' : 'text-gray-600'}>P/L:</span>
+                              <span className={`font-bold ${isBreached ? 'text-gray-400' : pl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {pl >= 0 ? '+' : ''}
                                 {formatCurrency(pl, account.currency)}
                               </span>

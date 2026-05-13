@@ -96,20 +96,29 @@ export default function Dashboard() {
     return accounts.filter(account => {
       if (selectedFirm !== 'all' && getAccountFirmId(account) !== selectedFirm) return false;
       if (selectedAccount !== 'all' && account.id !== selectedAccount) return false;
+      if (account.status === 'BREACHED') return false;
       return true;
     });
   }, [accounts, selectedAccount, selectedFirm]);
 
-  const stats = useMemo(() => calculateTradeStats(trades), [trades]);
+  const filteredTrades = useMemo(() => {
+    return trades.filter(trade => {
+      const account = accounts.find(a => a.id === getTradeAccountId(trade));
+      if (account?.status === 'BREACHED') return false;
+      return true;
+    });
+  }, [trades, accounts]);
 
-  const openTrades = useMemo(() => trades.filter(t => t.status === 'OPEN'), [trades]);
+  const stats = useMemo(() => calculateTradeStats(filteredTrades), [filteredTrades]);
+
+  const openTrades = useMemo(() => filteredTrades.filter(t => t.status === 'OPEN'), [filteredTrades]);
 
   const recentTrades = useMemo(
-    () => trades
+    () => filteredTrades
       .filter(t => t.status === 'CLOSED')
       .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
       .slice(0, 5),
-    [trades]
+    [filteredTrades]
   );
 
   const totalInitialBalance = useMemo(
@@ -121,6 +130,13 @@ export default function Dashboard() {
     () => totalInitialBalance + stats.netProfit,
     [totalInitialBalance, stats.netProfit]
   );
+
+  const totalBalanceWithBreached = useMemo(() => {
+    const allInitial = accounts
+      .filter(a => a.status !== 'BREACHED')
+      .reduce((sum, acc) => sum + acc.initialBalance, 0);
+    return allInitial + stats.netProfit;
+  }, [accounts, stats.netProfit]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">

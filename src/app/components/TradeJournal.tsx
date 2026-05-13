@@ -11,6 +11,7 @@ import { Input } from './ui/input';
 import TimePicker from './ui/TimePicker';
 import FormField from './ui/FormField';
 import ImageViewer from './ImageViewer';
+import AccountSelect from './ui/AccountSelect';
 import { format } from 'date-fns';
 import { cn } from './ui/utils';
 import { getDateKey, getLocalDateString, convertTo24Hour } from '../utils/dateUtils';
@@ -29,6 +30,7 @@ export default function TradeJournal() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterAccount, setFilterAccount] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [accountState, setAccountState] = useState<string>('ACTIVE');
   const [viewingTrade, setViewingTrade] = useState<Trade | null>(null);
   const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
   const [viewingImageIndex, setViewingImageIndex] = useState(0);
@@ -119,8 +121,12 @@ export default function TradeJournal() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        const filters: any = {};
+        if (filterAccount !== 'all') filters.accountId = filterAccount;
+        if (accountState !== 'all') filters.accountState = accountState;
+
         const [tradesData, accountsData, firmsData, mastersData, pairsData, sessionsData] = await Promise.all([
-          apiService.getTrades(),
+          apiService.getTrades(Object.keys(filters).length > 0 ? filters : undefined),
           apiService.getAccounts(),
           apiService.getPropFirms(),
           apiService.getMasters(),
@@ -139,7 +145,7 @@ export default function TradeJournal() {
     };
 
     loadData();
-  }, []);
+  }, [filterAccount, accountState]);
 
   const strategies = useMemo(() => masters.filter(m => m.type === 'strategy'), [masters]);
   const keyLevels = useMemo(() => masters.filter(m => m.type === 'keyLevel'), [masters]);
@@ -147,6 +153,11 @@ export default function TradeJournal() {
   const strategiesWithChecklist = useMemo(() =>
     strategies.filter(s => s.checklist && s.checklist.length > 0),
     [strategies]
+  );
+
+  const activeAccounts = useMemo(() =>
+    accounts.filter(a => a.status !== 'BREACHED'),
+    [accounts]
   );
 
   const selectedStrategyHasChecklist = useMemo(() => {
@@ -228,6 +239,12 @@ export default function TradeJournal() {
   const handleSubmit = async () => {
     if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) {
       alert('Please fill in all required fields: Account, Pair, Entry Price, and Lot Size');
+      return;
+    }
+
+    const selectedAccount = accounts.find(a => a.id === formData.accountId);
+    if (selectedAccount && !selectedAccount.canTrade) {
+      alert('This account is not active for trading.');
       return;
     }
 
@@ -842,7 +859,7 @@ export default function TradeJournal() {
 
       <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-slate-200/50">
         <span className="text-sm text-slate-500 font-medium">Filters:</span>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <Select
             value={filterAccount || 'all'}
             onValueChange={(value: string) => setFilterAccount(value)}
@@ -871,6 +888,37 @@ export default function TradeJournal() {
               <SelectItem value="CLOSED">Closed</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select
+            value={accountState || 'ACTIVE'}
+            onValueChange={(value: string) => setAccountState(value)}
+          >
+            <SelectTrigger className={`w-[180px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors ${accountState === 'BREACHED' ? 'border-red-300 bg-red-50' : ''}`}>
+              <SelectValue placeholder="Account State" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ACTIVE">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  Active Accounts
+                </span>
+              </SelectItem>
+              <SelectItem value="BREACHED">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  Breached Accounts
+                </span>
+              </SelectItem>
+              <SelectItem value="all">All Accounts</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {accountState === 'BREACHED' && (
+            <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-lg flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              Showing breached accounts only
+            </span>
+          )}
         </div>
       </div>
 
@@ -902,16 +950,13 @@ export default function TradeJournal() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {/* Basic Info */}
                     <FormField label="Account" required>
-                      <Select value={formData.accountId} onValueChange={value => setFormData({ ...formData, accountId: value })}>
-                        <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
-                          <SelectValue placeholder="Select Account" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {accounts.map(account => (
-                            <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <AccountSelect
+                        accounts={accounts}
+                        value={formData.accountId}
+                        onValueChange={value => setFormData({ ...formData, accountId: value })}
+                        placeholder="Select Account"
+                        className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors"
+                      />
                     </FormField>
 
                     <FormField label="Pair" required>

@@ -1,5 +1,5 @@
 const { Trade, SSMT_TYPES } = require('./trade.model');
-const Account = require('../accounts/account.model');
+const { Account } = require('../accounts/account.model');
 const Master = require('../masters/master.model');
 const { getCachedPairs, calculateRealPL } = require('../../services/tradeService');
 

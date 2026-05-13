@@ -1,12 +1,22 @@
 const { Trade } = require('../trades/trade.model');
+const { Account } = require('../accounts/account.model');
 const { LossAnalysis } = require('../lossAnalysis/lossAnalysis.model');
 const { generateDocument, filterTradesByPeriod } = require('../../services/reportService');
 
 const VALID_PERIODS = ['daily', 'weekly', 'monthly', 'all'];
 
+const getActiveAccountIds = async (userId, includeBreached) => {
+  const accountQuery = { userId };
+  if (!includeBreached) {
+    accountQuery.status = { $ne: 'BREACHED' };
+  }
+  const accounts = await Account.find(accountQuery).select('_id');
+  return accounts.map(a => a._id);
+};
+
 const exportTrades = async (req, res, next) => {
   try {
-    const { period = 'all', date, accountId, firmId } = req.query;
+    const { period = 'all', date, accountId, firmId, includeBreached } = req.query;
 
     if (!VALID_PERIODS.includes(period)) {
       return res.status(400).json({
@@ -18,7 +28,15 @@ const exportTrades = async (req, res, next) => {
     
     if (accountId) {
       filter.accountId = accountId;
+    } else {
+      const accountIds = await getActiveAccountIds(req.session.userId, includeBreached === 'true');
+      if (accountIds.length > 0) {
+        filter.accountId = { $in: accountIds };
+      } else {
+        filter.accountId = { $in: [] };
+      }
     }
+    
     if (firmId) {
       filter.propFirmId = firmId;
     }
@@ -86,7 +104,7 @@ const exportTrades = async (req, res, next) => {
 
 const exportMissedTrades = async (req, res, next) => {
   try {
-    const { period = 'all', date, accountId } = req.query;
+    const { period = 'all', date, accountId, includeBreached } = req.query;
 
     const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = require('docx');
     
@@ -96,6 +114,13 @@ const exportMissedTrades = async (req, res, next) => {
     
     if (accountId) {
       filter.accountId = accountId;
+    } else {
+      const accountIds = await getActiveAccountIds(req.session.userId, includeBreached === 'true');
+      if (accountIds.length > 0) {
+        filter.accountId = { $in: accountIds };
+      } else {
+        filter.accountId = { $in: [] };
+      }
     }
 
     let missedTrades = await MissedTrade.find(filter)

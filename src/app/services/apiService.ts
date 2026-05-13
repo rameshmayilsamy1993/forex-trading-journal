@@ -132,11 +132,20 @@ const apiService = {
     });
   },
   
-  getAccounts: async (): Promise<TradingAccount[]> => {
-    return fetchWithAuth(`${API_BASE_URL}/accounts`);
+  getAccounts: async (status?: string): Promise<TradingAccount[]> => {
+    let url = `${API_BASE_URL}/accounts`;
+    if (status) url += `?status=${status}`;
+    return fetchWithAuth(url);
   },
   
-  createAccount: async (account: Omit<TradingAccount, 'id' | 'createdAt'>): Promise<TradingAccount> => {
+  createAccount: async (account: {
+    name: string;
+    propFirmId: string;
+    initialBalance: number;
+    currentBalance: number;
+    currency: string;
+    status: string;
+  }): Promise<TradingAccount> => {
     return fetchWithAuth(`${API_BASE_URL}/accounts`, {
       method: 'POST',
       body: JSON.stringify(account),
@@ -156,12 +165,13 @@ const apiService = {
     });
   },
   
-  getTrades: async (filters?: { accountId?: string; firmId?: string; ssmtType?: string }): Promise<Trade[]> => {
+  getTrades: async (filters?: { accountId?: string; firmId?: string; ssmtType?: string; includeBreached?: boolean }): Promise<Trade[]> => {
     let url = `${API_BASE_URL}/trades`;
     const params = new URLSearchParams();
     if (filters?.accountId) params.append('accountId', filters.accountId);
     if (filters?.firmId) params.append('firmId', filters.firmId);
     if (filters?.ssmtType) params.append('ssmtType', filters.ssmtType);
+    if (filters?.includeBreached) params.append('includeBreached', 'true');
     const queryString = params.toString();
     if (queryString) url += `?${queryString}`;
     return fetchWithAuth(url);
@@ -906,6 +916,90 @@ const apiService = {
         credentials: 'include',
       });
       return handleResponse(response);
+    },
+  },
+
+  reminders: {
+    getAll: async () => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders`);
+    },
+
+    getUpcoming: async () => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/upcoming`);
+    },
+
+    getById: async (id: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}`);
+    },
+
+    create: async (data: {
+      title: string;
+      pair?: string;
+      date: string;
+      time: string;
+      repeatType?: 'ONETIME' | 'DAILY';
+      reminders?: {
+        before10Min: boolean;
+        before5Min: boolean;
+        onTime: boolean;
+      };
+      sound?: string;
+      notes?: string;
+      isActive?: boolean;
+    }) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    update: async (id: string, data: {
+      title?: string;
+      pair?: string;
+      date?: string;
+      time?: string;
+      repeatType?: 'ONETIME' | 'DAILY';
+      reminders?: {
+        before10Min: boolean;
+        before5Min: boolean;
+        onTime: boolean;
+      };
+      sound?: string;
+      notes?: string;
+      isActive?: boolean;
+    }) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    delete: async (id: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}`, {
+        method: 'DELETE',
+      });
+    },
+
+    toggleActive: async (id: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}/toggle`, {
+        method: 'POST',
+      });
+    },
+
+    resetAlerts: async (id: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}/reset-alerts`, {
+        method: 'POST',
+      });
+    },
+
+    getNotifications: async () => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/notifications`);
+    },
+
+    markNotificationRead: async (notificationId: string) => {
+      return fetchWithAuth(`${API_BASE_URL}/reminders/notifications/${notificationId}/read`, {
+        method: 'POST',
+      });
     },
   }
 };

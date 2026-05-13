@@ -3,8 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import App from "./app/App.tsx";
 import Login from "./app/components/Login";
+import { NotificationProvider } from "./app/context/NotificationContext.tsx";
 import apiService, { User } from "./app/services/apiService.ts";
 import "./styles/index.css";
+
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(permission => {
+      console.log('Notification permission:', permission);
+    });
+  }
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const [checking, setChecking] = useState(true);
@@ -15,6 +24,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       try {
         const user = await apiService.auth.getCurrentUser();
         setIsAuthenticated(!!user);
+        if (user) {
+          requestNotificationPermission();
+        }
       } catch {
         setIsAuthenticated(false);
         localStorage.removeItem('user');
@@ -65,7 +77,9 @@ createRoot(document.getElementById("root")!).render(
         path="/" 
         element={
           <ProtectedRoute>
-            <App />
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
           </ProtectedRoute>
         }
       />

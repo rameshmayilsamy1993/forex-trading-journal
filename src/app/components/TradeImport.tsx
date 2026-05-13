@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, AlertTriangle, FileUp, FileText } from 'lucide-react';
-import apiService, { TradingAccount } from '../services/apiService';
+import apiService from '../services/apiService';
+import { TradingAccount } from '../types/trading';
 import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
+import AccountSelect from './ui/AccountSelect';
 
 interface PreviewTrade {
   positionId: string;
@@ -171,6 +173,12 @@ export default function TradeImport() {
       return;
     }
 
+    const selectedAccountData = accounts.find(a => a.id === selectedAccount);
+    if (selectedAccountData && !selectedAccountData.canTrade) {
+      setError('This account is not active for trading.');
+      return;
+    }
+
     setIsPreviewing(true);
     setError(null);
 
@@ -196,6 +204,12 @@ export default function TradeImport() {
   const handleImport = async () => {
     if (!selectedAccount) {
       setError('Please select an account');
+      return;
+    }
+
+    const selectedAccountData = accounts.find(a => a.id === selectedAccount);
+    if (selectedAccountData && !selectedAccountData.canTrade) {
+      setError('This account is not active for trading.');
       return;
     }
 
@@ -344,19 +358,15 @@ export default function TradeImport() {
             <label className="block text-sm font-semibold text-slate-700 mb-3">
               Select Account
             </label>
-            <select
-              value={selectedAccount}
-              onChange={(e) => setSelectedAccount(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 transition-all hover:bg-slate-100"
-            >
-              <option value="">-- Select an account --</option>
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name} {account.propFirmId && typeof account.propFirmId === 'object' ? `- ${(account.propFirmId as any).name}` : ''}
-                </option>
-              ))}
-            </select>
-            {accounts.length === 0 && (
+            {accounts.length > 0 ? (
+              <AccountSelect
+                accounts={accounts}
+                value={selectedAccount}
+                onValueChange={setSelectedAccount}
+                placeholder="Select an account"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 transition-all hover:bg-slate-100"
+              />
+            ) : (
               <p className="mt-2 text-sm text-slate-500">
                 No accounts found. Please create an account first.
               </p>

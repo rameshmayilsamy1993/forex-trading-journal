@@ -40,8 +40,8 @@ const SAMPLE_FIRMS: PropFirm[] = [
 ];
 
 const SAMPLE_ACCOUNTS: TradingAccount[] = [
-  { id: 'acc1', name: '25K Account', propFirmId: 'firm1', initialBalance: 25000, currentBalance: 25230, currency: 'USD', createdAt: '' },
-  { id: 'acc2', name: '50K Account', propFirmId: 'firm2', initialBalance: 50000, currentBalance: 50180, currency: 'USD', createdAt: '' },
+  { id: 'acc1', name: '25K Account', propFirmId: 'firm1', initialBalance: 25000, currentBalance: 25230, currency: 'USD', status: 'ACTIVE', isActive: true, canTrade: true, createdAt: '' },
+  { id: 'acc2', name: '50K Account', propFirmId: 'firm2', initialBalance: 50000, currentBalance: 50180, currency: 'USD', status: 'ACTIVE', isActive: true, canTrade: true, createdAt: '' },
 ];
 
 export default function TradingCalendar() {

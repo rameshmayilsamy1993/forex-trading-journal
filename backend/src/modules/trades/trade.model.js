@@ -35,6 +35,7 @@ const tradeSchema = new mongoose.Schema({
   exitTime: String,
   checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'ChecklistSession' },
   checklistSession: String,
+  isBreachedAccountTrade: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
