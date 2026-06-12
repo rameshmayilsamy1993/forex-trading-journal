@@ -65,7 +65,7 @@ export default function Login() {
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
@@ -82,7 +82,7 @@ export default function Login() {
                 />
               </div>
             )}
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Email
@@ -96,7 +96,7 @@ export default function Login() {
                 className="w-full"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Password
@@ -126,13 +126,13 @@ export default function Login() {
                 />
               </div>
             )}
-            
+
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
-            
+
             <Button
               type="submit"
               disabled={loading}
@@ -141,15 +141,15 @@ export default function Login() {
               {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
             </Button>
           </form>
-          
+
           <div className="text-center">
             <button
               type="button"
               onClick={toggleMode}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
-              {isLogin 
-                ? "Don't have an account? Sign up" 
+              {isLogin
+                ? "Don't have an account? Sign up"
                 : 'Already have an account? Sign in'}
             </button>
           </div>
@@ -157,7 +157,7 @@ export default function Login() {
           {isLogin && (
             <div className="pt-4 border-t border-slate-200">
               <p className="text-center text-xs text-slate-500">
-                Demo: admin@fxjournal.com / admin123
+                {/* Demo: admin@fxjournal.com / admin123 */}
               </p>
             </div>
           )}

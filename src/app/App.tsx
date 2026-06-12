@@ -26,6 +26,8 @@ import CRTInput from './components/CRTInput';
 import CRTHistory from './components/CRTHistory';
 import BreachedTrades from './components/BreachedTrades';
 import Reminders from './components/Reminders';
+import XauusdCalculator from './components/XauusdCalculator';
+import ForexLotCalculator from './components/ForexLotCalculator';
 import apiService, { User as UserType } from './services/apiService';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -140,6 +142,8 @@ export default function App() {
               {activeTab === 'breached-trades' && <BreachedTrades />}
               {activeTab === 'reminders' && <Reminders />}
               {activeTab === 'settings' && <Settings />}
+              {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
+              {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
             </ErrorBoundary>
           </div>
         </main>

@@ -4,12 +4,13 @@ import {
   EyeOff, Calendar, Settings as SettingsIcon, FileUp,
   Activity, FileSpreadsheet, ClipboardCheck, Settings2,
   ChevronLeft, ChevronRight, X, ActivitySquare, TrendingUp,
-  TrendingDown, History, Layers, AlertTriangle, Bell
+  TrendingDown, History, Layers, AlertTriangle, Bell, Calculator,
+  DollarSign
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'reminders';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'reminders' | 'xauusd-calculator' | 'forex-lot-calculator';
 
 interface NavItem {
   id: Tab;
@@ -67,6 +68,13 @@ const navigationGroups: NavGroup[] = [
       { id: 'firms', label: 'Prop Firms', icon: Building2 },
       { id: 'strategy-master', label: 'Strategies', icon: Settings2 },
       { id: 'settings', label: 'Settings', icon: SettingsIcon },
+    ],
+  },
+  {
+    title: 'TOOLS',
+    items: [
+      { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
+      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
     ],
   },
 ];

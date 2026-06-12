@@ -866,13 +866,35 @@ const apiService = {
       pair?: string;
       month?: string;
       timeframe?: string;
+      direction?: string;
+      status?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
     }) => {
       const params = new URLSearchParams();
       if (filters?.pair) params.set('pair', filters.pair);
       if (filters?.month) params.set('month', filters.month);
       if (filters?.timeframe) params.set('timeframe', filters.timeframe);
+      if (filters?.direction) params.set('direction', filters.direction);
+      if (filters?.status) params.set('status', filters.status);
+      if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom);
+      if (filters?.dateTo) params.set('dateTo', filters.dateTo);
+      if (filters?.search) params.set('search', filters.search);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
 
       const response = await fetch(`${API_BASE_URL}/crt-events?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
+    getSummary: async (filters?: { pair?: string }) => {
+      const params = filters?.pair ? `?pair=${filters.pair}` : '';
+      const response = await fetch(`${API_BASE_URL}/crt-events/summary${params}`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -883,6 +905,14 @@ const apiService = {
       timeframe: string;
       date: string;
       time?: string;
+      keyLevelExists?: boolean;
+      keyLevelType?: string;
+      customKeyLevel?: string;
+      crtPlaying?: boolean;
+      crtDirection?: string;
+      crtStatus?: string;
+      crtRangeRespected?: string;
+      imagePath?: string;
       isCRT?: boolean;
       image?: string;
       notes?: string;
@@ -895,9 +925,24 @@ const apiService = {
       });
       return handleResponse(response);
     },
+    getById: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/crt-events/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      return handleResponse(response);
+    },
     update: async (id: string, data: {
       date?: string;
       time?: string;
+      keyLevelExists?: boolean;
+      keyLevelType?: string;
+      customKeyLevel?: string;
+      crtPlaying?: boolean;
+      crtDirection?: string;
+      crtStatus?: string;
+      crtRangeRespected?: string;
+      imagePath?: string;
       isCRT?: boolean;
       image?: string;
       notes?: string;
