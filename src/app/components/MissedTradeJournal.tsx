@@ -10,6 +10,7 @@ import ImageViewer from './ImageViewer';
 import ExportMenu from './ExportMenu';
 import { cn } from './ui/utils';
 import { truncateText, stripHTML, decodeHtml, hasHTML } from '../utils/htmlUtils';
+import { formatPrice } from '../utils/calculations';
 import DOMPurify from 'dompurify';
 
 const REASON_OPTIONS = [
@@ -318,11 +319,11 @@ export default function MissedTradeJournal() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-slate-200">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Missed Trade Journal</h2>
-              <p className="text-sm text-gray-500 mt-1">Track missed trading opportunities - no account required</p>
+              <h2 className="text-xl font-bold text-slate-900">Missed Trade Journal</h2>
+              <p className="text-sm text-slate-500 mt-1">Track missed trading opportunities - no account required</p>
             </div>
             <div className="flex items-center gap-3">
               <ExportMenu type="missed-trades" />
@@ -339,15 +340,15 @@ export default function MissedTradeJournal() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-orange-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">Total Missed</p>
+              <p className="text-sm text-slate-600">Total Missed</p>
               <p className="text-2xl font-bold text-orange-600">{stats.total}</p>
             </div>
             <div className="bg-green-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">Reviewed</p>
+              <p className="text-sm text-slate-600">Reviewed</p>
               <p className="text-2xl font-bold text-green-600">{stats.reviewed}</p>
             </div>
             <div className="bg-purple-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">Most Common Reason</p>
+              <p className="text-sm text-slate-600">Most Common Reason</p>
               {stats.mostCommonReason ? (
                 <div
                   className="prose prose-sm max-w-none text-gray-700"
@@ -788,7 +789,7 @@ export default function MissedTradeJournal() {
 
               {/* Table */}
               {filteredMissedTrades.length === 0 && !isAdding && (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-slate-500">
                   <p>No missed trades found</p>
                   <p className="text-sm">Click "Add Missed Trade" to record one</p>
                 </div>
@@ -796,29 +797,30 @@ export default function MissedTradeJournal() {
 
               {filteredMissedTrades.length > 0 && (
                 <div className="overflow-x-auto">
+                  <div className="overflow-hidden rounded-xl border border-slate-200">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Pair</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Type</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Entry</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">SL</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">TP</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">RR</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">P/L</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Comm</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Swap</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Real P/L</th>
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Date</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Pair</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Type</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Entry</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">SL</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">TP</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">RR</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">P/L</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Comm</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Swap</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Real P/L</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Status</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredMissedTrades.map(trade => {
                         const realPL = trade.realPL ?? ((trade.profitLoss || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
                         return (
-                          <tr key={trade.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <tr key={trade.id} className="border-b border-slate-100 hover:bg-slate-50">
                             <td className="py-3 px-4 text-sm">{new Date(trade.date).toLocaleDateString()}</td>
                             <td className="py-3 px-4 text-sm font-medium">{trade.pair}</td>
                             <td className="py-3 px-4 text-sm">
@@ -827,9 +829,9 @@ export default function MissedTradeJournal() {
                                 {trade.type}
                               </span>
                             </td>
-                            <td className="py-3 px-4 text-sm text-right">{trade.entryPrice.toFixed(5)}</td>
-                            <td className="py-3 px-4 text-sm text-right text-red-600">{trade.stopLoss.toFixed(5)}</td>
-                            <td className="py-3 px-4 text-sm text-right text-green-600">{trade.takeProfit.toFixed(5)}</td>
+                            <td className="py-3 px-4 text-sm text-right font-mono">{formatPrice(trade.entryPrice, trade.pair)}</td>
+                            <td className="py-3 px-4 text-sm text-right text-red-600 font-mono">{formatPrice(trade.stopLoss, trade.pair)}</td>
+                            <td className="py-3 px-4 text-sm text-right text-green-600 font-mono">{formatPrice(trade.takeProfit, trade.pair)}</td>
                             <td className="py-3 px-4 text-sm text-right">
                               <span className={trade.rr >= 1 ? 'text-green-600 font-medium' : 'text-yellow-600'}>
                                 {trade.rr.toFixed(2)}
@@ -851,7 +853,7 @@ export default function MissedTradeJournal() {
                             <td className="py-3 px-4 text-sm">
                               <button
                                 onClick={() => toggleReviewStatus(trade)}
-                                className={`px-2 py-1 rounded text-xs font-medium cursor-pointer ${trade.status === 'REVIEWED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                className={`px-2 py-1 rounded text-xs font-medium cursor-pointer ${trade.status === 'REVIEWED' ? 'bg-emerald-50 text-emerald-700 rounded-full' : 'bg-slate-100 text-slate-600 rounded-full'
                                   }`}
                               >
                                 {trade.status === 'REVIEWED' ? 'Reviewed' : 'Missed'}
@@ -900,6 +902,7 @@ export default function MissedTradeJournal() {
                       })}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               )}
         </div>
@@ -924,11 +927,11 @@ export default function MissedTradeJournal() {
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
+            <div className="p-5 border-b border-slate-200 bg-gradient-to-r from-blue-50/40 to-white flex-shrink-0">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-gray-900">{viewingTrade.pair}</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">{viewingTrade.pair}</h2>
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
                       viewingTrade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                     }`}>
@@ -943,7 +946,7 @@ export default function MissedTradeJournal() {
                   onClick={() => setViewingTrade(null)}
                   className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                 >
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
             </div>
@@ -952,44 +955,44 @@ export default function MissedTradeJournal() {
               <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4">
                   <p className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">Entry Price</p>
-                  <p className="text-xl font-bold text-gray-900">{viewingTrade.entryPrice?.toFixed(5) || '-'}</p>
+                  <p className="text-xl font-bold text-slate-900 font-mono">{formatPrice(viewingTrade.entryPrice, viewingTrade.pair)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-4">
                   <p className="text-xs text-purple-600 font-medium uppercase tracking-wide mb-1">Stop Loss</p>
-                  <p className="text-xl font-bold text-red-600">{viewingTrade.stopLoss?.toFixed(5) || '-'}</p>
+                  <p className="text-xl font-bold text-red-600 font-mono">{formatPrice(viewingTrade.stopLoss, viewingTrade.pair)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-4">
                   <p className="text-xs text-green-600 font-medium uppercase tracking-wide mb-1">Take Profit</p>
-                  <p className="text-xl font-bold text-green-600">{viewingTrade.takeProfit?.toFixed(5) || '-'}</p>
+                  <p className="text-xl font-bold text-green-600 font-mono">{formatPrice(viewingTrade.takeProfit, viewingTrade.pair)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-4">
                   <p className="text-xs text-orange-600 font-medium uppercase tracking-wide mb-1">Risk / Reward</p>
-                  <p className="text-xl font-bold text-gray-900">{viewingTrade.rr ? `1:${viewingTrade.rr.toFixed(2)}` : '-'}</p>
+                  <p className="text-xl font-bold text-slate-900">{viewingTrade.rr ? `1:${viewingTrade.rr.toFixed(2)}` : '-'}</p>
                 </div>
               </div>
 
               <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
                   Financials
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Profit/Loss</span>
+                    <span className="text-slate-500">Profit/Loss</span>
                     <span className={`font-medium ${(viewingTrade.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {(viewingTrade.profitLoss || 0) >= 0 ? '+' : ''}${viewingTrade.profitLoss?.toFixed(2) || '0.00'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Commission</span>
+                    <span className="text-slate-500">Commission</span>
                     <span className="font-medium text-red-500">-${Math.abs(viewingTrade.commission || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Swap</span>
+                    <span className="text-slate-500">Swap</span>
                     <span className="font-medium text-red-500">-${Math.abs(viewingTrade.swap || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Real P/L</span>
+                    <span className="text-slate-500">Real P/L</span>
                     <span className={`font-bold ${(viewingTrade.realPL || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {(viewingTrade.realPL || 0) >= 0 ? '+' : ''}${viewingTrade.realPL?.toFixed(2) || '0.00'}
                     </span>
@@ -998,50 +1001,50 @@ export default function MissedTradeJournal() {
               </div>
 
               <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <span className="w-1 h-4 bg-purple-500 rounded-full"></span>
                   Session & Strategy
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Session</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.session || '-'}</span>
+                    <span className="text-slate-500">Session</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.session || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Strategy</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.strategy || '-'}</span>
+                    <span className="text-slate-500">Strategy</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.strategy || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Key Level</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.keyLevel || '-'}</span>
+                    <span className="text-slate-500">Key Level</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.keyLevel || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">SMT</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.smt || '-'}</span>
+                    <span className="text-slate-500">SMT</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.smt || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Model #1</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.model1 || '-'}</span>
+                    <span className="text-slate-500">Model #1</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.model1 || '-'}</span>
                   </div>
                 </div>
               </div>
 
               <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <span className="w-1 h-4 bg-orange-500 rounded-full"></span>
                   Missed Trade Info
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Reason</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.reason || '-'}</span>
+                    <span className="text-slate-500">Reason</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.reason || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Emotion</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.emotion || '-'}</span>
+                    <span className="text-slate-500">Emotion</span>
+                    <span className="font-medium text-slate-900">{viewingTrade.emotion || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Status</span>
+                    <span className="text-slate-500">Status</span>
                     <span className={`font-medium ${viewingTrade.status === 'REVIEWED' ? 'text-green-600' : 'text-orange-600'}`}>
                       {viewingTrade.status}
                     </span>
@@ -1051,7 +1054,7 @@ export default function MissedTradeJournal() {
 
               {(viewingTrade.screenshots?.before || viewingTrade.screenshots?.after) && (
                 <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
                     <ImageIcon className="w-4 h-4" />
                     Screenshots
                   </h4>
@@ -1128,14 +1131,14 @@ export default function MissedTradeJournal() {
             className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+            <div className="p-5 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50/50">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900">{viewingReason.title}</h3>
+                <h3 className="text-lg font-bold text-slate-900">{viewingReason.title}</h3>
                 <button
                   onClick={() => setViewingReason(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
             </div>

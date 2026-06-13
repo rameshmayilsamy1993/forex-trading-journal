@@ -24,12 +24,12 @@ interface AccountSelectProps {
 }
 
 const STATUS_CONFIG: Record<AccountStatus, { color: string; bgColor: string; label: string }> = {
-  ACTIVE: { color: 'text-green-600', bgColor: 'bg-green-100', label: 'Active' },
-  BREACHED: { color: 'text-red-600', bgColor: 'bg-red-100', label: 'Breached' },
-  PASSED_1: { color: 'text-yellow-600', bgColor: 'bg-yellow-100', label: 'Passed P1' },
-  PASSED_2: { color: 'text-orange-600', bgColor: 'bg-orange-100', label: 'Passed P2' },
-  FUNDED: { color: 'text-purple-600', bgColor: 'bg-purple-100', label: 'Funded' },
-  DISABLED: { color: 'text-slate-500', bgColor: 'bg-slate-100', label: 'Disabled' },
+  ACTIVE: { color: 'text-emerald-600', bgColor: 'bg-emerald-50', label: 'Active' },
+  BREACHED: { color: 'text-red-600', bgColor: 'bg-red-50', label: 'Breached' },
+  PASSED_1: { color: 'text-amber-600', bgColor: 'bg-amber-50', label: 'Passed P1' },
+  PASSED_2: { color: 'text-orange-600', bgColor: 'bg-orange-50', label: 'Passed P2' },
+  FUNDED: { color: 'text-purple-600', bgColor: 'bg-purple-50', label: 'Funded' },
+  DISABLED: { color: 'text-slate-400', bgColor: 'bg-slate-50', label: 'Disabled' },
 };
 
 function getPropFirmName(propFirmId: string | PropFirm | undefined): string {

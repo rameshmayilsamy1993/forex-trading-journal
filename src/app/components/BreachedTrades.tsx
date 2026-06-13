@@ -63,7 +63,7 @@ export default function BreachedTrades() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto p-8 text-center">
-        <p className="text-gray-500">Loading breached trades...</p>
+        <p className="text-slate-500">Loading breached trades...</p>
       </div>
     );
   }
@@ -78,34 +78,34 @@ export default function BreachedTrades() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl p-6 border border-slate-200">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
-            <span className="text-sm text-gray-600">Total Breached Trades</span>
+            <span className="text-sm text-slate-600">Total Breached Trades</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{breachedTrades.length}</p>
+          <p className="text-2xl font-bold text-slate-900">{breachedTrades.length}</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl p-6 border border-slate-200">
           <div className="flex items-center gap-3 mb-2">
             {totalBreachedPL >= 0 ? (
               <TrendingUp className="w-5 h-5 text-green-600" />
             ) : (
               <TrendingDown className="w-5 h-5 text-red-600" />
             )}
-            <span className="text-sm text-gray-600">Total P/L</span>
+            <span className="text-sm text-slate-600">Total P/L</span>
           </div>
           <p className={`text-2xl font-bold ${totalBreachedPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCurrency(totalBreachedPL)}
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl p-6 border border-slate-200">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
-            <span className="text-sm text-gray-600">Breached Accounts</span>
+            <span className="text-sm text-slate-600">Breached Accounts</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl font-bold text-slate-900">
             {accounts.filter(a => a.status === 'BREACHED').length}
           </p>
         </div>
@@ -115,33 +115,33 @@ export default function BreachedTrades() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Date</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Account</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Firm</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Pair</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Type</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Entry</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-600">Exit</th>
-                <th className="text-right p-4 text-sm font-medium text-gray-600">Profit</th>
+              <tr className="border-b border-slate-200 bg-slate-50">
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Date</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Account</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Firm</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Pair</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Type</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Entry</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Exit</th>
+                <th className="text-right p-4 text-sm font-medium text-slate-600">Profit</th>
               </tr>
             </thead>
             <tbody>
               {breachedTrades.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center p-8 text-gray-500">
+                  <td colSpan={8} className="text-center p-8 text-slate-500">
                     No breached trades found
                   </td>
                 </tr>
               ) : (
                 breachedTrades.map((trade, i) => (
-                  <tr key={trade.id ?? i} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-4 text-sm text-gray-900">
+                  <tr key={trade.id ?? i} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="p-4 text-sm text-slate-900">
                       {trade.entryDate ? format(new Date(trade.entryDate), 'MMM dd, yyyy') : '-'}
                     </td>
-                    <td className="p-4 text-sm text-gray-900">{getAccountName(trade)}</td>
-                    <td className="p-4 text-sm text-gray-600">{getFirmName(trade)}</td>
-                    <td className="p-4 text-sm font-medium text-gray-900">{trade.pair}</td>
+                    <td className="p-4 text-sm text-slate-900">{getAccountName(trade)}</td>
+                    <td className="p-4 text-sm text-slate-600">{getFirmName(trade)}</td>
+                    <td className="p-4 text-sm font-medium text-slate-900">{trade.pair}</td>
                     <td className="p-4">
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         trade.type === 'BUY'
@@ -151,8 +151,8 @@ export default function BreachedTrades() {
                         {trade.type}
                       </span>
                     </td>
-                    <td className="p-4 text-sm text-gray-900">{trade.entryPrice}</td>
-                    <td className="p-4 text-sm text-gray-900">{trade.exitPrice || '-'}</td>
+                    <td className="p-4 text-sm text-slate-900">{trade.entryPrice}</td>
+                    <td className="p-4 text-sm text-slate-900">{trade.exitPrice || '-'}</td>
                     <td className={`p-4 text-right text-sm font-bold ${
                       (trade.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>

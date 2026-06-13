@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, AlertTriangle, FileUp, FileText } from 'lucide-react';
 import apiService from '../services/apiService';
 import { TradingAccount } from '../types/trading';
+import { formatPrice } from '../utils/calculations';
 import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
 import AccountSelect from './ui/AccountSelect';
 
@@ -569,16 +570,16 @@ export default function TradeImport() {
                           {trade.lotSize != null && trade.lotSize !== 0 ? trade.lotSize.toFixed(2) : '-'}
                         </td>
                         <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.entryPrice != null && trade.entryPrice !== 0 ? trade.entryPrice.toFixed(5) : '-'}
+                          {trade.entryPrice != null && trade.entryPrice !== 0 ? formatPrice(trade.entryPrice, trade.pair) : '-'}
                         </td>
                         <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.stopLoss != null && trade.stopLoss !== 0 ? trade.stopLoss.toFixed(5) : '-'}
+                          {trade.stopLoss != null && trade.stopLoss !== 0 ? formatPrice(trade.stopLoss, trade.pair) : '-'}
                         </td>
                         <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.takeProfit != null && trade.takeProfit !== 0 ? trade.takeProfit.toFixed(5) : '-'}
+                          {trade.takeProfit != null && trade.takeProfit !== 0 ? formatPrice(trade.takeProfit, trade.pair) : '-'}
                         </td>
                         <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.exitPrice != null && trade.exitPrice !== 0 ? trade.exitPrice.toFixed(5) : '-'}
+                          {trade.exitPrice != null && trade.exitPrice !== 0 ? formatPrice(trade.exitPrice, trade.pair) : '-'}
                         </td>
                         <td className="px-3 py-3 text-right text-slate-700">
                           {trade.commission != null && trade.commission !== 0 ? trade.commission.toFixed(2) : '-'}
@@ -676,19 +677,19 @@ export default function TradeImport() {
                           {trade.entryDate ? `${trade.entryDate} ${trade.entryTime}` : '-'}
                         </td>
                         <td className="px-4 py-3 text-right text-slate-700 font-mono">
-                          {trade.entryPrice != null ? trade.entryPrice.toFixed(5) : '-'}
+                          {trade.entryPrice != null ? formatPrice(trade.entryPrice, trade.pair) : '-'}
                         </td>
                         <td className="px-4 py-3 text-slate-700">
                           {trade.exitDate ? `${trade.exitDate} ${trade.exitTime}` : '-'}
                         </td>
                         <td className="px-4 py-3 text-right text-slate-700 font-mono">
-                          {trade.exitPrice != null ? trade.exitPrice.toFixed(5) : '-'}
+                          {trade.exitPrice != null ? formatPrice(trade.exitPrice, trade.pair) : '-'}
                         </td>
                         <td className="px-4 py-3 text-right text-slate-700 font-mono">
-                          {trade.stopLoss != null ? trade.stopLoss.toFixed(5) : '-'}
+                          {trade.stopLoss != null ? formatPrice(trade.stopLoss, trade.pair) : '-'}
                         </td>
                         <td className="px-4 py-3 text-right text-slate-700 font-mono">
-                          {trade.takeProfit != null ? trade.takeProfit.toFixed(5) : '-'}
+                          {trade.takeProfit != null ? formatPrice(trade.takeProfit, trade.pair) : '-'}
                         </td>
                         <td className="px-4 py-3 text-right text-slate-700">
                           {trade.commission != null ? trade.commission.toFixed(2) : '-'}

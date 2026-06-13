@@ -232,7 +232,7 @@ export default function BiasHistory() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg"
+              className="modern-input px-3 py-2"
             />
           </div>
 
@@ -242,13 +242,13 @@ export default function BiasHistory() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg"
+              className="modern-input px-3 py-2"
             />
           </div>
 
           <button
             onClick={loadEvents}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 hover:shadow-sm"
             title="Refresh"
           >
             <RefreshCw className="w-4 h-4" />
@@ -258,33 +258,41 @@ export default function BiasHistory() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">Total Shifts</div>
-          <div className="text-2xl font-bold text-orange-600 flex items-center gap-2">
-            <Flame className="w-5 h-5" />
-            {stats.totalShifts}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">Total Shifts</span>
+            <div className="p-2 bg-orange-50 rounded-xl">
+              <Flame className="w-4 h-4 text-orange-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-orange-600">{stats.totalShifts}</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">Bullish Days</div>
-          <div className="text-2xl font-bold text-green-600 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            {stats.bullishDays}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">Bullish Days</span>
+            <div className="p-2 bg-emerald-50 rounded-xl">
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-emerald-600">{stats.bullishDays}</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">Bearish Days</div>
-          <div className="text-2xl font-bold text-red-600 flex items-center gap-2">
-            <TrendingDown className="w-5 h-5" />
-            {stats.bearishDays}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">Bearish Days</span>
+            <div className="p-2 bg-rose-50 rounded-xl">
+              <TrendingDown className="w-4 h-4 text-rose-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-rose-600">{stats.bearishDays}</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">Neutral Days</div>
-          <div className="text-2xl font-bold text-gray-600 flex items-center gap-2">
-            <Minus className="w-5 h-5" />
-            {stats.neutralDays}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">Neutral Days</span>
+            <div className="p-2 bg-slate-50 rounded-xl">
+              <Minus className="w-4 h-4 text-slate-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-slate-600">{stats.neutralDays}</div>
         </div>
       </div>
 
@@ -302,20 +310,22 @@ export default function BiasHistory() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEvents]) => (
-              <div key={date} className="border border-slate-200 rounded-xl overflow-hidden">
+                  <div key={date} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                 {/* Date Header */}
                 <div 
-                  className="flex items-center justify-between p-4 bg-slate-50 cursor-pointer hover:bg-slate-100"
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white cursor-pointer hover:from-slate-100 hover:to-slate-50 transition-all duration-200"
                   onClick={() => toggleDateExpand(date)}
                 >
                   <div className="flex items-center gap-3">
-                    <ChevronRight className={cn("w-4 h-4 transition-transform", expandedDates.has(date) && "rotate-90")} />
-                    <span className="font-semibold">{formatDate(date)}</span>
-                    <span className="text-sm text-slate-500">({dateEvents.length} event{dateEvents.length !== 1 ? 's' : ''})</span>
+                    <div className="p-1 rounded-lg bg-white shadow-sm">
+                      <ChevronRight className={cn("w-4 h-4 text-slate-400 transition-transform duration-200", expandedDates.has(date) && "rotate-90")} />
+                    </div>
+                    <span className="font-semibold text-slate-900">{formatDate(date)}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">{dateEvents.length} event{dateEvents.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {dateEvents.some(hasAnyShift) && (
-                      <span className="flex items-center gap-1 text-orange-600 text-sm">
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-sm font-medium border border-orange-200">
                         <Flame className="w-4 h-4" />
                         {dateEvents.filter(e => hasAnyShift(e)).length} shift(s)
                       </span>
@@ -328,14 +338,14 @@ export default function BiasHistory() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-slate-200 bg-slate-50/50">
-                          <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Time</th>
-                          <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Pair</th>
-                          <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Monthly</th>
-                          <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Weekly</th>
-                          <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Daily</th>
-                          <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Shift</th>
-                          <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Details</th>
+                        <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Time</th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Pair</th>
+                          <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Monthly</th>
+                          <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Weekly</th>
+                          <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Daily</th>
+                          <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Shift</th>
+                          <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Details</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -343,40 +353,45 @@ export default function BiasHistory() {
                           <tr 
                             key={entry.id} 
                             className={cn(
-                              "hover:bg-slate-50 transition-colors cursor-pointer",
-                              hasAnyShift(entry) && "bg-orange-50/50"
+                              "hover:bg-slate-50/70 transition-all duration-150 cursor-pointer group",
+                              hasAnyShift(entry) && "bg-orange-50/30"
                             )}
                             onClick={() => openModal(entry)}
                           >
-                            <td className="py-3 px-4 text-sm">
+                            <td className="py-3 px-4 text-sm text-slate-600 font-mono">
                               {formatTime(entry.createdAt)}
                             </td>
-                            <td className="py-3 px-4 text-sm font-medium">{entry.pair}</td>
+                            <td className="py-3 px-4 text-sm font-semibold text-slate-900">{entry.pair}</td>
                             <td className="py-3 px-4 text-center">
-                              <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all hover:scale-105", getBiasStyle(entry.monthlyBias).badge)}>
+                              <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm transition-all hover:scale-105 group-hover:shadow-md", getBiasStyle(entry.monthlyBias).badge)}>
                                 {getBiasIcon(entry.monthlyBias)}
+                                {entry.monthlyBias}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all hover:scale-105", getBiasStyle(entry.weeklyBias).badge)}>
+                              <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm transition-all hover:scale-105 group-hover:shadow-md", getBiasStyle(entry.weeklyBias).badge)}>
                                 {getBiasIcon(entry.weeklyBias)}
+                                {entry.weeklyBias}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all hover:scale-105", getBiasStyle(entry.dailyBias).badge)}>
+                              <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm transition-all hover:scale-105 group-hover:shadow-md", getBiasStyle(entry.dailyBias).badge)}>
                                 {getBiasIcon(entry.dailyBias)}
+                                {entry.dailyBias}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-center">
                               <div className="flex items-center justify-center gap-1">
-                                {entry.monthlyShifted && <Flame className="w-4 h-4 text-orange-500" />}
-                                {entry.weeklyShifted && <Flame className="w-4 h-4 text-orange-500" />}
-                                {entry.dailyShifted && <Flame className="w-4 h-4 text-orange-500" />}
-                                {!hasAnyShift(entry) && <Minus className="w-4 h-4 text-gray-300" />}
+                                {entry.monthlyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-medium"><Flame className="w-3 h-3" /> M</span>}
+                                {entry.weeklyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-medium"><Flame className="w-3 h-3" /> W</span>}
+                                {entry.dailyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-medium"><Flame className="w-3 h-3" /> D</span>}
+                                {!hasAnyShift(entry) && <span className="text-slate-300 text-xs">None</span>}
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-sm text-blue-600">
-                              Click for details
+                            <td className="py-3 px-4 text-sm">
+                              <span className="inline-flex items-center gap-1 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
+                                View details <ChevronRight className="w-3 h-3" />
+                              </span>
                             </td>
                           </tr>
                         ))}
@@ -399,14 +414,14 @@ export default function BiasHistory() {
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-3 py-1 bg-slate-100 rounded hover:bg-slate-200 disabled:opacity-50"
+                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all duration-200"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-3 py-1 bg-slate-100 rounded hover:bg-slate-200 disabled:opacity-50"
+                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all duration-200"
               >
                 Next
               </button>
@@ -426,18 +441,21 @@ export default function BiasHistory() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-white">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {selectedEvent.pair} - Bias Details
-                </h2>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xl font-bold text-slate-900">
+                    {selectedEvent.pair}
+                  </h2>
+                  <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">Bias Details</span>
+                </div>
                 <p className="text-sm text-slate-500">
                   {formatDate(selectedEvent.createdAt)} at {formatTime(selectedEvent.createdAt)}
                 </p>
               </div>
               <button
                 onClick={closeModal}
-                className="p-2 hover:bg-slate-100 rounded-lg"
+                className="p-2 hover:bg-white/80 rounded-xl transition-colors"
               >
                 <X className="w-5 h-5 text-slate-500" />
               </button>
@@ -453,21 +471,21 @@ export default function BiasHistory() {
                     const bias = selectedEvent[biasKey];
                     const style = getBiasStyle(bias);
                     return (
-                      <div 
-                        key={biasKey}
-                        className={cn(
-                          "p-4 rounded-lg text-center border-2 transition-all hover:shadow-md",
-                          style.bg, style.border
-                        )}
-                      >
-                        <div className={cn("text-xs font-medium mb-2", style.text)}>
-                          {biasKey === 'monthlyBias' ? 'Monthly' : biasKey === 'weeklyBias' ? 'Weekly' : 'Daily'}
+                    <div 
+                          key={biasKey}
+                          className={cn(
+                            "p-5 rounded-2xl text-center border-2 transition-all hover:shadow-lg hover:-translate-y-0.5 duration-200",
+                            style.bg, style.border
+                          )}
+                        >
+                          <div className={cn("text-xs font-semibold uppercase tracking-wider mb-3", style.text)}>
+                            {biasKey === 'monthlyBias' ? 'Monthly' : biasKey === 'weeklyBias' ? 'Weekly' : 'Daily'}
+                          </div>
+                          <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-full shadow-sm", style.badge)}>
+                            {getBiasIcon(bias)}
+                            <span className="font-bold text-base">{bias}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-center gap-2">
-                          {getBiasIcon(bias)}
-                          <span className={cn("font-bold text-lg", style.text)}>{bias}</span>
-                        </div>
-                      </div>
                     );
                   })}
                 </div>
@@ -488,27 +506,27 @@ export default function BiasHistory() {
                     
                     return (
                       <div 
-                        key={key}
-                        className={cn(
-                          "p-4 rounded-lg border-l-4 transition-all hover:shadow-md",
-                          shifted ? "bg-orange-100 dark:bg-orange-900 border-orange-500" : cn(style.bg, "border-l-4", style.border)
-                        )}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">{label} Bias</span>
-                            {shifted && (
-                              <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-200 dark:bg-orange-700 text-orange-700 dark:text-orange-200 text-xs font-semibold rounded-full">
-                                <Flame className="w-3 h-3" /> SHIFT
-                              </span>
-                            )}
+                          key={key}
+                          className={cn(
+                            "p-4 rounded-2xl border-l-4 transition-all hover:shadow-lg hover:-translate-y-0.5 duration-200",
+                            shifted ? "bg-orange-50 border-orange-500" : cn(style.bg, "border-l-4", style.border)
+                          )}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-slate-800">{label} Bias</span>
+                              {shifted && (
+                                <span className="flex items-center gap-1.5 px-3 py-0.5 bg-orange-200 text-orange-700 text-xs font-semibold rounded-full">
+                                  <Flame className="w-3 h-3" /> SHIFTED
+                                </span>
+                              )}
+                            </div>
+                            <span className={cn("px-3 py-1 rounded-full text-sm font-bold shadow-sm", style.badge)}>
+                              {bias}
+                            </span>
                           </div>
-                          <span className={cn("px-3 py-1 rounded-full text-sm font-bold", style.badge)}>
-                            {bias}
-                          </span>
+                          <p className="text-sm text-slate-600">{explanation}</p>
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{explanation}</p>
-                      </div>
                     );
                   })}
                 </div>
@@ -525,14 +543,21 @@ export default function BiasHistory() {
                       <div 
                         key={event.id} 
                         className={cn(
-                          "flex gap-4 p-3 rounded-lg border",
-                          event.id === selectedEvent.id ? "border-blue-300 bg-blue-50" : "border-slate-200"
+                          "flex gap-4 p-4 rounded-xl border transition-all duration-200 hover:shadow-sm",
+                          event.id === selectedEvent.id ? "border-blue-300 bg-blue-50/50" : "border-slate-200 bg-white"
                         )}
                       >
-                        <div className="text-sm text-slate-500 font-mono whitespace-nowrap">
-                          {formatTime(event.createdAt)}
+                        <div className="flex flex-col items-center gap-1">
+                          <div className={cn(
+                            "w-3 h-3 rounded-full ring-2 ring-white",
+                            event.id === selectedEvent.id ? "bg-blue-500" : "bg-slate-300"
+                          )} />
+                          {idx < timelineEvents.length - 1 && <div className="w-px flex-1 bg-slate-200" />}
                         </div>
-                        <div className="flex-1 space-y-1">
+                        <div>
+                          <div className="text-sm font-mono text-slate-500 mb-2">
+                            {formatTime(event.createdAt)}
+                          </div>
                           <div className="flex items-center gap-2 flex-wrap">
                             {(['dailyBias', 'weeklyBias', 'monthlyBias'] as const).map((biasKey) => {
                               const bias = event[biasKey];
@@ -542,7 +567,7 @@ export default function BiasHistory() {
                                 <span 
                                   key={biasKey}
                                   className={cn(
-                                    "px-2 py-1 rounded-md text-xs font-semibold transition-all hover:scale-105",
+                                    "px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm transition-all hover:scale-105",
                                     style.badge
                                   )}
                                 >
@@ -551,13 +576,13 @@ export default function BiasHistory() {
                               );
                             })}
                             {hasAnyShift(event) && (
-                              <span className="flex items-center gap-1 px-2 py-1 bg-orange-200 dark:bg-orange-700 text-orange-700 dark:text-orange-200 text-xs font-bold rounded-md">
+                              <span className="flex items-center gap-1 px-2.5 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full border border-orange-200">
                                 <Flame className="w-3 h-3" /> SHIFT
                               </span>
                             )}
                           </div>
                           {event.notes && (
-                            <p className="text-xs text-slate-500">{event.notes}</p>
+                            <p className="text-xs text-slate-500 mt-2">{event.notes}</p>
                           )}
                         </div>
                       </div>

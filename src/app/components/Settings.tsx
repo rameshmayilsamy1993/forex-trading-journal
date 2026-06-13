@@ -146,23 +146,23 @@ export default function Settings() {
       />
 
       <CardContainer className="!p-0">
-        <div className="flex border-b border-gray-100">
+        <div className="flex border-b border-slate-200">
           <button
             onClick={() => setActiveSection('masters')}
-            className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
               activeSection === 'masters'
-                ? 'text-pink-600 border-b-2 border-pink-600 bg-pink-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-pink-700 border-b-2 border-pink-600 bg-pink-50/50'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             }`}
           >
             Master Data
           </button>
           <button
             onClick={() => setActiveSection('pairs')}
-            className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
               activeSection === 'pairs'
-                ? 'text-pink-600 border-b-2 border-pink-600 bg-pink-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-pink-700 border-b-2 border-pink-600 bg-pink-50/50'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             }`}
           >
             Trading Pairs
@@ -195,7 +195,7 @@ export default function Settings() {
                   <Button 
                     onClick={handleAddMaster} 
                     disabled={!newMasterName.trim() || isLoading}
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90"
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25 transition-all duration-200"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add
@@ -219,12 +219,15 @@ export default function Settings() {
                           {groupedMasters[type.value as keyof typeof groupedMasters].map(master => (
                             <div
                               key={master.id}
-                              className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 group"
+                              className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50 group transition-all duration-150"
                             >
-                              <span className="text-sm text-gray-700">{master.name}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                                <span className="text-sm font-medium text-slate-700">{master.name}</span>
+                              </div>
                               <button
                                 onClick={() => handleDeleteMaster(master.id)}
-                                className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-150"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -260,7 +263,7 @@ export default function Settings() {
                   <Button 
                     onClick={handleAddPair} 
                     disabled={!newPair.trim() || isLoading}
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90"
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25 transition-all duration-200"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Pair
@@ -277,7 +280,7 @@ export default function Settings() {
                   pairs.map((pair, index) => (
                     <div
                       key={pair}
-                      className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow group"
+                      className="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-lg hover:border-slate-300 transition-all duration-200 group"
                     >
                       {editingId === pair ? (
                         <div className="space-y-2">
@@ -313,21 +316,21 @@ export default function Settings() {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-gray-900">{pair}</span>
+                          <div className="flex items-center justify-between">
+                          <span className="font-semibold text-slate-900">{pair}</span>
                           <div className="flex gap-1">
                             <button
                               onClick={() => {
                                 setEditingId(pair);
                                 setEditingValue(pair);
                               }}
-                              className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-150"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeletePair(pair)}
-                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-150"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

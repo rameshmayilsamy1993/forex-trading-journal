@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { Trade, SSMT_TYPES } = require('./trade.model');
 const { Account } = require('../accounts/account.model');
 const Master = require('../masters/master.model');
@@ -10,6 +11,9 @@ const getAll = async (req, res, next) => {
     let filter = { userId: req.session.userId };
 
     if (accountId) {
+      if (!mongoose.Types.ObjectId.isValid(accountId)) {
+        return res.status(400).json({ message: 'Invalid account ID' });
+      }
       filter.accountId = accountId;
     } else {
       let accountQuery = { userId: req.session.userId };
@@ -25,7 +29,12 @@ const getAll = async (req, res, next) => {
       }
     }
 
-    if (firmId) filter.propFirmId = firmId;
+    if (firmId) {
+      if (!mongoose.Types.ObjectId.isValid(firmId)) {
+        return res.status(400).json({ message: 'Invalid firm ID' });
+      }
+      filter.propFirmId = firmId;
+    }
 
     if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
       filter.ssmtType = ssmtType;
@@ -44,6 +53,7 @@ const getAll = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, accountId, ...rest } = req.body;
+    let account = null;
 
     const allowedPairs = await getCachedPairs();
     const finalPair = allowedPairs.includes(pair) ? pair : null;
@@ -55,7 +65,11 @@ const create = async (req, res, next) => {
     }
 
     if (accountId) {
-      const account = await Account.findOne({ _id: accountId, userId: req.session.userId });
+      if (!mongoose.Types.ObjectId.isValid(accountId)) {
+        return res.status(400).json({ message: 'Invalid account ID' });
+      }
+
+      account = await Account.findOne({ _id: accountId, userId: req.session.userId });
       if (!account) {
         return res.status(404).json({ message: 'Account not found' });
       }
@@ -91,7 +105,9 @@ const create = async (req, res, next) => {
       exitDate: finalExitDate,
       exitTime: exitTime || undefined,
       userId: req.session.userId,
-      isBreachedAccountTrade: accountId ? (await Account.findById(accountId))?.status === 'BREACHED' : false
+      accountId: account?._id,
+      propFirmId: account?.propFirmId || rest.propFirmId,
+      isBreachedAccountTrade: account?.status === 'BREACHED'
     });
     const savedTrade = await trade.save();
     res.status(201).json(savedTrade);
@@ -102,7 +118,12 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, highLowTime, ...rest } = req.body;
+    const { profit, commission, swap, entryDate, entryTime, exitDate, exitTime, ssmtType, pair, highLowTime, accountId, ...rest } = req.body;
+    let account = null;
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid trade ID' });
+    }
 
     const allowedPairs = await getCachedPairs();
     let finalPair = undefined;
@@ -116,36 +137,69 @@ const update = async (req, res, next) => {
       }
     }
 
-    const realPL = calculateRealPL(profit, commission, swap);
+    if (accountId !== undefined) {
+      if (!mongoose.Types.ObjectId.isValid(accountId)) {
+        return res.status(400).json({ message: 'Invalid account ID' });
+      }
 
-    let finalEntryDate = entryDate ? new Date(entryDate) : undefined;
-    if (finalEntryDate && isNaN(finalEntryDate.getTime())) {
-      finalEntryDate = undefined;
+      account = await Account.findOne({ _id: accountId, userId: req.session.userId });
+      if (!account) {
+        return res.status(404).json({ message: 'Account not found' });
+      }
+      if (account.status === 'BREACHED') {
+        return res.status(403).json({ message: 'Cannot move trades to a breached account' });
+      }
     }
 
-    let finalExitDate = exitDate ? new Date(exitDate) : undefined;
-    if (finalExitDate && isNaN(finalExitDate.getTime())) {
-      finalExitDate = undefined;
+    const existingTrade = await Trade.findOne({
+      _id: req.params.id,
+      userId: req.session.userId
+    });
+
+    if (!existingTrade) {
+      return res.status(404).json({ message: 'Trade not found' });
     }
 
-    const finalSsmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
+    const updateData = { ...rest };
 
-    const updateData = {
-      ...rest,
-      profit,
-      commission,
-      swap: swap || 0,
-      realPL,
-      ssmtType: finalSsmtType,
-      entryDate: finalEntryDate,
-      entryTime: entryTime || undefined,
-      exitDate: finalExitDate,
-      exitTime: exitTime || undefined,
-      highLowTime: highLowTime || undefined,
-    };
+    if (profit !== undefined) updateData.profit = profit;
+    if (commission !== undefined) updateData.commission = commission;
+    if (swap !== undefined) updateData.swap = swap || 0;
+
+    if (profit !== undefined || commission !== undefined || swap !== undefined) {
+      updateData.realPL = calculateRealPL(
+        profit ?? existingTrade.profit,
+        commission ?? existingTrade.commission,
+        swap ?? existingTrade.swap
+      );
+    }
+
+    if (ssmtType !== undefined) {
+      updateData.ssmtType = SSMT_TYPES.includes(ssmtType) ? ssmtType : 'NO';
+    }
+
+    if (entryDate !== undefined) {
+      const finalEntryDate = entryDate ? new Date(entryDate) : undefined;
+      updateData.entryDate = finalEntryDate && !isNaN(finalEntryDate.getTime()) ? finalEntryDate : undefined;
+    }
+
+    if (exitDate !== undefined) {
+      const finalExitDate = exitDate ? new Date(exitDate) : undefined;
+      updateData.exitDate = finalExitDate && !isNaN(finalExitDate.getTime()) ? finalExitDate : undefined;
+    }
+
+    if (entryTime !== undefined) updateData.entryTime = entryTime || undefined;
+    if (exitTime !== undefined) updateData.exitTime = exitTime || undefined;
+    if (highLowTime !== undefined) updateData.highLowTime = highLowTime || undefined;
 
     if (finalPair) {
       updateData.pair = finalPair;
+    }
+
+    if (account) {
+      updateData.accountId = account._id;
+      updateData.propFirmId = account.propFirmId || rest.propFirmId;
+      updateData.isBreachedAccountTrade = false;
     }
 
     const trade = await Trade.findOneAndUpdate(
@@ -153,9 +207,6 @@ const update = async (req, res, next) => {
       updateData,
       { new: true, runValidators: true }
     );
-    if (!trade) {
-      return res.status(404).json({ message: 'Trade not found' });
-    }
     res.json(trade);
   } catch (error) {
     next(error);

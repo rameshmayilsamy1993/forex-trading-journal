@@ -123,17 +123,31 @@ const changePassword = async (req, res, next) => {
 
 const seedAdminUser = async () => {
   try {
-    const adminExists = await User.findOne({ email: 'admin@fxjournal.com' });
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminName = process.env.ADMIN_NAME || 'Admin';
+
+    if (!adminEmail || !adminPassword) {
+      console.log('Admin seed skipped: ADMIN_EMAIL and ADMIN_PASSWORD are not set');
+      return;
+    }
+
+    if (adminPassword.length < 8) {
+      console.warn('Admin seed skipped: ADMIN_PASSWORD must be at least 8 characters');
+      return;
+    }
+
+    const adminExists = await User.findOne({ email: adminEmail });
     if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
       const admin = new User({
-        name: 'Admin',
-        email: 'admin@fxjournal.com',
+        name: adminName,
+        email: adminEmail,
         password: hashedPassword,
         role: 'admin'
       });
       await admin.save();
-      console.log('Admin user created: admin@fxjournal.com / admin123');
+      console.log(`Admin user created: ${adminEmail}`);
       await seedMasters(admin._id);
     }
   } catch (error) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Building2, Wallet, BookOpen, TrendingUp, TrendingDown, Activity, BarChart3 } from 'lucide-react';
+import { Building2, Wallet, BookOpen, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Target, TrendingUp as TrendUp, TrendingDown as TrendDown } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm } from '../types/trading';
 import apiService from '../services/apiService';
 import { calculateTradeStats } from '../utils/calculations';
@@ -20,7 +20,7 @@ export default function Dashboard() {
     try {
       const [accountsData, firmsData] = await Promise.all([
         apiService.getAccounts(),
-        apiService.getPropFirms()
+        apiService.getPropFirms(),
       ]);
       setAccounts(accountsData || []);
       setFirms(firmsData || []);
@@ -38,7 +38,7 @@ export default function Dashboard() {
       const filters: { accountId?: string; firmId?: string } = {};
       if (selectedAccount !== 'all') filters.accountId = selectedAccount;
       if (selectedFirm !== 'all') filters.firmId = selectedFirm;
-      
+
       const tradesData = await apiService.getTrades(Object.keys(filters).length > 0 ? filters : undefined);
       setTrades(tradesData);
     } catch (error) {
@@ -114,66 +114,48 @@ export default function Dashboard() {
   const openTrades = useMemo(() => filteredTrades.filter(t => t.status === 'OPEN'), [filteredTrades]);
 
   const recentTrades = useMemo(
-    () => filteredTrades
-      .filter(t => t.status === 'CLOSED')
-      .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
-      .slice(0, 5),
-    [filteredTrades]
+    () =>
+      filteredTrades
+        .filter(t => t.status === 'CLOSED')
+        .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
+        .slice(0, 5),
+    [filteredTrades],
   );
 
   const totalInitialBalance = useMemo(
     () => filteredAccounts.reduce((sum, acc) => sum + acc.initialBalance, 0),
-    [filteredAccounts]
+    [filteredAccounts],
   );
 
   const totalBalance = useMemo(
     () => totalInitialBalance + stats.netProfit,
-    [totalInitialBalance, stats.netProfit]
+    [totalInitialBalance, stats.netProfit],
   );
-
-  const totalBalanceWithBreached = useMemo(() => {
-    const allInitial = accounts
-      .filter(a => a.status !== 'BREACHED')
-      .reduce((sum, acc) => sum + acc.initialBalance, 0);
-    return allInitial + stats.netProfit;
-  }, [accounts, stats.netProfit]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <PageHeader
-        title="Dashboard"
-        subtitle="Overview of your trading performance"
-        icon={BarChart3}
-        color="indigo"
-      />
+      <PageHeader title="Dashboard" subtitle="Overview of your trading performance" icon={BarChart3} color="indigo" />
 
       {/* Filters */}
       <CardContainer className="!p-0">
-        <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
+        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
           <div className="flex items-center gap-3">
-            <Select 
-              value={selectedFirm || 'all'}
-              onValueChange={(value: string) => {
-                setSelectedFirm(value);
-                setSelectedAccount('all');
-              }}
-            >
-              <SelectTrigger className="w-[200px] bg-white">
+            <Select value={selectedFirm || 'all'} onValueChange={(value: string) => { setSelectedFirm(value); setSelectedAccount('all'); }}>
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All Prop Firms" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Prop Firms</SelectItem>
                 {firms.map(firm => (
-                  <SelectItem key={getPropFirmId(firm)} value={getPropFirmId(firm)}>{firm.name}</SelectItem>
+                  <SelectItem key={getPropFirmId(firm)} value={getPropFirmId(firm)}>
+                    {firm.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select 
-              value={selectedAccount || 'all'}
-              onValueChange={(value: string) => setSelectedAccount(value)}
-            >
-              <SelectTrigger className="w-[200px] bg-white">
+            <Select value={selectedAccount || 'all'} onValueChange={(value: string) => setSelectedAccount(value)}>
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All Accounts" />
               </SelectTrigger>
               <SelectContent>
@@ -181,7 +163,9 @@ export default function Dashboard() {
                 {accounts
                   .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
                   .map(account => (
-                    <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}
+                    </SelectItem>
                   ))}
               </SelectContent>
             </Select>
@@ -189,20 +173,10 @@ export default function Dashboard() {
         </div>
       </CardContainer>
 
-      {/* Overview Cards */}
+      {/* Key Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Prop Firms"
-          value={selectedFirm === 'all' ? firms.length : 1}
-          icon={Building2}
-          color="blue"
-        />
-        <StatCard
-          label="Accounts"
-          value={filteredAccounts.length}
-          icon={Wallet}
-          color="green"
-        />
+        <StatCard label="Prop Firms" value={selectedFirm === 'all' ? firms.length : 1} icon={Building2} color="blue" />
+        <StatCard label="Active Accounts" value={filteredAccounts.length} icon={Wallet} color="green" />
         <StatCard
           label="Total Trades"
           value={trades.length}
@@ -219,29 +193,48 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Second Row - Performance Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Net Profit" value={`${stats.netProfit >= 0 ? '+' : ''}$${stats.netProfit.toFixed(2)}`} icon={DollarSign} color={stats.netProfit >= 0 ? 'green' : 'red'} />
+        <StatCard label="Profit Factor" value={stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)} icon={Target} color="blue" />
+        <StatCard
+          label="Largest Win"
+          value={`$${stats.largestWin.toFixed(2)}`}
+          icon={TrendUp}
+          color="teal"
+        />
+        <StatCard
+          label="Largest Loss"
+          value={`-$${Math.abs(stats.largestLoss).toFixed(2)}`}
+          icon={TrendDown}
+          color="orange"
+        />
+      </div>
+
       {/* Balance & Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Total Balance */}
-        <SectionCard
-          title="Total Balance"
-          icon={Wallet}
-          color="green"
-        >
+        <SectionCard title="Total Balance" icon={Wallet} color="green">
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">Current Balance</p>
-              <p className="text-3xl font-bold text-gray-900">${totalBalance.toFixed(2)}</p>
+              <p className="text-sm text-[#64748B]">Current Balance</p>
+              <p className="text-3xl font-bold text-[#0F172A]">
+                ${totalBalance.toFixed(2)}
+              </p>
             </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[#F8FAFC] rounded-xl border border-[#E5EAF2]">
               <div>
-                <p className="text-sm text-gray-600">Initial Investment</p>
-                <p className="font-medium text-gray-900">${totalInitialBalance.toFixed(2)}</p>
+                <p className="text-sm text-[#64748B]">Initial Investment</p>
+                <p className="font-semibold text-[#0F172A]">
+                  ${totalInitialBalance.toFixed(2)}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">Total P/L</p>
-                <p className={`font-bold text-lg ${
-                  totalBalance - totalInitialBalance >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <p className="text-sm text-[#64748B]">Total P/L</p>
+                <p
+                  className={`font-bold text-lg ${
+                    totalBalance - totalInitialBalance >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                  }`}
+                >
                   {totalBalance - totalInitialBalance >= 0 ? '+' : ''}$
                   {(totalBalance - totalInitialBalance).toFixed(2)}
                 </p>
@@ -250,43 +243,33 @@ export default function Dashboard() {
           </div>
         </SectionCard>
 
-        {/* Performance Summary */}
-        <SectionCard
-          title="Performance Summary"
-          icon={TrendingUp}
-          color="purple"
-        >
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+        <SectionCard title="Performance Summary" icon={TrendingUp} color="purple">
+          <div className="grid grid-cols-1 gap-2">
+            <div className="flex justify-between items-center p-3 bg-[#16A34A]/5 rounded-xl border border-[#16A34A]/10">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-                <span className="text-sm text-gray-700">Total Win</span>
+                <TrendingUp className="w-4 h-4 text-[#16A34A]" />
+                <span className="text-sm text-[#0F172A]">Total Win</span>
               </div>
-              <span className="font-bold text-green-600">${stats.totalProfit.toFixed(2)}</span>
+              <span className="font-bold text-[#16A34A]">${stats.totalProfit.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-[#DC2626]/5 rounded-xl border border-[#DC2626]/10">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Net P/L</span>
+                <TrendingDown className="w-4 h-4 text-[#DC2626]" />
+                <span className="text-sm text-[#0F172A]">Total Loss</span>
               </div>
-              <span className="font-bold text-emerald-600">${stats.netProfit.toFixed(2)}</span>
+              <span className="font-bold text-[#DC2626]">-${stats.totalLoss.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <TrendingDown className="w-5 h-5 text-red-600" />
-                <span className="text-sm text-gray-700">Total Loss</span>
-              </div>
-              <span className="font-bold text-red-600">-${stats.totalLoss.toFixed(2)}</span>
+            <div className="flex justify-between items-center p-3 bg-[#2563EB]/5 rounded-xl border border-[#2563EB]/10">
+              <span className="text-sm text-[#0F172A]">Average Win</span>
+              <span className="font-bold text-[#2563EB]">${stats.averageWin.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm text-gray-700">Profit Factor</span>
-              <span className="font-bold text-blue-600">
-                {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
-              </span>
+            <div className="flex justify-between items-center p-3 bg-[#7C3AED]/5 rounded-xl border border-[#7C3AED]/10">
+              <span className="text-sm text-[#0F172A]">Average Loss</span>
+              <span className="font-bold text-[#7C3AED]">-${stats.averageLoss.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-              <span className="text-sm text-gray-700">Average Win</span>
-              <span className="font-bold text-purple-600">${stats.averageWin.toFixed(2)}</span>
+            <div className="flex justify-between items-center p-3 bg-[#0D9488]/5 rounded-xl border border-[#0D9488]/10">
+              <span className="text-sm text-[#0F172A]">Avg Risk/Reward</span>
+              <span className="font-bold text-[#0D9488]">1:{stats.averageRR ? stats.averageRR.toFixed(2) : '0.00'}</span>
             </div>
           </div>
         </SectionCard>
@@ -300,8 +283,8 @@ export default function Dashboard() {
         color="teal"
       >
         {filteredAccounts.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Wallet className="w-12 h-12 mx-auto mb-3 opacity-50" />
+          <div className="text-center py-8 text-[#64748B]">
+            <Wallet className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p>No accounts match the selected filters</p>
             <p className="text-sm">Try adjusting your filters or add a new account</p>
           </div>
@@ -316,22 +299,19 @@ export default function Dashboard() {
               return (
                 <CardContainer key={account.id} className="!p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: getFirmColor(getAccountFirmId(account)) }}
-                    />
-                    <h4 className="font-medium text-gray-900">{account.name}</h4>
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getFirmColor(getAccountFirmId(account)) }} />
+                    <h4 className="font-semibold text-[#0F172A]">{account.name}</h4>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Balance:</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-[#64748B]">Balance:</span>
+                      <span className="font-medium text-[#0F172A]">
                         ${currentBalance.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">P/L:</span>
-                      <span className={`font-bold ${pl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className="text-[#64748B]">P/L:</span>
+                      <span className={`font-bold ${pl >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                         {pl >= 0 ? '+' : ''}${pl.toFixed(2)} ({plPercent >= 0 ? '+' : ''}
                         {plPercent.toFixed(2)}%)
                       </span>
@@ -352,8 +332,8 @@ export default function Dashboard() {
         color="indigo"
       >
         {recentTrades.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+          <div className="text-center py-8 text-[#64748B]">
+            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p>No closed trades yet</p>
             <p className="text-sm">Go to the Trade Journal tab to record your trades</p>
           </div>
@@ -365,26 +345,27 @@ export default function Dashboard() {
               return (
                 <CardContainer key={trade.id} className="!p-4 flex items-center justify-between" hover={false}>
                   <div className="flex items-center gap-4 flex-1">
-                    <div
-                      className="w-2 h-12 rounded-full"
-                      style={{ backgroundColor: getFirmColor(getTradeFirmId(trade)) }}
-                    />
+                    <div className="w-2 h-10 rounded-full" style={{ backgroundColor: getFirmColor(getTradeFirmId(trade)) }} />
                     <div>
-                      <p className="font-medium text-gray-900">{trade.pair}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-semibold text-[#0F172A]">{trade.pair}</p>
+                      <p className="text-sm text-[#64748B]">
                         {getAccountName(getTradeAccountId(trade))} • {new Date(trade.entryDate).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className={`px-3 py-1 rounded text-sm font-medium ${
-                      trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        trade.type === 'BUY' ? 'bg-[#16A34A]/10 text-[#16A34A]' : 'bg-[#DC2626]/10 text-[#DC2626]'
+                      }`}
+                    >
                       {trade.type}
                     </span>
-                    <span className={`font-bold min-w-[100px] text-right ${
-                      realPL >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <span
+                      className={`font-bold min-w-[100px] text-right ${
+                        realPL >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                      }`}
+                    >
                       {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
                     </span>
                   </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, User, LogOut } from 'lucide-react';
+import { Menu, User, LogOut, Bell, Clock } from 'lucide-react';
 import Sidebar, { Tab } from './components/Sidebar';
 import LiveISTClock from './components/common/LiveISTClock';
 import NotificationDropdown from './components/common/NotificationDropdown';
@@ -39,7 +39,7 @@ export default function App() {
 
   useEffect(() => {
     setCurrentUser(apiService.auth.getStoredUser());
-    
+
     const handleNavigation = (e: CustomEvent) => {
       setActiveTab(e.detail as Tab);
     };
@@ -53,7 +53,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#F5F7FB]">
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -66,22 +66,22 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <div 
+      <div
         className={`transition-all duration-300 min-h-screen ${
           isCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
         }`}
       >
         {/* Top Header (Mobile only) */}
-        <header className="lg:hidden sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-4 py-3">
+        <header className="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-[#E5EAF2] px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsMobileOpen(true)}
-                className="p-2 -ml-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 -ml-2 hover:bg-[#F1F5F9] rounded-xl transition-colors"
               >
-                <Menu className="w-5 h-5 text-slate-600" />
+                <Menu className="w-5 h-5 text-[#64748B]" />
               </button>
-              <h1 className="text-lg font-bold text-slate-900">FX Journal</h1>
+              <h1 className="text-lg font-semibold tracking-tight text-[#0F172A]">FX Journal</h1>
             </div>
             <div className="flex items-center gap-2">
               <NotificationDropdown onNavigateToReminders={() => setActiveTab('reminders')} />
@@ -91,23 +91,26 @@ export default function App() {
         </header>
 
         {/* Desktop Header Bar */}
-        <header className="hidden lg:flex sticky top-0 z-20 h-14 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/60 items-center justify-end px-6 gap-4">
+        <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5EAF2] items-center justify-end px-6 gap-3">
           <NotificationDropdown onNavigateToReminders={() => setActiveTab('reminders')} />
           <LiveISTClock />
+          <div className="w-px h-8 bg-[#E5EAF2]" />
           {currentUser && (
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200/60">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{currentUser.name}</span>
-                {currentUser.role === 'admin' && (
-                  <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium w-fit">Admin</span>
-                )}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#2563EB] to-[#4F46E5] rounded-lg flex items-center justify-center shadow-sm">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-[#0F172A]">{currentUser.name}</span>
+                  {currentUser.role === 'admin' && (
+                    <span className="text-[10px] px-1.5 py-0.5 bg-[#2563EB]/10 text-[#2563EB] rounded font-medium w-fit">Admin</span>
+                  )}
+                </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-[#64748B] hover:text-[#DC2626] hover:bg-red-50 rounded-xl transition-colors"
                 title="Sign out"
               >
                 <LogOut className="w-4 h-4" />

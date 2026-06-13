@@ -104,8 +104,8 @@ export default function Sidebar({
     <>
       {/* Mobile Overlay */}
       {isMobileOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        <div
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={onMobileClose}
         />
       )}
@@ -113,51 +113,51 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-screen bg-white border-r border-slate-200/60 z-50 transition-all duration-300 flex flex-col",
+          "fixed top-0 left-0 h-screen z-50 transition-all duration-300 flex flex-col",
+          "bg-[#0B1620] border-r border-white/[0.06] shadow-2xl shadow-slate-950/40",
           isCollapsed ? "w-[72px]" : "w-[260px]",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Logo */}
-        <div className={cn(
-          "h-16 flex items-center border-b border-slate-100 px-4",
-          isCollapsed ? "justify-center" : "justify-between"
-        )}>
+        <div
+          className={cn(
+            "h-16 flex items-center border-b border-white/[0.06] px-4",
+            isCollapsed ? "justify-center" : "justify-between",
+          )}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#2563EB] via-[#4F46E5] to-[#7C3AED] rounded-xl flex items-center justify-center shadow-lg shadow-[#2563EB]/30 ring-1 ring-white/[0.1]">
               <Activity className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
               <div>
-                <h1 className="text-lg font-bold text-slate-900">FX Journal</h1>
-                <p className="text-xs text-slate-500">Trading Platform</p>
+                <h1 className="text-base font-semibold tracking-tight text-white">FX Journal</h1>
+                <p className="text-[10px] text-slate-500">Trading Platform</p>
               </div>
             )}
           </div>
           {!isCollapsed && (
-            <button
-              onClick={onMobileClose}
-              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg"
-            >
-              <X className="w-5 h-5 text-slate-500" />
+            <button onClick={onMobileClose} className="lg:hidden p-2 hover:bg-white/[0.06] rounded-lg transition-colors">
+              <X className="w-4 h-4 text-slate-400" />
             </button>
           )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <nav className="flex-1 overflow-y-auto py-4 px-2.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {navigationGroups.map((group, groupIndex) => (
-            <div key={group.title} className={cn(groupIndex > 0 && "mt-6")}>
+            <div key={group.title} className={cn(groupIndex > 0 && "mt-5")}>
               {!isCollapsed && (
-                <p className="px-3 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <p className="px-3 mb-1.5 text-[10px] font-semibold text-slate-600 uppercase tracking-[0.18em]">
                   {group.title}
                 </p>
               )}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
-                  
+
                   return (
                     <button
                       key={item.id}
@@ -166,18 +166,20 @@ export default function Sidebar({
                         onMobileClose();
                       }}
                       className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                        isCollapsed && "justify-center px-2",
+                        "w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 relative",
+                        isCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
                         isActive
-                          ? "bg-blue-50 text-blue-600"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                          ? "bg-gradient-to-r from-[#2563EB]/20 to-transparent text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-5 before:bg-[#2563EB] before:rounded-r-full"
+                          : "text-slate-400 hover:text-white hover:bg-white/[0.04]",
                       )}
                       title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={cn(
-                        "w-5 h-5 flex-shrink-0",
-                        isActive ? "text-blue-600" : "text-slate-500"
-                      )} />
+                      <Icon
+                        className={cn(
+                          "w-[18px] h-[18px] flex-shrink-0 transition-all duration-200",
+                          isActive ? "text-[#2563EB]" : "text-slate-500 group-hover:text-white",
+                        )}
+                      />
                       {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   );
@@ -190,12 +192,12 @@ export default function Sidebar({
         {/* Collapse Toggle (Desktop) */}
         <button
           onClick={() => onCollapsedChange(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white border border-slate-200 rounded-full items-center justify-center shadow-sm hover:bg-slate-50 transition-colors"
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-[#1E293B] border border-white/[0.08] rounded-full items-center justify-center shadow-lg shadow-slate-950/30 hover:bg-[#334155] transition-colors"
         >
           {isCollapsed ? (
-            <ChevronRight className="w-3 h-3 text-slate-500" />
+            <ChevronRight className="w-3 h-3 text-slate-400" />
           ) : (
-            <ChevronLeft className="w-3 h-3 text-slate-500" />
+            <ChevronLeft className="w-3 h-3 text-slate-400" />
           )}
         </button>
       </aside>

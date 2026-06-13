@@ -555,7 +555,7 @@ const apiService = {
       if (options?.page) params.set('page', options.page.toString());
       if (options?.limit) params.set('limit', options.limit.toString());
 
-      const response = await fetch(`${API_BASE_URL}/loss-analysis-list?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/loss-analysis/list?${params}`, {
         method: 'GET',
         credentials: 'include',
       });

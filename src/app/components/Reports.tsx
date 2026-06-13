@@ -1,11 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Target, Award, AlertCircle, BarChart3 } from 'lucide-react';
-import { Trade, TradingAccount, PropFirm, TradeStats } from '../types/trading';
+import {
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Award,
+  AlertCircle,
+  BarChart3,
+  DollarSign,
+  Activity,
+  Zap,
+  Flame,
+} from 'lucide-react';
+import { Trade, TradingAccount, PropFirm } from '../types/trading';
 import apiService from '../services/apiService';
-import { calculateTradeStats } from '../utils/calculations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PageHeader, StatCard, CardContainer, SectionCard } from './ui/DesignSystem';
 import { LoadingSpinner } from './ui/Loading';
+import { Badge } from './ui/badge';
 
 export default function Reports() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -21,7 +32,7 @@ export default function Reports() {
     try {
       const [accountsData, firmsData] = await Promise.all([
         apiService.getAccounts(),
-        apiService.getPropFirms()
+        apiService.getPropFirms(),
       ]);
       setAccounts(accountsData || []);
       setFirms(firmsData || []);
@@ -92,13 +103,13 @@ export default function Reports() {
     const closedTrades = trades.filter(t => t.status === 'CLOSED');
     const wins = closedTrades.filter(t => getRealPL(t) > 0);
     const losses = closedTrades.filter(t => getRealPL(t) < 0);
-    
+
     const totalWin = wins.reduce((sum, t) => sum + getRealPL(t), 0);
     const totalLoss = Math.abs(losses.reduce((sum, t) => sum + getRealPL(t), 0));
     const netPL = totalWin - totalLoss;
     const profitFactor = totalLoss !== 0 ? totalWin / totalLoss : totalWin > 0 ? Infinity : 0;
     const avgWin = wins.length ? totalWin / wins.length : 0;
-    
+
     return {
       totalTrades: closedTrades.length,
       winningTrades: wins.length,
@@ -168,81 +179,71 @@ export default function Reports() {
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [trades]);
 
+  const getWinRateColor = (rate: number) => {
+    if (rate >= 60) return 'text-[#16A34A]';
+    if (rate >= 40) return 'text-[#EA580C]';
+    return 'text-[#DC2626]';
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <PageHeader
-        title="Performance Reports"
-        subtitle="Analyze your trading performance"
-        icon={BarChart3}
-        color="purple"
-      />
+      <PageHeader title="Performance Reports" subtitle="Analyze your trading performance" icon={BarChart3} color="purple" />
 
       {/* Filters */}
       <CardContainer className="!p-0">
-        <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
+        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-gradient-to-r from-purple-50/50 to-pink-50/50">
           <div className="flex gap-3">
-            <Select 
-              value={selectedFirm} 
-              onValueChange={(value: string) => setSelectedFirm(value)}
-            >
-              <SelectTrigger className="w-[200px] bg-white">
+            <Select value={selectedFirm} onValueChange={(value: string) => setSelectedFirm(value)}>
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All Prop Firms" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Prop Firms</SelectItem>
                 {firms.map(firm => (
-                  <SelectItem key={getPropFirmId(firm)} value={getPropFirmId(firm)}>{firm.name}</SelectItem>
+                  <SelectItem key={getPropFirmId(firm)} value={getPropFirmId(firm)}>
+                    {firm.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-              <Select
-                value={selectedAccount || 'all'}
-                onValueChange={(value: string) => setSelectedAccount(value)}
-              >
-                <SelectTrigger className="w-[200px] bg-white">
-                  <SelectValue placeholder="All Accounts" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Accounts</SelectItem>
-                  {accounts
-                    .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
-                    .map(account => (
-                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+            <Select value={selectedAccount || 'all'} onValueChange={(value: string) => setSelectedAccount(value)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Accounts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Accounts</SelectItem>
+                {accounts
+                  .filter(acc => selectedFirm === 'all' || getAccountFirmId(acc) === selectedFirm)
+                  .map(account => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
 
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={includeBreached}
-                    onChange={(e) => setIncludeBreached(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  Include Breached Accounts
-                </label>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  includeBreached 
-                    ? 'bg-amber-100 text-amber-700' 
-                    : 'bg-green-100 text-green-700'
-                }`}>
-                  {includeBreached ? 'Including Breached' : 'Active Only'}
-                </span>
-              </div>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-[#64748B] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={includeBreached}
+                  onChange={e => setIncludeBreached(e.target.checked)}
+                  className="rounded border-[#E5EAF2] text-[#2563EB] focus:ring-[#2563EB]/30"
+                />
+                Include Breached Accounts
+              </label>
+              <Badge variant={includeBreached ? 'warning' : 'success'}>
+                {includeBreached ? 'Including Breached' : 'Active Only'}
+              </Badge>
             </div>
           </div>
-        </CardContainer>
+        </div>
+      </CardContainer>
 
-      {/* Overview Stats */}
+      {/* Executive Summary - Top Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard
-          label="Total Trades"
-          value={stats.totalTrades}
-          icon={Target}
-          color="blue"
-        />
+        <StatCard label="Total Trades" value={stats.totalTrades} icon={Target} color="blue" />
         <StatCard
           label="Win Rate"
           value={`${stats.winRate.toFixed(1)}%`}
@@ -250,80 +251,83 @@ export default function Reports() {
           color="purple"
           trend={{ value: `${stats.winningTrades}W / ${stats.losingTrades}L`, positive: stats.winRate >= 50 }}
         />
-        <StatCard
-          label="Total Win"
-          value={`$${stats.totalProfit.toFixed(2)}`}
-          icon={TrendingUp}
-          color="green"
-        />
+        <StatCard label="Total Profit" value={`$${stats.totalProfit.toFixed(2)}`} icon={TrendingUp} color="green" />
         <StatCard
           label="Net P/L"
           value={`$${stats.netProfit.toFixed(2)}`}
           icon={stats.netProfit >= 0 ? TrendingUp : TrendingDown}
           color={stats.netProfit >= 0 ? 'green' : 'red'}
-          trend={{ value: `PF: ${stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}`, positive: stats.netProfit >= 0 }}
+          trend={{
+            value: `PF: ${stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}`,
+            positive: stats.netProfit >= 0,
+          }}
         />
-        <StatCard
-          label="Avg Win"
-          value={`$${stats.averageWin.toFixed(2)}`}
-          icon={AlertCircle}
-          color="orange"
-        />
+        <StatCard label="Avg Win" value={`$${stats.averageWin.toFixed(2)}`} icon={AlertCircle} color="orange" />
       </div>
 
-      {/* Detailed Stats */}
+      {/* Detailed Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profit Breakdown */}
-        <SectionCard
-          title="Net Performance"
-          icon={TrendingUp}
-          color="purple"
-        >
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-              <span className="text-sm text-gray-700">Total Win</span>
-              <span className="font-bold text-green-600">${stats.totalProfit.toFixed(2)}</span>
+        <SectionCard title="Net Performance" icon={TrendingUp} color="purple">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center p-3 bg-[#16A34A]/5 rounded-xl border border-[#16A34A]/10">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-[#16A34A]" />
+                <span className="text-sm text-[#0F172A]">Total Win</span>
+              </div>
+              <span className="font-bold text-[#16A34A]">${stats.totalProfit.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-              <span className="text-sm text-gray-700">Total Loss</span>
-              <span className="font-bold text-red-600">-${stats.totalLoss.toFixed(2)}</span>
+            <div className="flex justify-between items-center p-3 bg-[#DC2626]/5 rounded-xl border border-[#DC2626]/10">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-[#DC2626]" />
+                <span className="text-sm text-[#0F172A]">Total Loss</span>
+              </div>
+              <span className="font-bold text-[#DC2626]">-${stats.totalLoss.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <span className="text-sm font-medium text-gray-700">Net P/L</span>
-              <span className={`font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className="flex justify-between items-center p-3 bg-[#2563EB]/5 rounded-xl border-2 border-[#2563EB]/20">
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-[#2563EB]" />
+                <span className="text-sm font-semibold text-[#0F172A]">Net P/L</span>
+              </div>
+              <span className={`font-bold text-lg ${stats.netProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                 {stats.netProfit >= 0 ? '+' : ''}${stats.netProfit.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-              <span className="text-sm text-gray-700">Largest Win</span>
-              <span className="font-bold text-purple-600">${stats.largestWin.toFixed(2)}</span>
+            <div className="flex justify-between items-center p-3 bg-[#7C3AED]/5 rounded-xl border border-[#7C3AED]/10">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#7C3AED]" />
+                <span className="text-sm text-[#0F172A]">Largest Win</span>
+              </div>
+              <span className="font-bold text-[#7C3AED]">${stats.largestWin.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-              <span className="text-sm text-gray-700">Largest Loss</span>
-              <span className="font-bold text-orange-600">${stats.largestLoss.toFixed(2)}</span>
+            <div className="flex justify-between items-center p-3 bg-[#EA580C]/5 rounded-xl border border-[#EA580C]/10">
+              <div className="flex items-center gap-2">
+                <TrendingDown className="w-4 h-4 text-[#EA580C]" />
+                <span className="text-sm text-[#0F172A]">Largest Loss</span>
+              </div>
+              <span className="font-bold text-[#EA580C]">${Math.abs(stats.largestLoss).toFixed(2)}</span>
             </div>
           </div>
         </SectionCard>
 
         {/* Best Performing Pairs */}
-        <SectionCard
-          title="Top Pairs by Profit"
-          icon={Target}
-          color="green"
-        >
+        <SectionCard title="Top Pairs by Profit" icon={Target} color="green">
           <div className="space-y-2">
             {pairStats.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-8">No closed trades yet</p>
+              <p className="text-sm text-[#64748B] text-center py-8">No closed trades yet</p>
             )}
-            {pairStats.slice(0, 5).map(pair => (
-              <div key={pair.pair} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            {pairStats.slice(0, 6).map(pair => (
+              <div
+                key={pair.pair}
+                className="flex items-center justify-between p-3 bg-[#F8FAFC] rounded-xl hover:bg-[#F1F5F9] transition-colors border border-[#E5EAF2]/50"
+              >
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{pair.pair}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-semibold text-[#0F172A]">{pair.pair}</p>
+                  <p className="text-xs text-[#64748B]">
                     {pair.trades} trades • {pair.winRate.toFixed(1)}% win rate
                   </p>
                 </div>
-                <span className={`font-bold ${pair.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`font-bold ${pair.profit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                   {pair.profit >= 0 ? '+' : ''}${pair.profit.toFixed(2)}
                 </span>
               </div>
@@ -333,23 +337,29 @@ export default function Reports() {
       </div>
 
       {/* Monthly Performance */}
-      <SectionCard
-        title="Monthly Performance"
-        icon={BarChart3}
-        color="indigo"
-      >
+      <SectionCard title="Monthly Performance" icon={BarChart3} color="indigo">
         <div className="overflow-x-auto">
           {monthlyStats.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-8">No closed trades yet</p>
+            <p className="text-sm text-[#64748B] text-center py-8">No closed trades yet</p>
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Month</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Trades</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Wins</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Win Rate</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Profit/Loss</th>
+                <tr className="border-b border-[#E5EAF2] bg-[#F8FAFC]">
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                    Month
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                    Trades
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                    Wins
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                    Win Rate
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                    Profit/Loss
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -357,33 +367,31 @@ export default function Reports() {
                   const monthDate = (() => {
                     try {
                       const d = new Date(month.month + '-01T00:00:00');
-                      return isNaN(d.getTime()) ? null : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                      return isNaN(d.getTime())
+                        ? null
+                        : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
                     } catch {
                       return month.month;
                     }
                   })();
                   return (
-                  <tr key={month.month} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4 text-sm text-gray-900">
-                      {monthDate || month.month}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-right text-gray-900">{month.trades}</td>
-                    <td className="py-3 px-4 text-sm text-right text-gray-900">{month.wins}</td>
-                    <td className="py-3 px-4 text-sm text-right">
-                      <span className={`font-medium ${
-                        month.winRate >= 50 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {month.winRate.toFixed(1)}%
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-right">
-                      <span className={`font-bold ${
-                        month.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {month.profit >= 0 ? '+' : ''}${month.profit.toFixed(2)}
-                      </span>
-                    </td>
-                  </tr>
+                    <tr key={month.month} className="border-b border-[#E5EAF2]/60 hover:bg-[#F8FAFC] transition-colors">
+                      <td className="py-3 px-4 text-sm text-[#0F172A] font-medium">
+                        {monthDate || month.month}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-right text-[#0F172A]">{month.trades}</td>
+                      <td className="py-3 px-4 text-sm text-right text-[#0F172A]">{month.wins}</td>
+                      <td className="py-3 px-4 text-sm text-right">
+                        <span className={`font-semibold ${getWinRateColor(month.winRate)}`}>
+                          {month.winRate.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-right">
+                        <span className={`font-bold ${month.profit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                          {month.profit >= 0 ? '+' : ''}${month.profit.toFixed(2)}
+                        </span>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>

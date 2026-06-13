@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn, Trash, AlertTriangle, FileText, ClipboardCheck, Link2, Unlink } from 'lucide-react';
+import { Plus, X, Check, TrendingUp, TrendingDown, Edit2, Trash2, Image as ImageIcon, Eye, Calendar as CalendarIcon, ZoomIn, Trash, AlertTriangle, FileText, ClipboardCheck, Link2, Unlink, Wallet, Target, CircleDollarSign, BarChart3, Clock3, Layers, ShieldCheck } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm, TradingSession, MasterData, SMTType, Model1Type } from '../types/trading';
 import apiService from '../services/apiService';
-import { calculateTradeProfit, calculateRiskReward } from '../utils/calculations';
+import { calculateTradeProfit, calculateRiskReward, formatPrice, formatMoney } from '../utils/calculations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
@@ -30,6 +30,7 @@ export default function TradeJournal() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterAccount, setFilterAccount] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterAnalysis, setFilterAnalysis] = useState<string>('all');
   const [accountState, setAccountState] = useState<string>('ACTIVE');
   const [viewingTrade, setViewingTrade] = useState<Trade | null>(null);
   const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
@@ -46,6 +47,9 @@ export default function TradeJournal() {
     existingAnalysis: any | null;
     mode: 'add' | 'view';
   }>({ isOpen: false, tradeId: null, tradeData: null, existingAnalysis: null, mode: 'add' });
+
+  // Analysis Map: tradeId → analysis
+  const [analysesMap, setAnalysesMap] = useState<Record<string, any>>({});
 
   // Checklist Modal State
   const [checklistModal, setChecklistModal] = useState<{
@@ -125,13 +129,14 @@ export default function TradeJournal() {
         if (filterAccount !== 'all') filters.accountId = filterAccount;
         if (accountState !== 'all') filters.accountState = accountState;
 
-        const [tradesData, accountsData, firmsData, mastersData, pairsData, sessionsData] = await Promise.all([
+        const [tradesData, accountsData, firmsData, mastersData, pairsData, sessionsData, analysesData] = await Promise.all([
           apiService.getTrades(Object.keys(filters).length > 0 ? filters : undefined),
           apiService.getAccounts(),
           apiService.getPropFirms(),
           apiService.getMasters(),
           apiService.settings.getPairs(),
-          apiService.checklists.getActiveSessions()
+          apiService.checklists.getActiveSessions(),
+          apiService.lossAnalysis.list({ limit: 1000 }).catch(() => null)
         ]);
         setTrades(tradesData);
         setAccounts(accountsData);
@@ -139,6 +144,18 @@ export default function TradeJournal() {
         setMasters(mastersData);
         setPairs(pairsData || []);
         setActiveSessions(sessionsData || []);
+
+        // Build analysis map
+        if (analysesData?.analyses) {
+          const map: Record<string, any> = {};
+          analysesData.analyses.forEach((a: any) => {
+            if (a.tradeId) {
+              const tid = typeof a.tradeId === 'object' ? a.tradeId._id || a.tradeId : a.tradeId;
+              map[tid] = a;
+            }
+          });
+          setAnalysesMap(map);
+        }
       } catch (error) {
         console.error('Failed to load data:', error);
       }
@@ -813,6 +830,14 @@ export default function TradeJournal() {
     return firm?.color || '#6B7280';
   };
 
+  const getFirmName = (firmId: any): string => {
+    if (typeof firmId === 'object' && firmId !== null) {
+      return firmId.name || 'Unknown firm';
+    }
+    const firm = firms.find(f => f.id === firmId);
+    return firm?.name || 'Unknown firm';
+  };
+
   const getTradeAccountId = (trade: Trade): string => {
     if (typeof trade.accountId === 'object' && trade.accountId !== null) {
       return String((trade.accountId as any).id || (trade.accountId as any)._id || '');
@@ -827,13 +852,52 @@ export default function TradeJournal() {
     return String(trade.propFirmId || '');
   };
 
+  const getTradeRealPL = (trade: Trade): number => {
+    return (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs((trade as any).swap || 0));
+  };
+
+  const getChecklistStatus = (trade: Trade): 'complete' | 'partial' | 'missing' => {
+    const checklistId = (trade as any).checklistId;
+    if (!checklistId) return 'missing';
+    const cached = checklistCache[checklistId];
+    if (cached?.isValid) return 'complete';
+    if (cached && !cached.isValid) return 'partial';
+    return 'partial';
+  };
+
+  const getTradeImages = (trade: Trade) => {
+    const images: { url: string; label: string }[] = [];
+    if (trade.beforeScreenshot) images.push({ url: trade.beforeScreenshot, label: 'Before Screenshot' });
+    if (trade.afterScreenshot) images.push({ url: trade.afterScreenshot, label: 'After Screenshot' });
+    return images;
+  };
+
+  const openTradeImageViewer = (trade: Trade, index: number) => {
+    setViewingImages(getTradeImages(trade));
+    setViewingImageIndex(index);
+  };
+
+  const getAnalysisStatus = (trade: Trade): 'Not Required' | 'Pending' | 'Completed' => {
+    const realPL = getTradeRealPL(trade);
+    if (realPL >= 0) return 'Not Required';
+    if (analysesMap[trade.id]) return 'Completed';
+    return 'Pending';
+  };
+
   const filteredTrades = useMemo(() => {
     return trades.filter(trade => {
       if (filterAccount !== 'all' && getTradeAccountId(trade) !== filterAccount) return false;
       if (filterStatus !== 'all' && trade.status !== filterStatus) return false;
+      if (filterAnalysis !== 'all') {
+        const status = getAnalysisStatus(trade);
+        if (filterAnalysis === 'pending' && status !== 'Pending') return false;
+        if (filterAnalysis === 'completed' && status !== 'Completed') return false;
+        if (filterAnalysis === 'profit' && status !== 'Not Required') return false;
+        if (filterAnalysis === 'loss' && status === 'Not Required') return false;
+      }
       return true;
     });
-  }, [trades, filterAccount, filterStatus]);
+  }, [trades, filterAccount, filterStatus, filterAnalysis, analysesMap]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -910,6 +974,22 @@ export default function TradeJournal() {
                 </span>
               </SelectItem>
               <SelectItem value="all">All Accounts</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filterAnalysis}
+            onValueChange={(value: string) => setFilterAnalysis(value)}
+          >
+            <SelectTrigger className="w-[160px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+              <SelectValue placeholder="All Analysis" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Trades</SelectItem>
+              <SelectItem value="pending">Pending Analysis</SelectItem>
+              <SelectItem value="completed">Completed Analysis</SelectItem>
+              <SelectItem value="profit">Profit Trades</SelectItem>
+              <SelectItem value="loss">Loss Trades</SelectItem>
             </SelectContent>
           </Select>
 
@@ -1442,9 +1522,9 @@ export default function TradeJournal() {
                       </FormField>
                     </div>
                   </div>
-                  <div className="flex gap-2 justify-end mt-4">
+                  <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-slate-100">
                     {isEditMode && (trades.find(t => t.id === editingId) as any)?.checklistSession && (
-                      <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-2">
+                      <span className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl flex items-center gap-2 text-sm font-medium border border-blue-200">
                         <ClipboardCheck className="w-4 h-4" />
                         Linked: {(trades.find(t => t.id === editingId) as any)?.checklistSession}
                       </span>
@@ -1452,7 +1532,7 @@ export default function TradeJournal() {
                     {isEditMode && (
                       <button
                         onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null })}
-                        className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 flex items-center gap-2"
+                        className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-all duration-200"
                       >
                         <Link2 className="w-4 h-4" />
                         Change Checklist
@@ -1461,14 +1541,14 @@ export default function TradeJournal() {
                     {!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId && (
                       <button
                         onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null })}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-lg shadow-blue-500/25"
+                        className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 text-sm font-medium shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5"
                       >
                         <ClipboardCheck className="w-4 h-4" />
                         Complete Checklist
                       </button>
                     )}
                     {!isEditMode && selectedStrategyHasChecklist && checklistModal.completedChecklistId && (
-                      <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg flex items-center gap-2">
+                      <span className="px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl flex items-center gap-2 text-sm font-medium border border-emerald-200">
                         <Check className="w-4 h-4" />
                         Checklist Completed
                       </span>
@@ -1476,14 +1556,14 @@ export default function TradeJournal() {
                     <button
                       onClick={editingId ? () => handleEdit(editingId) : handleSubmit}
                       disabled={!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Check className="w-4 h-4" />
-                      {editingId ? 'Update' : 'Save'}
+                      {editingId ? 'Update Trade' : 'Save Trade'}
                     </button>
                     <button
                       onClick={resetForm}
-                      className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 flex items-center gap-2"
+                      className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-all duration-200"
                     >
                       <X className="w-4 h-4" />
                       Cancel
@@ -1548,9 +1628,9 @@ export default function TradeJournal() {
                 {filteredTrades.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="w-full min-w-[1400px]">
+                      <table className="w-full min-w-[900px]">
                         <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50/50">
+                          <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
                             <th className="w-12 py-3 px-4">
                               <input
                                 type="checkbox"
@@ -1559,26 +1639,21 @@ export default function TradeJournal() {
                                 className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                               />
                             </th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Account</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Pair</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Type</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Strategy</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Checklist</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Entry</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Exit</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">RR</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">P/L</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Commission</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Real P/L</th>
-                            <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[140px]">Date</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[300px]">Account</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Pair</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Type</th>
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider hidden sm:table-cell w-[120px]">Entry</th>
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider hidden sm:table-cell w-[120px]">Exit</th>
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Real P/L</th>
+                            <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Checklist</th>
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[140px]">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                           {filteredTrades.map(trade => (
-                            <tr key={trade.id} className={`hover:bg-slate-50/50 transition-colors duration-150 ${selectedTrades.includes(trade.id) ? 'bg-blue-50/50' : ''}`}>
-                              <td className="py-3 px-4">
+                            <tr key={trade.id} className={`group hover:bg-slate-50 hover:shadow-sm transition-all duration-200 ${selectedTrades.includes(trade.id) ? 'bg-blue-50/50' : ''}`}>
+                              <td className="py-3 px-4 align-middle">
                                 <input
                                   type="checkbox"
                                   checked={selectedTrades.includes(trade.id)}
@@ -1586,7 +1661,7 @@ export default function TradeJournal() {
                                   className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                 />
                               </td>
-                              <td className="py-3 px-4 text-sm text-slate-900">
+                              <td className="py-3 px-4 text-sm text-slate-900 align-middle">
                                 <div>
                                   {getLocalDateString(trade.entryDate)}
                                   {trade.entryTime && (
@@ -1594,149 +1669,87 @@ export default function TradeJournal() {
                                   )}
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-sm">
+                              <td className="py-3 px-4 text-sm align-middle">
                                 <div className="flex items-center gap-2">
                                   <div
-                                    className="w-2 h-2 rounded-full"
+                                    className="w-2.5 h-2.5 rounded-full ring-2 ring-white shadow-sm"
                                     style={{ backgroundColor: getFirmColor(trade.propFirmId) }}
                                   />
-                                  <span className="text-slate-700">{getAccountName(trade.accountId)}</span>
+                                  <span className="font-medium text-slate-800">{getAccountName(trade.accountId)}</span>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-sm">
-                                <div className="font-semibold text-slate-900">{trade.pair}</div>
-                                {trade.session && (
-                                  <div className="text-xs text-slate-400">{trade.session}</div>
-                                )}
+                              <td className="py-3 px-4 text-sm align-middle">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                  {trade.pair}
+                                </span>
                               </td>
-                              <td className="py-3 px-4 text-sm">
-                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              <td className="py-3 px-4 text-sm align-middle">
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${trade.type === 'BUY' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                                   }`}>
-                                  {trade.type === 'BUY' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                  {trade.type === 'BUY' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                                   {trade.type}
                                 </span>
                               </td>
-                              <td className="py-3 px-4 text-sm text-slate-700">
-                                {trade.strategy || '-'}
+                              <td className="py-3 px-4 text-sm text-right font-mono text-slate-700 hidden sm:table-cell align-middle">{formatPrice(trade.entryPrice, trade.pair)}</td>
+                              <td className="py-3 px-4 text-sm text-right font-mono text-slate-700 hidden sm:table-cell align-middle">
+                                {trade.exitPrice ? formatPrice(trade.exitPrice, trade.pair) : '-'}
                               </td>
-                              <td className="py-3 px-4 text-sm">
-                                {(trade as any).checklistSession ? (
-                                  <button
-                                    onClick={() => handleViewChecklist((trade as any).checklistId)}
-                                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition-colors cursor-pointer"
-                                  >
-                                    <ClipboardCheck className="w-3 h-3" />
-                                    {(trade as any).checklistSession}
-                                  </button>
-                                ) : (
-                                  <span className="text-slate-300">-</span>
-                                )}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right font-mono text-slate-700">{trade.entryPrice.toFixed(5)}</td>
-                              <td className="py-3 px-4 text-sm text-right font-mono text-slate-700">
-                                {trade.exitPrice ? trade.exitPrice.toFixed(5) : '-'}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right">
-                                {trade.riskRewardRatio ? (
-                                  <span className="text-blue-600 font-medium">
-                                    1:{trade.riskRewardRatio.toFixed(2)}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-300">-</span>
-                                )}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right">
-                                {trade.profit !== undefined ? (
-                                  <span className={`font-semibold ${trade.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {trade.profit >= 0 ? '+' : ''}${trade.profit.toFixed(2)}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-300">-</span>
-                                )}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right text-red-500">
-                                {(trade as any).commission ? `-$${Math.abs((trade as any).commission).toFixed(2)}` : '-'}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right">
+                              <td className="py-3 px-4 text-sm text-right align-middle">
                                 {(() => {
-                                  const realPL = (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs((trade as any).swap || 0));
+                                  const realPL = getTradeRealPL(trade);
                                   return (
-                                    <span className={`font-semibold ${realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
+                                    <span className={`inline-flex items-center gap-1 font-bold ${realPL > 0 ? 'text-emerald-700' : realPL < 0 ? 'text-rose-700' : 'text-slate-400'}`}>
+                                      {formatMoney(realPL, true)}
                                     </span>
                                   );
                                 })()}
                               </td>
-                              <td className="py-3 px-4 text-sm text-center">
-                                <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${trade.status === 'OPEN' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
-                                  }`}>
-                                  {trade.status}
-                                </span>
+                              <td className="py-3 px-4 text-sm text-center align-middle">
+                                {getChecklistStatus(trade) === 'complete' ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit mx-auto">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Complete
+                                  </span>
+                                ) : getChecklistStatus(trade) === 'partial' ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 w-fit mx-auto">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                    Partial
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200 w-fit mx-auto">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                    Missing
+                                  </span>
+                                )}
                               </td>
-                              <td className="py-3 px-4 text-right">
+                              <td className="py-3 px-4 text-right align-middle">
                                 <div className="flex items-center justify-end gap-1">
-                                  {(trade.beforeScreenshot || trade.afterScreenshot) && (
+                                  {getTradeRealPL(trade) < 0 && (
                                     <button
-                                      onClick={() => setViewingTrade(trade)}
-                                      className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all duration-150 hover:scale-105"
-                                      title="View"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </button>
-                                  )}
-                                  {/* Loss Analysis Button - Only for losing trades */}
-                                  {(trade.profit || 0) < 0 && (
-                                    <button
-                                      onClick={() => handleOpenLossAnalysis(trade, 'add')}
-                                      className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-150 hover:scale-105"
-                                      title="Add Loss Reason"
+                                      onClick={() => handleOpenLossAnalysis(trade)}
+                                      className={`p-2 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm ${analysesMap[trade.id] ? 'text-orange-500 hover:text-orange-700 hover:bg-orange-50' : 'text-rose-400 hover:text-rose-700 hover:bg-rose-50'}`}
+                                      title={analysesMap[trade.id] ? 'View Loss Analysis' : 'Create Loss Analysis'}
                                     >
                                       <FileText className="w-4 h-4" />
                                     </button>
                                   )}
-                                  {/* Link Checklist - Only if no checklist linked */}
-                                  {!(trade as any).checklistSession && (
-                                    <button
-                                      onClick={async () => {
-                                        setSelectedTrades([trade.id]);
-                                        try {
-                                          const checklists = await apiService.checklists.getActiveList();
-                                          setLinkChecklistModal({
-                                            isOpen: true,
-                                            activeChecklists: checklists || [],
-                                            selectedChecklistId: '',
-                                            isLinking: false
-                                          });
-                                        } catch (error) {
-                                          console.error('Failed to load checklists:', error);
-                                          alert('Failed to load checklists');
-                                        }
-                                      }}
-                                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-150 hover:scale-105"
-                                      title="Link Checklist"
-                                    >
-                                      <Link2 className="w-4 h-4" />
-                                    </button>
-                                  )}
-                                  {(trade as any).checklistId && (
-                                    <button
-                                      onClick={() => handleUnlinkChecklist(trade.id, (trade as any).checklistId)}
-                                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-150 hover:scale-105"
-                                      title="Unlink Checklist"
-                                    >
-                                      <Unlink className="w-4 h-4" />
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => setViewingTrade(trade)}
+                                    className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                                    title="View trade"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
                                   <button
                                     onClick={() => startEdit(trade)}
-                                    className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all duration-150 hover:scale-105"
+                                    className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm"
                                     title="Edit"
                                   >
                                     <Edit2 className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleDelete(trade.id)}
-                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all duration-150 hover:scale-105"
+                                    className="p-2 text-rose-400 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm"
                                     title="Delete"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -1759,249 +1772,394 @@ export default function TradeJournal() {
       {/* Trade Details Modal */}
       {viewingTrade && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200"
+          className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 z-50 animate-in fade-in duration-200"
           onClick={() => setViewingTrade(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col"
+            className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col border border-white/20"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Sticky Header */}
-            <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-gray-900">{viewingTrade.pair}</h2>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${viewingTrade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                      {viewingTrade.type}
-                    </span>
+            <div className="relative overflow-hidden bg-slate-950 text-white">
+              <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_#22c55e,_transparent_32%),radial-gradient(circle_at_top_right,_#38bdf8,_transparent_30%)]" />
+              <div className="relative p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${viewingTrade.type === 'BUY' ? 'bg-emerald-400/15 text-emerald-200 ring-1 ring-emerald-300/25' : 'bg-rose-400/15 text-rose-200 ring-1 ring-rose-300/25'}`}>
+                        {viewingTrade.type === 'BUY' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                        {viewingTrade.type}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${viewingTrade.status === 'OPEN' ? 'bg-sky-400/15 text-sky-200 ring-1 ring-sky-300/25' : 'bg-white/10 text-slate-200 ring-1 ring-white/15'}`}>
+                        {viewingTrade.status}
+                      </span>
+                      {(viewingTrade as any).checklistSession && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-400/15 text-violet-200 ring-1 ring-violet-300/25 text-xs font-semibold">
+                          <ClipboardCheck className="w-3.5 h-3.5" />
+                          {(viewingTrade as any).checklistSession}
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{viewingTrade.pair}</h2>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-300">
+                      <span className="inline-flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-slate-400" />
+                        {getAccountName(viewingTrade.accountId)}
+                      </span>
+                      <span className="inline-flex items-center gap-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full ring-2 ring-white/20"
+                          style={{ backgroundColor: getFirmColor(getTradeFirmId(viewingTrade)) }}
+                        />
+                        {getFirmName(viewingTrade.propFirmId)}
+                      </span>
+                      <span className="inline-flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-slate-400" />
+                        {getLocalDateString(viewingTrade.entryDate)}
+                      </span>
+                      {viewingTrade.entryTime && (
+                        <span className="inline-flex items-center gap-2">
+                          <Clock3 className="w-4 h-4 text-slate-400" />
+                          {viewingTrade.entryTime}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-slate-500 mt-1">
-                    {getLocalDateString(viewingTrade.entryDate)} {viewingTrade.entryTime && `at ${viewingTrade.entryTime}`}
-                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setViewingTrade(null);
+                        startEdit(viewingTrade);
+                      }}
+                      className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 text-white hover:bg-white/15 ring-1 ring-white/15 transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setViewingTrade(null)}
+                      className="p-2.5 hover:bg-white/10 rounded-xl transition-colors ring-1 ring-white/10"
+                      title="Close"
+                    >
+                      <X className="w-5 h-5 text-slate-200" />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setViewingTrade(null)}
-                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
+
+                <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="rounded-2xl bg-white/10 ring-1 ring-white/15 p-4 backdrop-blur">
+                    <div className="flex items-center justify-between text-slate-300 mb-3">
+                      <span className="text-xs font-medium uppercase">Net P/L</span>
+                      <CircleDollarSign className="w-4 h-4" />
+                    </div>
+                    <p className={`text-2xl font-bold ${getTradeRealPL(viewingTrade) >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                      {formatMoney(getTradeRealPL(viewingTrade), true)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 ring-1 ring-white/15 p-4 backdrop-blur">
+                    <div className="flex items-center justify-between text-slate-300 mb-3">
+                      <span className="text-xs font-medium uppercase">Gross P/L</span>
+                      <BarChart3 className="w-4 h-4" />
+                    </div>
+                    <p className={`text-2xl font-bold ${(viewingTrade.profit ?? 0) >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                      {viewingTrade.profit !== undefined ? formatMoney(viewingTrade.profit, true) : '-'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 ring-1 ring-white/15 p-4 backdrop-blur">
+                    <div className="flex items-center justify-between text-slate-300 mb-3">
+                      <span className="text-xs font-medium uppercase">Risk Reward</span>
+                      <Target className="w-4 h-4" />
+                    </div>
+                    <p className="text-2xl font-bold text-white">
+                      {viewingTrade.riskRewardRatio ? `1:${viewingTrade.riskRewardRatio.toFixed(2)}` : '-'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 ring-1 ring-white/15 p-4 backdrop-blur">
+                    <div className="flex items-center justify-between text-slate-300 mb-3">
+                      <span className="text-xs font-medium uppercase">Lot Size</span>
+                      <Layers className="w-4 h-4" />
+                    </div>
+                    <p className="text-2xl font-bold text-white">{viewingTrade.lotSize}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-5">
-              {/* Key Metrics Cards */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4">
-                  <p className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">Entry Price</p>
-                  <p className="text-xl font-bold text-gray-900">{viewingTrade.entryPrice.toFixed(5)}</p>
-                </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-4">
-                  <p className="text-xs text-purple-600 font-medium uppercase tracking-wide mb-1">Exit Price</p>
-                  <p className="text-xl font-bold text-gray-900">{viewingTrade.exitPrice?.toFixed(5) || '-'}</p>
-                </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-4">
-                  <p className={`text-xs font-medium uppercase tracking-wide mb-1 ${(viewingTrade.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>P/L</p>
-                  <p className={`text-xl font-bold ${(viewingTrade.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {viewingTrade.profit !== undefined ? `${viewingTrade.profit >= 0 ? '+' : ''}$${viewingTrade.profit.toFixed(2)}` : '-'}
-                  </p>
-                </div>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-4">
-                  <p className="text-xs text-orange-600 font-medium uppercase tracking-wide mb-1">Risk / Reward</p>
-                  <p className="text-xl font-bold text-gray-900">{viewingTrade.riskRewardRatio ? `1:${viewingTrade.riskRewardRatio.toFixed(2)}` : '-'}</p>
-                </div>
-              </div>
-
-              {/* Trade Information */}
-              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
-                  Trade Details
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Account</span>
-                    <span className="font-medium text-gray-900">{getAccountName(viewingTrade.accountId)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Lot Size</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.lotSize}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Commission</span>
-                    <span className="font-medium text-red-500">-${Math.abs(viewingTrade.commission || 0).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Swap</span>
-                    <span className="font-medium text-red-500">-${Math.abs((viewingTrade as any).swap || 0).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Status</span>
-                    <span className={`font-medium ${viewingTrade.status === 'OPEN' ? 'text-blue-600' : 'text-gray-700'}`}>{viewingTrade.status}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Real P/L Summary */}
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 mb-4 border border-slate-200">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="w-1 h-4 bg-emerald-500 rounded-full"></span>
-                  Net Performance
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <p className="text-xs text-slate-500 uppercase tracking-wide">Profit</p>
-                    <p className={`text-lg font-bold ${(viewingTrade.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ${viewingTrade.profit?.toFixed(2) || '0.00'}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-slate-500 uppercase tracking-wide">Real P/L</p>
-                    <p className={`text-lg font-bold ${(() => {
-                      const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) - Math.abs(viewingTrade.commission || 0) - Math.abs((viewingTrade as any).swap || 0));
-                      return realPL >= 0 ? 'text-green-600' : 'text-red-600';
-                    })()}`}>
-                      ${(() => {
-                        const realPL = (viewingTrade as any).realPL ?? ((viewingTrade.profit || 0) - Math.abs(viewingTrade.commission || 0) - Math.abs((viewingTrade as any).swap || 0));
-                        return realPL >= 0 ? `+${realPL.toFixed(2)}` : realPL.toFixed(2);
-                      })()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trade Management */}
-              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="w-1 h-4 bg-orange-500 rounded-full"></span>
-                  Risk Management
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Stop Loss</span>
-                    <span className="font-medium text-red-600">{viewingTrade.stopLoss?.toFixed(5) || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Take Profit</span>
-                    <span className="font-medium text-green-600">{viewingTrade.takeProfit?.toFixed(5) || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Risk (pips)</span>
-                    <span className="font-medium text-red-600">
-                      {viewingTrade.stopLoss && viewingTrade.entryPrice ? Math.abs((viewingTrade.entryPrice - viewingTrade.stopLoss) * 10000).toFixed(1) : '-'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Reward (pips)</span>
-                    <span className="font-medium text-green-600">
-                      {viewingTrade.takeProfit && viewingTrade.entryPrice ? Math.abs((viewingTrade.takeProfit - viewingTrade.entryPrice) * 10000).toFixed(1) : '-'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Session & Strategy */}
-              <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="w-1 h-4 bg-purple-500 rounded-full"></span>
-                  Session & Strategy
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Session</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.session || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Strategy</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.strategy || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Key Level</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.keyLevel || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">High/Low Time</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.highLowTime || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">SMT</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.smt || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Model #1</span>
-                    <span className="font-medium text-gray-900">{viewingTrade.model1 || '-'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Screenshots */}
-              {(viewingTrade.beforeScreenshot || viewingTrade.afterScreenshot) && (
-                <div className="bg-slate-50/50 rounded-xl p-4 mb-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4" />
-                    Screenshots
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {viewingTrade.beforeScreenshot && (
-                      <div className="relative group rounded-lg overflow-hidden">
-                        <img
-                          src={viewingTrade.beforeScreenshot}
-                          alt="Before trade"
-                          className="w-full h-40 object-cover cursor-pointer"
-                          onClick={() => {
-                            const images = [];
-                            if (viewingTrade.beforeScreenshot) images.push({ url: viewingTrade.beforeScreenshot, label: 'Before Screenshot' });
-                            if (viewingTrade.afterScreenshot) images.push({ url: viewingTrade.afterScreenshot, label: 'After Screenshot' });
-                            setViewingImages(images);
-                            setViewingImageIndex(0);
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
-                          <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6">
+              <div className="grid grid-cols-1 xl:grid-cols-[1.25fr_0.75fr] gap-5">
+                <div className="space-y-5">
+                  <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-xl bg-sky-50 text-sky-600">
+                          <BarChart3 className="w-4 h-4" />
                         </div>
-                        <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                          Before
-                        </span>
+                        <h3 className="font-semibold text-slate-900">Price Execution</h3>
                       </div>
-                    )}
-                    {viewingTrade.afterScreenshot && (
-                      <div className="relative group rounded-lg overflow-hidden">
-                        <img
-                          src={viewingTrade.afterScreenshot}
-                          alt="After trade"
-                          className="w-full h-40 object-cover cursor-pointer"
-                          onClick={() => {
-                            const images = [];
-                            if (viewingTrade.beforeScreenshot) images.push({ url: viewingTrade.beforeScreenshot, label: 'Before Screenshot' });
-                            if (viewingTrade.afterScreenshot) images.push({ url: viewingTrade.afterScreenshot, label: 'After Screenshot' });
-                            setViewingImages(images);
-                            setViewingImageIndex(viewingTrade.beforeScreenshot ? 1 : 0);
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
-                          <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="text-xs text-slate-400 font-mono">#{viewingTrade.id.slice(-6).toUpperCase()}</span>
+                    </div>
+                    <div className="p-5">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                          <p className="text-xs text-slate-500 uppercase font-medium mb-1">Entry</p>
+                          <p className="text-xl font-bold text-slate-950 font-mono">{formatPrice(viewingTrade.entryPrice, viewingTrade.pair)}</p>
                         </div>
-                        <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                          After
-                        </span>
+                        <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                          <p className="text-xs text-slate-500 uppercase font-medium mb-1">Exit</p>
+                          <p className="text-xl font-bold text-slate-950 font-mono">{formatPrice(viewingTrade.exitPrice, viewingTrade.pair)}</p>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                          <p className="text-xs text-slate-500 uppercase font-medium mb-1">Realized Move</p>
+                          <p className={`text-xl font-bold ${viewingTrade.exitPrice ? (viewingTrade.type === 'BUY' ? viewingTrade.exitPrice - viewingTrade.entryPrice : viewingTrade.entryPrice - viewingTrade.exitPrice) >= 0 ? 'text-emerald-600' : 'text-rose-600' : 'text-slate-400'}`}>
+                            {viewingTrade.exitPrice ? `${((viewingTrade.type === 'BUY' ? viewingTrade.exitPrice - viewingTrade.entryPrice : viewingTrade.entryPrice - viewingTrade.exitPrice) * 10000).toFixed(1)} pips` : '-'}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              )}
 
-              {/* Notes Section */}
-              {viewingTrade.notes && (
-                <div className="bg-amber-50/50 rounded-xl p-4">
-                  <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
-                    <span className={`w-1 h-4 rounded-full ${viewingTrade.notes ? 'bg-amber-500' : 'bg-gray-400'}`}></span>
-                    Notes
-                  </h4>
-                  <p className="text-sm text-gray-700 leading-relaxed">{viewingTrade.notes}</p>
+                      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="rounded-xl border border-rose-100 bg-rose-50/70 p-4">
+                          <p className="text-xs text-rose-600 uppercase font-medium mb-1">Stop Loss</p>
+                          <p className="text-lg font-bold text-rose-700 font-mono">{formatPrice(viewingTrade.stopLoss, viewingTrade.pair)}</p>
+                        </div>
+                        <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+                          <p className="text-xs text-emerald-600 uppercase font-medium mb-1">Take Profit</p>
+                          <p className="text-lg font-bold text-emerald-700 font-mono">{formatPrice(viewingTrade.takeProfit, viewingTrade.pair)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                        <CircleDollarSign className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900">Performance Breakdown</h3>
+                    </div>
+                    <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                        <p className="text-xs text-slate-500 uppercase font-medium mb-1">Gross</p>
+                        <p className={`text-lg font-bold ${(viewingTrade.profit ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {viewingTrade.profit !== undefined ? formatMoney(viewingTrade.profit, true) : '-'}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                        <p className="text-xs text-slate-500 uppercase font-medium mb-1">Commission</p>
+                        <p className="text-lg font-bold text-rose-600">{formatMoney(-Math.abs(viewingTrade.commission || 0))}</p>
+                      </div>
+                      <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                        <p className="text-xs text-slate-500 uppercase font-medium mb-1">Swap</p>
+                        <p className="text-lg font-bold text-rose-600">{formatMoney(-Math.abs((viewingTrade as any).swap || 0))}</p>
+                      </div>
+                      <div className="rounded-xl bg-slate-950 p-4">
+                        <p className="text-xs text-slate-300 uppercase font-medium mb-1">Net</p>
+                        <p className={`text-lg font-bold ${getTradeRealPL(viewingTrade) >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                          {formatMoney(getTradeRealPL(viewingTrade), true)}
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-violet-50 text-violet-600">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900">Context</h3>
+                    </div>
+                    <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                      {[
+                        ['Session', viewingTrade.session || '-'],
+                        ['Strategy', viewingTrade.strategy || '-'],
+                        ['Key Level', viewingTrade.keyLevel || '-'],
+                        ['High/Low Time', viewingTrade.highLowTime || '-'],
+                        ['SSMT', viewingTrade.ssmtType || viewingTrade.smt || '-'],
+                        ['Model #1', viewingTrade.model1 || '-'],
+                      ].map(([label, value]) => (
+                        <div key={label} className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+                          <span className="text-slate-500">{label}</span>
+                          <span className="font-medium text-slate-900 text-right">{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  {viewingTrade.notes && (
+                    <section className="bg-amber-50 rounded-2xl border border-amber-200 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <FileText className="w-4 h-4 text-amber-700" />
+                        <h3 className="font-semibold text-amber-950">Notes</h3>
+                      </div>
+                      <p className="text-sm text-amber-900 leading-relaxed whitespace-pre-wrap">{viewingTrade.notes}</p>
+                    </section>
+                  )}
                 </div>
-              )}
+
+                <div className="space-y-5">
+                  <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-slate-100 text-slate-700">
+                        <Clock3 className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900">Timeline</h3>
+                    </div>
+                    <div className="p-5 space-y-5">
+                      <div className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                          <span className="w-px flex-1 bg-slate-200 mt-2" />
+                        </div>
+                        <div className="pb-4">
+                          <p className="font-semibold text-slate-900">Entry</p>
+                          <p className="text-sm text-slate-500">{getLocalDateString(viewingTrade.entryDate)}{viewingTrade.entryTime ? `, ${viewingTrade.entryTime}` : ''}</p>
+                          <p className="text-sm font-mono text-slate-700 mt-1">{formatPrice(viewingTrade.entryPrice, viewingTrade.pair)}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <span className={`w-3 h-3 rounded-full ${viewingTrade.exitDate ? 'bg-slate-900' : 'bg-slate-300'}`} />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">Exit</p>
+                          <p className="text-sm text-slate-500">{viewingTrade.exitDate ? `${getLocalDateString(viewingTrade.exitDate)}${viewingTrade.exitTime ? `, ${viewingTrade.exitTime}` : ''}` : 'Still open'}</p>
+                          <p className="text-sm font-mono text-slate-700 mt-1">{formatPrice(viewingTrade.exitPrice, viewingTrade.pair)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                          <ClipboardCheck className="w-4 h-4" />
+                        </div>
+                        <h3 className="font-semibold text-slate-900">Checklist</h3>
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      {(viewingTrade as any).checklistSession ? (
+                        <button
+                          onClick={() => handleViewChecklist((viewingTrade as any).checklistId)}
+                          className="w-full flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-left hover:bg-blue-100 transition-colors"
+                        >
+                          <span>
+                            <span className="block font-semibold text-blue-900">{(viewingTrade as any).checklistSession}</span>
+                            <span className="text-sm text-blue-700">View linked checklist</span>
+                          </span>
+                          <Eye className="w-4 h-4 text-blue-700" />
+                        </button>
+                      ) : (
+                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center">
+                          <ClipboardCheck className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                          <p className="text-sm font-medium text-slate-700">No checklist linked</p>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  {getTradeRealPL(viewingTrade) < 0 && (
+                    <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 rounded-xl bg-orange-50 text-orange-600">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <h3 className="font-semibold text-slate-900">Loss Analysis</h3>
+                        </div>
+                        {analysesMap[viewingTrade.id] && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Analyzed
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-5">
+                        {analysesMap[viewingTrade.id] ? (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                <p className="text-xs text-slate-500 uppercase font-medium mb-1">Category</p>
+                                <p className="text-sm font-semibold text-slate-900">{analysesMap[viewingTrade.id].reasonType || '-'}</p>
+                              </div>
+                              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                <p className="text-xs text-slate-500 uppercase font-medium mb-1">Type</p>
+                                <p className="text-sm font-semibold text-slate-900">{analysesMap[viewingTrade.id].isValidTrade ? 'Valid Loss' : 'Mistake'}</p>
+                              </div>
+                            </div>
+                            {analysesMap[viewingTrade.id].description && (
+                              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                <p className="text-xs text-slate-500 uppercase font-medium mb-1">Notes</p>
+                                <p className="text-sm text-slate-700 whitespace-pre-wrap">{analysesMap[viewingTrade.id].description}</p>
+                              </div>
+                            )}
+                            {analysesMap[viewingTrade.id].createdAt && (
+                              <p className="text-xs text-slate-400">
+                                Analyzed on {new Date(analysesMap[viewingTrade.id].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </p>
+                            )}
+                            <button
+                              onClick={() => handleOpenLossAnalysis(viewingTrade)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-rose-500 text-white rounded-xl hover:from-orange-600 hover:to-rose-600 shadow-md transition-all text-sm font-semibold"
+                            >
+                              <FileText className="w-4 h-4" />
+                              View Full Analysis
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-rose-200 bg-rose-50/50 px-4 py-5 text-center">
+                            <FileText className="w-8 h-8 text-rose-300 mx-auto mb-2" />
+                            <p className="text-sm font-medium text-rose-800">No loss analysis recorded</p>
+                            <p className="text-xs text-rose-600 mt-1">Analyze this trade to track mistakes</p>
+                            <button
+                              onClick={() => handleOpenLossAnalysis(viewingTrade)}
+                              className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-orange-500 text-white rounded-xl hover:from-rose-600 hover:to-orange-600 shadow-md transition-all text-xs font-semibold"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              Create Loss Analysis
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
+                  <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-slate-100 text-slate-700">
+                        <ImageIcon className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900">Screenshots</h3>
+                    </div>
+                    <div className="p-5">
+                      {getTradeImages(viewingTrade).length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
+                          {getTradeImages(viewingTrade).map((image, index) => (
+                            <button
+                              key={image.label}
+                              onClick={() => openTradeImageViewer(viewingTrade, index)}
+                              className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 text-left"
+                            >
+                              <img src={image.url} alt={image.label} className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                              <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/35 transition-colors flex items-center justify-center">
+                                <ZoomIn className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                              <span className="absolute left-3 bottom-3 px-2.5 py-1 rounded-lg bg-slate-950/75 text-white text-xs font-medium">
+                                {image.label.replace(' Screenshot', '')}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+                          <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                          <p className="text-sm font-medium text-slate-700">No screenshots added</p>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                </div>
+              </div>
             </div>
           </div>
         </div>

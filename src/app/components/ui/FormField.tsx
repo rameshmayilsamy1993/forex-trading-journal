@@ -9,8 +9,8 @@ interface FormFieldProps {
 
 export default function FormField({ label, required = false, children, className = '' }: FormFieldProps) {
   return (
-    <div className={`space-y-1 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700">
+    <div className={`space-y-1.5 ${className}`}>
+      <label className="block text-sm font-medium text-slate-700">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>

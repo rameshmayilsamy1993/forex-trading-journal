@@ -37,7 +37,7 @@ const getLiquidityLabel = (high: boolean, low: boolean) => {
   if (high && low) return { label: 'High & Low', color: 'bg-orange-100 border-orange-300 text-orange-700' };
   if (high) return { label: 'High Taken', color: 'bg-blue-100 border-blue-300 text-blue-700' };
   if (low) return { label: 'Low Taken', color: 'bg-purple-100 border-purple-300 text-purple-700' };
-  return { label: 'None', color: 'bg-gray-100 border-gray-300 text-gray-600' };
+  return { label: 'None', color: 'bg-slate-100 border-gray-300 text-slate-600' };
 };
 
 export default function H4History() {
@@ -247,7 +247,7 @@ export default function H4History() {
                       key={time}
                       className={cn(
                         "p-4 rounded-lg border-l-4",
-                        dir === 'BULLISH' ? 'border-green-500 bg-green-50' : dir === 'BEARISH' ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-gray-50'
+                        dir === 'BULLISH' ? 'border-green-500 bg-green-50' : dir === 'BEARISH' ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-slate-50'
                       )}
                     >
                       <div className="flex items-center justify-between">

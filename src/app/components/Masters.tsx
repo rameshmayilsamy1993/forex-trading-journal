@@ -88,17 +88,17 @@ export default function Masters() {
 
       <CardContainer className="!p-0">
         {/* Tabs */}
-        <div className="flex border-b border-gray-100">
+        <div className="flex border-b border-slate-200">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveType(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
                   activeType === tab.id
-                    ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-purple-700 border-b-2 border-purple-600 bg-purple-50/50'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -137,12 +137,15 @@ export default function Masters() {
               filteredMasters.map(master => (
                 <div
                   key={master.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl group hover:border-purple-200 hover:bg-purple-50/30 transition-all duration-200"
+                  className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl group hover:border-purple-200 hover:bg-purple-50/30 hover:shadow-sm transition-all duration-200"
                 >
-                  <span className="font-medium text-gray-900">{master.name}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-purple-400" />
+                    <span className="font-semibold text-slate-900">{master.name}</span>
+                  </div>
                   <button
                     onClick={() => handleDelete(master.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-2 text-rose-400 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all duration-150 opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

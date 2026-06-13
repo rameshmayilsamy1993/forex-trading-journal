@@ -82,7 +82,7 @@ const getLiquidityMeta = (liquidity: string): LiquidityMeta => {
 const getLiquidityBadge = (liquidity: string) => {
   const meta = getLiquidityMeta(liquidity);
   return (
-    <span className={cn("inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold", meta.badgeColor)}>
+    <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm border transition-all hover:scale-105", meta.badgeColor)}>
       {meta.label}
     </span>
   );
@@ -193,7 +193,7 @@ export default function LiquidityHistory() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg"
+              className="modern-input px-3 py-2"
             />
           </div>
 
@@ -203,13 +203,13 @@ export default function LiquidityHistory() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg"
+              className="modern-input px-3 py-2"
             />
           </div>
 
           <button
             onClick={loadEntries}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg"
+            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all duration-200 hover:shadow-sm"
             title="Refresh"
           >
             <RefreshCw className="w-4 h-4" />
@@ -219,26 +219,32 @@ export default function LiquidityHistory() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">High Taken</div>
-          <div className="text-2xl font-bold text-blue-600 flex items-center gap-2">
-            <ArrowUp className="w-5 h-5" />
-            {stats.highTaken}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">High Taken</span>
+            <div className="p-2 bg-blue-50 rounded-xl">
+              <ArrowUp className="w-4 h-4 text-blue-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-blue-600">{stats.highTaken}</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">Low Taken</div>
-          <div className="text-2xl font-bold text-purple-600 flex items-center gap-2">
-            <ArrowDown className="w-5 h-5" />
-            {stats.lowTaken}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">Low Taken</span>
+            <div className="p-2 bg-purple-50 rounded-xl">
+              <ArrowDown className="w-4 h-4 text-purple-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-purple-600">{stats.lowTaken}</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-sm text-slate-500">Both Taken</div>
-          <div className="text-2xl font-bold text-orange-600 flex items-center gap-2">
-            <ArrowUpDown className="w-5 h-5" />
-            {stats.bothTaken}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">Both Taken</span>
+            <div className="p-2 bg-orange-50 rounded-xl">
+              <ArrowUpDown className="w-4 h-4 text-orange-600" />
+            </div>
           </div>
+          <div className="text-2xl font-bold text-orange-600">{stats.bothTaken}</div>
         </div>
       </div>
 
@@ -256,32 +262,34 @@ export default function LiquidityHistory() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEntries]) => (
-              <div key={date} className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="p-4 bg-slate-50 border-b border-slate-200">
-                  <span className="font-semibold">{formatDate(date)}</span>
-                  <span className="text-sm text-slate-500 ml-2">({dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''})</span>
+              <div key={date} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="p-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-slate-900">{formatDate(date)}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">{dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''}</span>
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50/50">
-                        <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Time</th>
-                        <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Pair</th>
-                        <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Monthly</th>
-                        <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Weekly</th>
-                        <th className="text-center py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Daily</th>
-                        <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Notes</th>
+                      <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Time</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Pair</th>
+                        <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Monthly</th>
+                        <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Weekly</th>
+                        <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Daily</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Notes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 
-                          className="hover:bg-slate-50 transition-colors cursor-pointer"
+                          className="group hover:bg-slate-50/70 transition-all duration-150 cursor-pointer"
                           onClick={() => setSelectedEntry(entry)}
                         >
-                          <td className="py-3 px-4 text-sm">{formatTime(entry.createdAt)}</td>
-                          <td className="py-3 px-4 text-sm font-medium">{entry.pair}</td>
+                          <td className="py-3 px-4 text-sm text-slate-600 font-mono">{formatTime(entry.createdAt)}</td>
+                          <td className="py-3 px-4 text-sm font-semibold text-slate-900">{entry.pair}</td>
                           <td className="py-3 px-4 text-center">
                             {getLiquidityBadge(entry.monthlyLiquidity)}
                           </td>
@@ -291,8 +299,8 @@ export default function LiquidityHistory() {
                           <td className="py-3 px-4 text-center">
                             {getLiquidityBadge(entry.dailyLiquidity)}
                           </td>
-                          <td className="py-3 px-4 text-sm text-slate-500 max-w-[200px] truncate">
-                            {entry.notes || '-'}
+                          <td className="py-3 px-4 text-sm text-slate-500 max-w-[200px] truncate group-hover:text-slate-700 transition-colors">
+                            {entry.notes || <span className="text-slate-300">-</span>}
                           </td>
                         </tr>
                       ))}
@@ -314,14 +322,14 @@ export default function LiquidityHistory() {
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-3 py-1 bg-slate-100 rounded hover:bg-slate-200 disabled:opacity-50"
+                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all duration-200"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-3 py-1 bg-slate-100 rounded hover:bg-slate-200 disabled:opacity-50"
+                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all duration-200"
               >
                 Next
               </button>
@@ -340,18 +348,21 @@ export default function LiquidityHistory() {
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-white">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {selectedEntry.pair} - Liquidity Details
-                </h2>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xl font-bold text-slate-900">
+                    {selectedEntry.pair}
+                  </h2>
+                  <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold">Liquidity</span>
+                </div>
                 <p className="text-sm text-slate-500">
                   {formatDate(selectedEntry.createdAt)} at {formatTime(selectedEntry.createdAt)}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedEntry(null)}
-                className="p-2 hover:bg-slate-100 rounded-lg"
+                className="p-2 hover:bg-white/80 rounded-xl transition-colors"
               >
                 <X className="w-5 h-5 text-slate-500" />
               </button>
@@ -360,7 +371,7 @@ export default function LiquidityHistory() {
 <div className="p-5 overflow-y-auto max-h-[70vh]">
               {/* Liquidity States */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3"> Liquidity States</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Liquidity States</h3>
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { key: 'monthlyLiquidity', label: 'Monthly' },
@@ -373,15 +384,17 @@ export default function LiquidityHistory() {
                       <div 
                         key={key}
                         className={cn(
-                          "p-5 rounded-lg border-l-4 shadow-sm transition-all hover:shadow-md",
+                          "p-5 rounded-2xl border-l-4 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5 duration-200",
                           meta.cardColor
                         )}
                       >
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{label}</span>
-                          {meta.icon}
+                          <span className="text-sm font-semibold text-slate-600">{label}</span>
+                          <div className={cn("p-2 rounded-xl bg-white/50", meta.cardText)}>
+                            {meta.icon}
+                          </div>
                         </div>
-                        <div className={cn("text-xl font-bold mb-1", meta.cardText)}>
+                        <div className={cn("text-base font-bold mb-1", meta.cardText)}>
                           {meta.fullLabel}
                         </div>
                       </div>
@@ -393,7 +406,9 @@ export default function LiquidityHistory() {
               {/* Insights */}
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                  <Info className="w-4 h-4" />
+                  <div className="p-1.5 rounded-lg bg-indigo-50">
+                    <Info className="w-4 h-4 text-indigo-600" />
+                  </div>
                   Trading Insights
                 </h3>
                 <div className="space-y-3">
@@ -408,13 +423,15 @@ export default function LiquidityHistory() {
                       <div 
                         key={key} 
                         className={cn(
-                          "p-4 rounded-lg border-l-4 shadow-sm",
+                          "p-4 rounded-2xl border-l-4 shadow-sm transition-all hover:shadow-md",
                           meta.cardColor
                         )}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">{label}</span>
-                          {meta.icon}
+                          <span className="font-semibold text-slate-700">{label}</span>
+                          <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", meta.badgeColor)}>
+                            {meta.label}
+                          </span>
                         </div>
                         <p className={cn("text-sm font-medium", meta.cardText)}>
                           {meta.insight}
@@ -429,8 +446,8 @@ export default function LiquidityHistory() {
               {selectedEntry.notes && (
                 <div>
                   <h3 className="text-sm font-semibold text-slate-700 mb-3">Notes</h3>
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-sm text-slate-600">{selectedEntry.notes}</p>
+                  <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                    <p className="text-sm text-amber-800">{selectedEntry.notes}</p>
                   </div>
                 </div>
               )}

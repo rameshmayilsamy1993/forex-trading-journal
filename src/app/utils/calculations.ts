@@ -25,6 +25,25 @@ export const calculateTradeProfit = (trade: Trade): number => {
   return priceDiff * trade.lotSize * 100000; // Standard lot calculation
 };
 
+export const formatPrice = (value?: number, pair?: string): string => {
+  if (value === undefined || value === null) return '-';
+
+  if (pair) {
+    const upper = pair.toUpperCase();
+    if (upper === 'XAUUSD' || upper === 'BTCUSD') return value.toFixed(2);
+    if (upper === 'USDJPY' || upper === 'JPYUSD') return value.toFixed(3);
+    if (['EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'USDCAD', 'USDCHF', 'EURGBP', 'EURAUD', 'EURJPY', 'GBPJPY', 'AUDJPY'].includes(upper)) return value.toFixed(5);
+  }
+
+  return value.toFixed(5);
+};
+
+export const formatMoney = (value?: number, showPlus = false): string => {
+  if (value === undefined || Number.isNaN(value)) return '-';
+  const prefix = showPlus && value > 0 ? '+$' : value < 0 ? '-$' : '$';
+  return `${prefix}${Math.abs(value).toFixed(2)}`;
+};
+
 export const calculateTradeStats = (trades: Trade[]): TradeStats => {
   const closedTrades = trades.filter(t => t.status === 'CLOSED' && t.profit !== undefined);
 

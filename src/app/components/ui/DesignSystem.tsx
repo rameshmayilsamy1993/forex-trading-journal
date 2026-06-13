@@ -3,18 +3,19 @@ import { LucideIcon } from 'lucide-react';
 import { cn } from './utils';
 import { Button } from './button';
 
-export type ColorTheme = 'blue' | 'green' | 'orange' | 'purple' | 'teal' | 'pink' | 'red' | 'indigo' | 'yellow';
+export type ColorTheme = 'blue' | 'green' | 'orange' | 'purple' | 'teal' | 'pink' | 'red' | 'indigo' | 'yellow' | 'slate';
 
-const colorThemes: Record<ColorTheme, { gradient: string; text: string; bg: string }> = {
-  blue: { gradient: 'from-blue-500 to-blue-600', text: 'text-blue-600', bg: 'bg-blue-50' },
-  green: { gradient: 'from-green-500 to-emerald-600', text: 'text-green-600', bg: 'bg-green-50' },
-  orange: { gradient: 'from-orange-500 to-red-500', text: 'text-orange-600', bg: 'bg-orange-50' },
-  purple: { gradient: 'from-purple-500 to-pink-500', text: 'text-purple-600', bg: 'bg-purple-50' },
-  teal: { gradient: 'from-teal-500 to-cyan-600', text: 'text-teal-600', bg: 'bg-teal-50' },
-  pink: { gradient: 'from-pink-500 to-rose-500', text: 'text-pink-600', bg: 'bg-pink-50' },
-  red: { gradient: 'from-red-500 to-rose-600', text: 'text-red-600', bg: 'bg-red-50' },
-  indigo: { gradient: 'from-indigo-500 to-purple-600', text: 'text-indigo-600', bg: 'bg-indigo-50' },
-  yellow: { gradient: 'from-yellow-500 to-amber-500', text: 'text-yellow-600', bg: 'bg-yellow-50' },
+const colorThemes: Record<ColorTheme, { gradient: string; text: string; bg: string; ring: string; iconBg: string; iconText: string }> = {
+  blue: { gradient: 'from-blue-600 to-indigo-600', text: 'text-blue-700', bg: 'bg-blue-50', ring: 'ring-blue-500/10', iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600', iconText: 'text-white' },
+  green: { gradient: 'from-emerald-500 to-teal-500', text: 'text-emerald-700', bg: 'bg-emerald-50', ring: 'ring-emerald-500/10', iconBg: 'bg-gradient-to-br from-emerald-500 to-green-600', iconText: 'text-white' },
+  orange: { gradient: 'from-amber-500 to-orange-500', text: 'text-amber-700', bg: 'bg-amber-50', ring: 'ring-amber-500/10', iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600', iconText: 'text-white' },
+  purple: { gradient: 'from-violet-600 to-indigo-500', text: 'text-violet-700', bg: 'bg-violet-50', ring: 'ring-violet-500/10', iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600', iconText: 'text-white' },
+  teal: { gradient: 'from-cyan-500 to-sky-500', text: 'text-cyan-700', bg: 'bg-cyan-50', ring: 'ring-cyan-500/10', iconBg: 'bg-gradient-to-br from-cyan-500 to-teal-600', iconText: 'text-white' },
+  pink: { gradient: 'from-rose-500 to-fuchsia-500', text: 'text-rose-700', bg: 'bg-rose-50', ring: 'ring-rose-500/10', iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600', iconText: 'text-white' },
+  red: { gradient: 'from-rose-600 to-red-500', text: 'text-rose-700', bg: 'bg-rose-50', ring: 'ring-rose-500/10', iconBg: 'bg-gradient-to-br from-red-500 to-rose-600', iconText: 'text-white' },
+  indigo: { gradient: 'from-indigo-600 to-blue-500', text: 'text-indigo-700', bg: 'bg-indigo-50', ring: 'ring-indigo-500/10', iconBg: 'bg-gradient-to-br from-indigo-500 to-blue-600', iconText: 'text-white' },
+  yellow: { gradient: 'from-yellow-500 to-amber-400', text: 'text-amber-700', bg: 'bg-yellow-50', ring: 'ring-amber-500/10', iconBg: 'bg-gradient-to-br from-yellow-500 to-amber-600', iconText: 'text-white' },
+  slate: { gradient: 'from-slate-800 to-slate-600', text: 'text-slate-700', bg: 'bg-slate-100', ring: 'ring-slate-500/10', iconBg: 'bg-gradient-to-br from-slate-600 to-slate-700', iconText: 'text-white' },
 };
 
 const defaultTheme = colorThemes.blue;
@@ -28,7 +29,7 @@ interface IconBadgeProps {
 
 export function IconBadge({ icon: Icon, color, size = 'md', className }: IconBadgeProps) {
   const theme = color ? (colorThemes[color] || defaultTheme) : defaultTheme;
-  
+
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
@@ -44,13 +45,13 @@ export function IconBadge({ icon: Icon, color, size = 'md', className }: IconBad
   return (
     <div
       className={cn(
-        'rounded-xl flex items-center justify-center text-white shadow-sm',
-        `bg-gradient-to-br ${theme.gradient}`,
+        'rounded-xl flex items-center justify-center shadow-lg shadow-slate-950/10',
+        theme.iconBg,
         sizeClasses[size],
-        className
+        className,
       )}
     >
-      <Icon className={iconSizes[size]} />
+      <Icon className={cn(iconSizes[size], 'text-white')} />
     </div>
   );
 }
@@ -69,28 +70,23 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, subtitle, icon: Icon, color = 'blue', action, children }: PageHeaderProps) {
-  const theme = color ? (colorThemes[color] || defaultTheme) : defaultTheme;
-  
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-3">
         {Icon && <IconBadge icon={Icon} color={color} />}
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#0F172A]">{title}</h1>
+          {subtitle && <p className="text-sm text-[#64748B] mt-0.5">{subtitle}</p>}
         </div>
         {children}
       </div>
       {action && (
         <Button
           onClick={action.onClick}
-          className={cn(
-            'shadow-sm',
-            theme.gradient,
-            'hover:opacity-90 text-white'
-          )}
+          className="shadow-lg shadow-[#2563EB]/25"
+          variant={color === 'red' ? 'destructive' : 'default'}
         >
-          {action.icon && <action.icon className="w-4 h-4 mr-2" />}
+          {action.icon && <action.icon className="w-4 h-4" />}
           {action.label}
         </Button>
       )}
@@ -112,30 +108,34 @@ interface StatCardProps {
 
 export function StatCard({ label, value, icon: Icon, color = 'blue', trend, className }: StatCardProps) {
   const theme = color ? (colorThemes[color] || defaultTheme) : defaultTheme;
-  
+
   return (
     <div
       className={cn(
-        'bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200',
-        'border border-gray-100',
-        className
+        'bg-white rounded-2xl border border-[#E5EAF2] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] shadow-[0_4px_16px_rgba(15,23,42,0.06)]',
+        className,
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm text-gray-500 font-medium">{label}</p>
-          <p className={cn('text-2xl font-bold mt-1', theme.text)}>
+          <p className="text-xs uppercase tracking-[0.12em] text-[#64748B] font-semibold">{label}</p>
+          <p className={cn('text-2xl font-bold mt-1.5 tracking-tight', theme.text)}>
             {value}
           </p>
           {trend && (
-            <p className={cn('text-xs mt-1 font-medium', trend.positive ? 'text-green-600' : 'text-red-600')}>
-              {trend.positive !== false ? '+' : ''}{trend.value}
+            <p
+              className={cn(
+                'text-xs mt-2 font-medium inline-flex items-center gap-1 px-2 py-0.5 rounded-full',
+                trend.positive !== false ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700',
+              )}
+            >
+              {trend.positive !== false ? '↑' : '↓'} {trend.value}
             </p>
           )}
         </div>
         {Icon && (
-          <div className={cn('p-2.5 rounded-lg', theme.bg)}>
-            <Icon className={cn('w-5 h-5', theme.text)} />
+          <div className={cn('p-3 rounded-xl shadow-sm', theme.iconBg)}>
+            <Icon className="w-5 h-5 text-white" />
           </div>
         )}
       </div>
@@ -155,16 +155,15 @@ export const CardContainer = React.forwardRef<HTMLDivElement, CardContainerProps
       <div
         ref={ref}
         className={cn(
-          'bg-white p-5 rounded-xl shadow-sm',
-          'border border-gray-100',
-          hover && 'hover:shadow-md transition-all duration-200',
-          className
+          'bg-white rounded-2xl border border-[#E5EAF2] p-5 shadow-[0_4px_16px_rgba(15,23,42,0.06)]',
+          hover && 'hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] hover:-translate-y-0.5 transition-all duration-200',
+          className,
         )}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 CardContainer.displayName = 'CardContainer';
@@ -181,26 +180,28 @@ interface SectionCardProps {
 
 export function SectionCard({ title, subtitle, icon: Icon, color = 'blue', children, className, action }: SectionCardProps) {
   const theme = color ? (colorThemes[color] || defaultTheme) : defaultTheme;
-  
+
   return (
-    <div className={cn('bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden', className)}>
+    <div className={cn('bg-white rounded-2xl border border-[#E5EAF2] overflow-hidden shadow-[0_4px_16px_rgba(15,23,42,0.06)]', className)}>
       {(title || action) && (
-        <div className={cn('px-5 py-4 border-b border-gray-100 bg-gradient-to-r', theme.bg, '/30')}>
+        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-gradient-to-r from-white to-[#F8FAFC]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {Icon && <Icon className={cn('w-5 h-5', theme.text)} />}
+            <div className="flex items-center gap-2.5">
+              {Icon && (
+                <div className={cn('p-2 rounded-lg', theme.iconBg)}>
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+              )}
               <div>
-                {title && <h3 className="font-semibold text-gray-900">{title}</h3>}
-                {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+                {title && <h3 className="font-semibold text-[#0F172A]">{title}</h3>}
+                {subtitle && <p className="text-xs text-[#64748B] mt-0.5">{subtitle}</p>}
               </div>
             </div>
             {action}
           </div>
         </div>
       )}
-      <div className="p-5">
-        {children}
-      </div>
+      <div className="p-5">{children}</div>
     </div>
   );
 }
@@ -211,45 +212,33 @@ interface TableCardProps {
 }
 
 export function TableCard({ children, className }: TableCardProps) {
-  return (
-    <div className={cn('bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden', className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn('bg-white rounded-2xl border border-[#E5EAF2] overflow-hidden shadow-[0_4px_16px_rgba(15,23,42,0.06)]', className)}>{children}</div>;
 }
 
 export function TableHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cn('px-5 py-3 bg-gray-50 border-b border-gray-100', className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn('px-5 py-3 bg-[#F8FAFC] border-b border-[#E5EAF2]', className)}>{children}</div>;
 }
 
 export function TableBody({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
-export function TableRow({ 
-  children, 
-  className, 
-  onClick 
-}: { 
-  children: React.ReactNode; 
-  className?: string; 
+export function TableRow({
+  children,
+  className,
+  onClick,
+}: {
+  children: React.ReactNode;
+  className?: string;
   onClick?: () => void;
 }) {
   return (
     <div
       className={cn(
-        'px-5 py-3 border-b border-gray-50 last:border-0',
-        'hover:bg-gray-50/50 transition-colors',
+        'px-5 py-3 border-b border-[#E5EAF2]/60 last:border-0',
+        'hover:bg-[#F8FAFC] transition-colors duration-150',
         onClick && 'cursor-pointer',
-        className
+        className,
       )}
       onClick={onClick}
     >

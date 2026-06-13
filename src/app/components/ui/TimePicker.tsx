@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Clock, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface TimePickerProps {
   value: string;
@@ -48,16 +48,6 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
 
   const formatTime = (hour12: string, minute: string, period: 'AM' | 'PM'): string => {
     return `${hour12.padStart(2, '0')}:${minute} ${period}`;
-  };
-
-  const get24HourTime = (): string => {
-    let hour = parseInt(selectedHour);
-    if (selectedPeriod === 'PM' && hour !== 12) {
-      hour += 12;
-    } else if (selectedPeriod === 'AM' && hour === 12) {
-      hour = 0;
-    }
-    return `${hour.toString().padStart(2, '0')}:${selectedMinute}`;
   };
 
   useEffect(() => {
@@ -136,37 +126,37 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full h-10 px-3 flex items-center gap-2 bg-white border border-gray-200 rounded-lg
-          hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-          transition-all duration-200 text-left
+          w-full h-12 px-4 flex items-center gap-2 bg-white border border-slate-200 rounded-xl
+          hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+          transition-all duration-200 text-left shadow-sm
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          ${value ? 'text-gray-900' : 'text-gray-400'}
+          ${value ? 'text-slate-900' : 'text-slate-400'}
         `}
       >
-        <Clock className="w-4 h-4 text-gray-400" />
+        <Clock className="w-4 h-4 text-slate-400" />
         <span className="text-sm">{displayValue}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 left-0 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex gap-2 mb-4 pb-3 border-b border-gray-100">
+        <div className="absolute z-50 mt-2 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 animate-in fade-in zoom-in-95 duration-200 min-w-[280px]">
+          <div className="flex gap-2 mb-4 pb-3 border-b border-slate-100">
             {quickSelects.map((qs) => (
               <button
                 key={qs.label}
                 type="button"
                 onClick={() => handleQuickSelect(qs.time)}
-                className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
               >
                 {qs.label}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="flex flex-col items-center">
-              <span className="text-[10px] text-gray-400 uppercase mb-1">Hour</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">Hour</span>
               <div className="relative">
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50 rounded-lg pointer-events-none border border-blue-200" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50/80 rounded-lg pointer-events-none border border-blue-100" />
                 <div
                   ref={hourRef}
                   className="w-14 h-40 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative"
@@ -189,7 +179,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                           transition-all duration-150 rounded-lg mx-1
                           ${selectedHour === hour 
                             ? 'text-blue-600 bg-blue-50' 
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}
                         `}
                       >
                         {hour}
@@ -200,12 +190,12 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
               </div>
             </div>
 
-            <span className="text-2xl font-bold text-gray-400 mt-4">:</span>
+            <span className="text-2xl font-bold text-slate-300 mt-4">:</span>
 
             <div className="flex flex-col items-center">
-              <span className="text-[10px] text-gray-400 uppercase mb-1">Min</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">Min</span>
               <div className="relative">
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50 rounded-lg pointer-events-none border border-blue-200" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50/80 rounded-lg pointer-events-none border border-blue-100" />
                 <div
                   ref={minuteRef}
                   className="w-14 h-40 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative"
@@ -228,7 +218,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                           transition-all duration-150 rounded-lg mx-1
                           ${selectedMinute === minute 
                             ? 'text-blue-600 bg-blue-50' 
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}
                         `}
                       >
                         {minute}
@@ -239,8 +229,8 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
               </div>
             </div>
 
-            <div className="flex flex-col items-center ml-2">
-              <span className="text-[10px] text-gray-400 uppercase mb-1">AM/PM</span>
+            <div className="flex flex-col items-center ml-1">
+              <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">AM/PM</span>
               <div className="flex flex-col gap-1">
                 {PERIODS.map((period) => (
                   <button
@@ -251,7 +241,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                       px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 cursor-pointer
                       ${selectedPeriod === period 
                         ? 'bg-blue-600 text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
                     `}
                   >
                     {period}
@@ -261,11 +251,11 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
+          <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             >
               Cancel
             </button>
@@ -275,7 +265,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                 onChange(formatTime(selectedHour, selectedMinute, selectedPeriod));
                 setIsOpen(false);
               }}
-              className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              className="px-4 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
             >
               Set Time
             </button>

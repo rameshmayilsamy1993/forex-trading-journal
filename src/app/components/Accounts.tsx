@@ -4,15 +4,16 @@ import { TradingAccount, PropFirm, Trade, AccountStatus } from '../types/trading
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
-import { PageHeader, CardContainer, SectionCard, StatCard } from './ui/DesignSystem';
+import { Button } from './ui/button';
+import { PageHeader, CardContainer, StatCard } from './ui/DesignSystem';
 
-const STATUS_COLORS: Record<AccountStatus, string> = {
-  ACTIVE: 'bg-green-100 text-green-800',
-  BREACHED: 'bg-red-100 text-red-800',
-  PASSED_1: 'bg-yellow-100 text-yellow-800',
-  PASSED_2: 'bg-orange-100 text-orange-800',
-  FUNDED: 'bg-purple-100 text-purple-800',
-  DISABLED: 'bg-slate-100 text-slate-600',
+const STATUS_COLORS: Record<AccountStatus, { bg: string; text: string; dot: string }> = {
+  ACTIVE: { bg: 'bg-[#16A34A]/10', text: 'text-[#16A34A]', dot: 'bg-[#16A34A]' },
+  BREACHED: { bg: 'bg-[#DC2626]/10', text: 'text-[#DC2626]', dot: 'bg-[#DC2626]' },
+  PASSED_1: { bg: 'bg-[#EA580C]/10', text: 'text-[#EA580C]', dot: 'bg-[#EA580C]' },
+  PASSED_2: { bg: 'bg-[#2563EB]/10', text: 'text-[#2563EB]', dot: 'bg-[#2563EB]' },
+  FUNDED: { bg: 'bg-[#7C3AED]/10', text: 'text-[#7C3AED]', dot: 'bg-[#7C3AED]' },
+  DISABLED: { bg: 'bg-[#64748B]/10', text: 'text-[#64748B]', dot: 'bg-[#64748B]' },
 };
 
 const STATUS_LABELS: Record<AccountStatus, string> = {
@@ -22,6 +23,15 @@ const STATUS_LABELS: Record<AccountStatus, string> = {
   PASSED_2: 'Passed P2',
   FUNDED: 'Funded',
   DISABLED: 'Disabled',
+};
+
+const STATUS_WATERMARK: Record<AccountStatus, string | null> = {
+  ACTIVE: null,
+  BREACHED: 'BREACHED',
+  PASSED_1: 'PASSED',
+  PASSED_2: 'PASSED',
+  FUNDED: 'FUNDED',
+  DISABLED: null,
 };
 
 interface FormFieldsProps {
@@ -43,16 +53,15 @@ function FormFields({ formData, setFormData, firms, onSubmit, onCancel, isEditin
         onChange={e => setFormData({ ...formData, name: e.target.value })}
         autoFocus
       />
-      <Select
-        value={formData.propFirmId}
-        onValueChange={value => setFormData({ ...formData, propFirmId: value })}
-      >
+      <Select value={formData.propFirmId} onValueChange={value => setFormData({ ...formData, propFirmId: value })}>
         <SelectTrigger>
           <SelectValue placeholder="Select Prop Firm" />
         </SelectTrigger>
         <SelectContent>
           {firms.map((firm, i) => (
-            <SelectItem key={firm.id ?? i} value={firm.id}>{firm.name}</SelectItem>
+            <SelectItem key={firm.id ?? i} value={firm.id}>
+              {firm.name}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -65,10 +74,7 @@ function FormFields({ formData, setFormData, firms, onSubmit, onCancel, isEditin
         step="0.01"
       />
 
-      <Select
-        value={formData.currency}
-        onValueChange={value => setFormData({ ...formData, currency: value })}
-      >
+      <Select value={formData.currency} onValueChange={value => setFormData({ ...formData, currency: value })}>
         <SelectTrigger>
           <SelectValue placeholder="Currency" />
         </SelectTrigger>
@@ -80,36 +86,29 @@ function FormFields({ formData, setFormData, firms, onSubmit, onCancel, isEditin
       </Select>
 
       {isEditing && (
-        <Select
-          value={formData.status}
-          onValueChange={value => setFormData({ ...formData, status: value as AccountStatus })}
-        >
+        <Select value={formData.status} onValueChange={value => setFormData({ ...formData, status: value as AccountStatus })}>
           <SelectTrigger>
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <SelectItem key={value} value={value}>{label}</SelectItem>
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       )}
 
       <div className="col-span-2 flex gap-2 justify-end">
-        <button
-          onClick={onSubmit}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-        >
+        <Button variant="success" onClick={onSubmit}>
           <Check className="w-4 h-4" />
           Save
-        </button>
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
-        >
+        </Button>
+        <Button variant="outline" onClick={onCancel}>
           <X className="w-4 h-4" />
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -135,7 +134,7 @@ export default function Accounts() {
         const [accountsData, firmsData, tradesData] = await Promise.all([
           apiService.getAccounts(),
           apiService.getPropFirms(),
-          apiService.getTrades()
+          apiService.getTrades(),
         ]);
         setAccounts(accountsData);
         setFirms(firmsData);
@@ -185,7 +184,7 @@ export default function Accounts() {
 
     try {
       const savedAccount = await apiService.updateAccount(id, updatedAccount);
-      setAccounts(accounts.map(account => account.id === id ? savedAccount : account));
+      setAccounts(accounts.map(account => (account.id === id ? savedAccount : account)));
       setEditingId(null);
       setFormData({ name: '', propFirmId: '', initialBalance: '', currency: 'USD', status: 'ACTIVE' });
     } catch (error) {
@@ -245,7 +244,6 @@ export default function Accounts() {
     return String(trade.accountId || '');
   };
 
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <PageHeader
@@ -256,37 +254,27 @@ export default function Accounts() {
         action={{
           label: 'Add Account',
           icon: Plus,
-          onClick: () => setIsAdding(true)
+          onClick: () => setIsAdding(true),
         }}
       />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard
-          label="Total Accounts"
-          value={accounts.length}
-          icon={Wallet}
-          color="teal"
-        />
+        <StatCard label="Total Accounts" value={accounts.length} icon={Wallet} color="teal" />
         <StatCard
           label="Total Balance"
           value={`$${accounts.reduce((sum, acc) => sum + acc.initialBalance, 0).toLocaleString()}`}
           icon={Building2}
           color="blue"
         />
-        <StatCard
-          label="Prop Firms"
-          value={firms.length}
-          icon={Building2}
-          color="green"
-        />
+        <StatCard label="Prop Firms" value={firms.length} icon={Building2} color="green" />
       </div>
 
       <CardContainer className="!p-0">
         <div className="p-6">
           {firms.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <div className="text-center py-12 text-[#64748B]">
+              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-40" />
               <p>Please add a prop firm first</p>
               <p className="text-sm">Go to "Prop Firms" tab to create one</p>
             </div>
@@ -294,23 +282,15 @@ export default function Accounts() {
 
           {firms.length > 0 && (
             <>
-              {/* Add Form */}
               {isAdding && (
                 <div className="mb-6 p-4 bg-gradient-to-r from-teal-50/50 to-cyan-50/50 rounded-xl border border-teal-100">
-                  <FormFields
-                    formData={formData}
-                    setFormData={setFormData}
-                    firms={firms}
-                    onSubmit={handleAdd}
-                    onCancel={cancelEdit}
-                  />
+                  <FormFields formData={formData} setFormData={setFormData} firms={firms} onSubmit={handleAdd} onCancel={cancelEdit} />
                 </div>
               )}
 
-              {/* Accounts Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {accounts.length === 0 && !isAdding && (
-                  <div className="col-span-full text-center py-12 text-gray-500">
+                  <div className="col-span-full text-center py-12 text-[#64748B]">
                     <p>No accounts added yet</p>
                     <p className="text-sm">Click "Add Account" to get started</p>
                   </div>
@@ -321,21 +301,26 @@ export default function Accounts() {
                   const getRealPL = (t: any) => t.realPL ?? ((t.profit || 0) + (t.commission || 0) + (t.swap || 0));
                   const pl = accountTrades.reduce((sum, t) => sum + getRealPL(t), 0);
                   const currentBalance = account.initialBalance + pl;
+                  const statusStyle = STATUS_COLORS[account.status || 'ACTIVE'];
+                  const watermark = STATUS_WATERMARK[account.status || 'ACTIVE'];
                   const isBreached = account.status === 'BREACHED';
 
                   return (
                     <div
                       key={account.id ?? i}
-                      className={`border rounded-xl p-5 transition-all duration-200 relative ${
-                        isBreached
-                          ? 'bg-gray-100 border-gray-300 opacity-75'
-                          : 'bg-white border-gray-100 hover:shadow-md hover:border-teal-200'
-                      }`}
+                      className={`bg-white rounded-2xl border p-5 transition-all duration-200 relative overflow-hidden ${
+                        isBreached ? 'border-[#DC2626]/30 opacity-80' : 'border-[#E5EAF2] hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] hover:-translate-y-0.5'
+                      } shadow-[0_4px_16px_rgba(15,23,42,0.06)]`}
                     >
-                      {isBreached && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                          <span className="text-red-500 text-6xl font-bold opacity-20 transform rotate-12 select-none">
-                            BREACHED
+                      {/* Watermark */}
+                      {watermark && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <span
+                            className={`text-5xl font-black opacity-[0.04] select-none tracking-[0.15em] ${
+                              watermark === 'BREACHED' ? 'text-[#DC2626]' : watermark === 'FUNDED' ? 'text-[#7C3AED]' : 'text-[#2563EB]'
+                            }`}
+                          >
+                            {watermark}
                           </span>
                         </div>
                       )}
@@ -351,59 +336,60 @@ export default function Accounts() {
                         />
                       ) : (
                         <>
-                          <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start justify-between mb-4 relative z-10">
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <h3 className={`font-bold ${isBreached ? 'text-gray-500' : 'text-gray-900'}`}>{account.name}</h3>
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[account.status || 'ACTIVE']}`}>
+                                <h3 className={`font-bold text-[#0F172A]`}>{account.name}</h3>
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
                                   {STATUS_LABELS[account.status || 'ACTIVE']}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                <div
-                                  className="w-3 h-3 rounded-full"
-                                  style={{ backgroundColor: getFirmColor(account.propFirmId) }}
-                                />
-                                <span className={`text-sm ${isBreached ? 'text-gray-400' : 'text-gray-600'}`}>{getFirmName(account.propFirmId)}</span>
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getFirmColor(account.propFirmId) }} />
+                                <span className={`text-sm ${isBreached ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
+                                  {getFirmName(account.propFirmId)}
+                                </span>
                               </div>
                             </div>
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 relative z-10">
                               {!isBreached && (
                                 <button
                                   onClick={() => startEdit(account)}
-                                  className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                  className="p-1.5 text-[#64748B] hover:bg-[#F1F5F9] rounded-lg transition-colors"
                                 >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
                               )}
                               <button
                                 onClick={() => handleDelete(account.id)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                className="p-1.5 text-[#DC2626] hover:bg-red-50 rounded-lg transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </div>
 
-                          <div className="space-y-2">
+                          <div className="space-y-2 relative z-10">
                             <div className="flex justify-between text-sm">
-                              <span className={isBreached ? 'text-gray-400' : 'text-gray-600'}>Initial:</span>
-                              <span className={`font-medium ${isBreached ? 'text-gray-400' : 'text-gray-900'}`}>
+                              <span className="text-[#64748B]">Initial:</span>
+                              <span className="font-medium text-[#0F172A]">
                                 {formatCurrency(account.initialBalance, account.currency)}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className={isBreached ? 'text-gray-400' : 'text-gray-600'}>Current:</span>
-                              <span className={`font-bold ${isBreached ? 'text-gray-400' : currentBalance >= account.initialBalance
-                                  ? 'text-green-600'
-                                  : 'text-red-600'
-                                }`}>
+                              <span className="text-[#64748B]">Current:</span>
+                              <span
+                                className={`font-bold ${
+                                  currentBalance >= account.initialBalance ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                                }`}
+                              >
                                 {formatCurrency(currentBalance, account.currency)}
                               </span>
                             </div>
-                            <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
-                              <span className={isBreached ? 'text-gray-400' : 'text-gray-600'}>P/L:</span>
-                              <span className={`font-bold ${isBreached ? 'text-gray-400' : pl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className="flex justify-between text-sm pt-2 border-t border-[#E5EAF2]">
+                              <span className="text-[#64748B]">P/L:</span>
+                              <span className={`font-bold ${pl >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                                 {pl >= 0 ? '+' : ''}
                                 {formatCurrency(pl, account.currency)}
                               </span>

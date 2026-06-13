@@ -23,7 +23,7 @@ const getLiquidityColor = (liquidity: string) => {
     case 'HIGH_TAKEN': return 'bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-300';
     case 'LOW_TAKEN': return 'bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-300';
     case 'BOTH_TAKEN': return 'bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-900 dark:border-orange-700 dark:text-orange-300';
-    default: return 'bg-gray-100 border-gray-300 text-gray-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400';
+    default: return 'bg-slate-100 border-gray-300 text-slate-600 dark:bg-gray-800 dark:border-gray-600 dark:text-slate-400';
   }
 };
 

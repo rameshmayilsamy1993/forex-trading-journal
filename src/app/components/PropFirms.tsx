@@ -139,13 +139,13 @@ export default function PropFirms() {
                 </div>
                 <button
                   onClick={handleAdd}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="p-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 shadow-lg shadow-emerald-500/25 transition-all duration-200"
                 >
                   <Check className="w-4 h-4" />
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="p-2.5 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all duration-200"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -205,7 +205,7 @@ export default function PropFirms() {
                 ) : (
                   <>
                     <div
-                      className="w-4 h-4 rounded-full"
+                      className="w-5 h-5 rounded-full ring-2 ring-white shadow-sm"
                       style={{ backgroundColor: firm.color }}
                     />
                     <span className="flex-1 font-medium text-gray-900">{firm.name}</span>
@@ -214,13 +214,13 @@ export default function PropFirms() {
                     </span>
                     <button
                       onClick={() => startEdit(firm)}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-150"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(firm.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-rose-400 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all duration-150"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
