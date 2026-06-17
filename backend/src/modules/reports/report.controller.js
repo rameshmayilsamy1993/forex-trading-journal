@@ -133,17 +133,17 @@ const exportMissedTrades = async (req, res, next) => {
 
     const children = [];
 
-    let headerText = 'Missed Trades Journal';
+    let headerText = 'CRT Missed Trades Journal';
     if (period === 'daily') {
-      headerText = `Missed Trades Journal — ${new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+      headerText = `CRT Missed Trades Journal — ${new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
     } else if (period === 'weekly') {
       const startOfWeek = new Date(date);
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
-      headerText = `Missed Trades Journal — ${startOfWeek.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} to ${endOfWeek.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+      headerText = `CRT Missed Trades Journal — ${startOfWeek.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} to ${endOfWeek.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
     } else if (period === 'monthly') {
-      headerText = `Missed Trades Journal — ${new Date(date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+      headerText = `CRT Missed Trades Journal — ${new Date(date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
     }
 
     children.push(new Paragraph({
@@ -185,6 +185,10 @@ const exportMissedTrades = async (req, res, next) => {
       addField('Status', trade.status);
       addField('Session', trade.session);
       addField('Strategy', trade.strategy);
+      addField('Entry Time', trade.time || 'N/A');
+      addField('Turtle Soup High Time', trade.turtleSoupTime || 'N/A');
+      addField('Daily Quarter', trade.dailyQuarter || 'N/A');
+      addField('6HR Quarter', trade.sixHourQuarter || 'N/A');
 
       if (trade.missedReason || trade.reason) {
         addField('Reason', trade.missedReason || trade.reason);

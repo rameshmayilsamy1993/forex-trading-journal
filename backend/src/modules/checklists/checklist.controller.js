@@ -198,10 +198,24 @@ const linkToTrade = async (req, res, next) => {
       });
     }
 
+    const Trade = require('../trades/trade.model').Trade;
+
     if (!checklist.linkedTrades.includes(tradeId)) {
       checklist.linkedTrades.push(tradeId);
-      await checklist.save();
     }
+
+    await Trade.updateOne(
+      { _id: tradeId, userId: req.session.userId },
+      { 
+        checklistId: checklist._id,
+        checklistSession: checklist.sessionId
+      }
+    );
+
+    if (!checklist.linkedTrades.includes(tradeId)) {
+      checklist.linkedTrades.push(tradeId);
+    }
+    await checklist.save();
 
     res.json(checklist);
   } catch (error) {
@@ -246,10 +260,6 @@ const linkChecklistToTrades = async (req, res, next) => {
 
     if (!checklist) {
       return res.status(404).json({ message: 'Checklist not found' });
-    }
-
-    if (checklist.status === 'LINKED') {
-      return res.status(400).json({ message: 'Checklist already linked to trades' });
     }
 
     if (!checklist.isValid) {

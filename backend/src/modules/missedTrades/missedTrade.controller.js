@@ -6,11 +6,18 @@ const { deleteImage } = require('../../config/cloudinary');
 
 const getAll = async (req, res, next) => {
   try {
-    const { ssmtType } = req.query;
+    const { ssmtType, dailyQuarter, sixHourQuarter, status, pair, type, model1Confirmation, ssmtConfirmation } = req.query;
     let filter = { userId: req.session.userId };
     if (ssmtType !== undefined && SSMT_TYPES.includes(ssmtType)) {
       filter.ssmtType = ssmtType;
     }
+    if (dailyQuarter) filter.dailyQuarter = dailyQuarter;
+    if (sixHourQuarter) filter.sixHourQuarter = sixHourQuarter;
+    if (status) filter.status = status;
+    if (pair) filter.pair = pair;
+    if (type) filter.type = type;
+    if (model1Confirmation) filter.model1Confirmation = model1Confirmation;
+    if (ssmtConfirmation) filter.ssmtConfirmation = ssmtConfirmation;
 
     const missedTrades = await MissedTrade.find(filter)
       .sort({ date: -1 });

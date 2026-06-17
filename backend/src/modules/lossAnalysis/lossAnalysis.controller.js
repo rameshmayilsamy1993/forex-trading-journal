@@ -114,8 +114,7 @@ const getList = async (req, res, next) => {
     const analyses = await LossAnalysis.find(filter)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(parseInt(limit))
-      .populate('tradeId');
+      .limit(parseInt(limit));
     
     const total = await LossAnalysis.countDocuments(filter);
     
