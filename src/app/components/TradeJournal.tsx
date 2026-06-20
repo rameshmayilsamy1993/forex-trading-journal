@@ -18,6 +18,8 @@ import { getDateKey, getLocalDateString, convertTo24Hour } from '../utils/dateUt
 import LossReasonModal from './LossReasonModal';
 import ExportMenu from './ExportMenu';
 import StrategyChecklist from './StrategyChecklist';
+import ChecklistDetailsModal from './ChecklistDetailsModal';
+import Modal from './ui/Modal';
 
 
 export default function TradeJournal() {
@@ -76,6 +78,24 @@ export default function TradeJournal() {
     checklist: any | null;
     isLoading: boolean;
   }>({ isOpen: false, checklist: null, isLoading: false });
+
+  // Checklist Details Modal State
+  const [checklistDetailsModal, setChecklistDetailsModal] = useState<{
+    isOpen: boolean;
+    tradeId: string | null;
+    checklistId: string | undefined;
+  }>({ isOpen: false, tradeId: null, checklistId: undefined });
+
+  // Create Checklist From Details Flow
+  const [createChecklistFlow, setCreateChecklistFlow] = useState<{
+    isOpen: boolean;
+    tradeId: string | null;
+  }>({ isOpen: false, tradeId: null });
+
+  // Edit Checklist Modal (distinct from create-flow checklist modal)
+  const [editChecklistModal, setEditChecklistModal] = useState<{
+    isOpen: boolean;
+  }>({ isOpen: false });
 
   // Cached checklists for performance
   const [checklistCache, setChecklistCache] = useState<Record<string, any>>({});
@@ -145,14 +165,12 @@ export default function TradeJournal() {
         setPairs(pairsData || []);
         setActiveSessions(sessionsData || []);
 
-        // Build analysis map
+        // Build analysis map (tradeId is a string from API)
         if (analysesData?.analyses) {
           const map: Record<string, any> = {};
           analysesData.analyses.forEach((a: any) => {
-            if (a.tradeId) {
-              const tid = typeof a.tradeId === 'object' ? a.tradeId._id || a.tradeId : a.tradeId;
-              map[tid] = a;
-            }
+            const tid = typeof a.tradeId === 'object' ? String(a.tradeId.id || a.tradeId._id || a.tradeId) : a.tradeId;
+            if (tid) map[tid] = a;
           });
           setAnalysesMap(map);
         }
@@ -253,7 +271,7 @@ export default function TradeJournal() {
 
   const isEditMode = !!editingId;
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (overrideChecklistId?: string, overrideChecklistSession?: string) => {
     if (!formData.accountId || !formData.pair || !formData.entryPrice || !formData.lotSize) {
       alert('Please fill in all required fields: Account, Pair, Entry Price, and Lot Size');
       return;
@@ -321,8 +339,8 @@ export default function TradeJournal() {
 
     // Get selected checklist info
     const selectedSession = activeSessions.find(s => s.id === selectedChecklistId);
-    const checklistIdToUse = checklistModal.completedChecklistId || selectedChecklistId || formData.checklistId;
-    const checklistSessionToUse = checklistModal.completedSessionId || selectedSession?.sessionId || formData.checklistSession;
+    const checklistIdToUse = overrideChecklistId || checklistModal.completedChecklistId || selectedChecklistId || formData.checklistId;
+    const checklistSessionToUse = overrideChecklistSession || checklistModal.completedSessionId || selectedSession?.sessionId || formData.checklistSession;
 
     const newTrade: Omit<Trade, 'id'> = {
       accountId: formData.accountId,
@@ -541,6 +559,55 @@ export default function TradeJournal() {
         mode: 'add'
       });
     }
+  };
+
+  const handleOpenChecklistDetails = (trade: Trade) => {
+    setChecklistDetailsModal({
+      isOpen: true,
+      tradeId: trade.id,
+      checklistId: (trade as any).checklistId || undefined
+    });
+  };
+
+  const handleEditChecklistComplete = async (checklistId: string, isValid: boolean, sessionId: string | undefined) => {
+    if (!editingId || !isValid || !checklistId) {
+      setEditChecklistModal({ isOpen: false });
+      return;
+    }
+    try {
+      await apiService.checklists.linkToTrade(checklistId, editingId);
+      setTrades(prev => prev.map(t =>
+        t.id === editingId ? { ...t, checklistId, checklistSession: sessionId } : t
+      ));
+      setFormData(prev => ({ ...prev, checklistId, checklistSession: sessionId || '' }));
+    } catch (err) {
+      console.error('Failed to link checklist:', err);
+      alert('Failed to link checklist to trade.');
+    }
+    setEditChecklistModal({ isOpen: false });
+  };
+
+  const handleCreateChecklist = (tradeId: string) => {
+    setChecklistDetailsModal({ isOpen: false, tradeId: null, checklistId: undefined });
+    setCreateChecklistFlow({ isOpen: true, tradeId });
+  };
+
+  const handleChecklistCreated = async (checklistId: string, isValid: boolean, sessionId: string | undefined) => {
+    const tradeId = createChecklistFlow.tradeId;
+    if (!tradeId || !isValid || !checklistId) {
+      setCreateChecklistFlow({ isOpen: false, tradeId: null });
+      return;
+    }
+    try {
+      await apiService.checklists.linkToTrade(checklistId, tradeId);
+      setTrades(prev => prev.map(t =>
+        t.id === tradeId ? { ...t, checklistId, checklistSession: sessionId } : t
+      ));
+    } catch (err) {
+      console.error('Failed to link checklist to trade:', err);
+      alert('Checklist created but failed to link. Please use bulk link.');
+    }
+    setCreateChecklistFlow({ isOpen: false, tradeId: null });
   };
 
   const toggleSelect = (id: string) => {
@@ -1531,7 +1598,7 @@ export default function TradeJournal() {
                     )}
                     {isEditMode && (
                       <button
-                        onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null })}
+                        onClick={() => setEditChecklistModal({ isOpen: true })}
                         className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-all duration-200"
                       >
                         <Link2 className="w-4 h-4" />
@@ -1554,7 +1621,7 @@ export default function TradeJournal() {
                       </span>
                     )}
                     <button
-                      onClick={editingId ? () => handleEdit(editingId) : handleSubmit}
+                      onClick={editingId ? () => handleEdit(editingId) : () => handleSubmit()}
                       disabled={!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId}
                       className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -1705,15 +1772,10 @@ export default function TradeJournal() {
                                 })()}
                               </td>
                               <td className="py-3 px-4 text-sm text-center align-middle">
-                                {getChecklistStatus(trade) === 'complete' ? (
+                                {(trade as any).checklistId ? (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit mx-auto">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    Complete
-                                  </span>
-                                ) : getChecklistStatus(trade) === 'partial' ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 w-fit mx-auto">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                    Partial
+                                    <Check className="w-3 h-3" />
+                                    Completed
                                   </span>
                                 ) : (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200 w-fit mx-auto">
@@ -1724,6 +1786,13 @@ export default function TradeJournal() {
                               </td>
                               <td className="py-3 px-4 text-right align-middle">
                                 <div className="flex items-center justify-end gap-1">
+                                  <button
+                                    onClick={() => handleOpenChecklistDetails(trade)}
+                                    className={`p-2 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm ${(trade as any).checklistId ? 'text-violet-500 hover:text-violet-700 hover:bg-violet-50' : 'text-slate-400 hover:text-violet-700 hover:bg-violet-50'}`}
+                                    title="Checklist"
+                                  >
+                                    <ClipboardCheck className="w-4 h-4" />
+                                  </button>
                                   {getTradeRealPL(trade) < 0 && (
                                     <button
                                       onClick={() => handleOpenLossAnalysis(trade)}
@@ -1771,15 +1840,9 @@ export default function TradeJournal() {
 
       {/* Trade Details Modal */}
       {viewingTrade && (
-        <div
-          className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 z-50 animate-in fade-in duration-200"
-          onClick={() => setViewingTrade(null)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col border border-white/20"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative overflow-hidden bg-slate-950 text-white">
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-white/20 animate-in zoom-in-95 duration-200">
+            <div className="relative overflow-hidden bg-slate-950 text-white flex-shrink-0">
               <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_#22c55e,_transparent_32%),radial-gradient(circle_at_top_right,_#38bdf8,_transparent_30%)]" />
               <div className="relative p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
@@ -1838,10 +1901,10 @@ export default function TradeJournal() {
                     </button>
                     <button
                       onClick={() => setViewingTrade(null)}
-                      className="p-2.5 hover:bg-white/10 rounded-xl transition-colors ring-1 ring-white/10"
+                      className="p-2 bg-white/10 hover:bg-red-500 hover:text-white rounded-full transition-colors"
                       title="Close"
                     >
-                      <X className="w-5 h-5 text-slate-200" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
@@ -2060,56 +2123,121 @@ export default function TradeJournal() {
 
                   {getTradeRealPL(viewingTrade) < 0 && (
                     <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-xl bg-orange-50 text-orange-600">
-                            <FileText className="w-4 h-4" />
+                      <div className="relative overflow-hidden bg-gradient-to-r from-orange-600 to-rose-600 text-white">
+                        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#f97316,_transparent_32%),radial-gradient(circle_at_top_right,_#e11d48,_transparent_30%)]" />
+                        <div className="relative px-5 py-4 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-lg bg-white/15">
+                              <FileText className="w-4 h-4" />
+                            </div>
+                            <h3 className="font-semibold">Loss Analysis</h3>
                           </div>
-                          <h3 className="font-semibold text-slate-900">Loss Analysis</h3>
+                          {analysesMap[viewingTrade.id] ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-400/20 text-emerald-200 px-2.5 py-1 rounded-full border border-emerald-300/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
+                              Analyzed
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-rose-400/20 text-rose-200 px-2.5 py-1 rounded-full border border-rose-300/30">
+                              Pending
+                            </span>
+                          )}
                         </div>
-                        {analysesMap[viewingTrade.id] && (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Analyzed
-                          </span>
-                        )}
                       </div>
                       <div className="p-5">
-                        {analysesMap[viewingTrade.id] ? (
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
-                                <p className="text-xs text-slate-500 uppercase font-medium mb-1">Category</p>
-                                <p className="text-sm font-semibold text-slate-900">{analysesMap[viewingTrade.id].reasonType || '-'}</p>
+                        {analysesMap[viewingTrade.id] ? (() => {
+                          const a = analysesMap[viewingTrade.id];
+                          const analysisImages: { url: string; label: string }[] = [];
+                          if (a.images && a.images.length > 0) {
+                            a.images.forEach((img: any) => {
+                              analysisImages.push({ url: img.url, label: `${img.timeframe} Chart` });
+                            });
+                          }
+                          return (
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                  a.isValidTrade
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {a.isValidTrade ? 'Valid Loss' : 'Mistake'}
+                                </span>
+                                {a.disciplineScore && (
+                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                    a.disciplineScore <= 2 ? 'bg-red-100 text-red-700' : a.disciplineScore <= 3 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+                                  }`}>
+                                    Discipline: {a.disciplineScore}/5
+                                  </span>
+                                )}
                               </div>
-                              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
-                                <p className="text-xs text-slate-500 uppercase font-medium mb-1">Type</p>
-                                <p className="text-sm font-semibold text-slate-900">{analysesMap[viewingTrade.id].isValidTrade ? 'Valid Loss' : 'Mistake'}</p>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                  <p className="text-xs text-slate-500 uppercase font-medium mb-1">Reason Type</p>
+                                  <p className="text-sm font-semibold text-slate-900">{a.reasonType || '-'}</p>
+                                </div>
+                                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                  <p className="text-xs text-slate-500 uppercase font-medium mb-1">Title</p>
+                                  <p className="text-sm font-semibold text-slate-900">{a.title || '-'}</p>
+                                </div>
                               </div>
+
+                              {a.description && (
+                                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                  <p className="text-xs text-slate-500 uppercase font-medium mb-1.5">Description</p>
+                                  <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{a.description}</p>
+                                </div>
+                              )}
+
+                              {analysisImages.length > 0 && (
+                                <div>
+                                  <p className="text-xs text-slate-500 uppercase font-medium mb-2">Chart Images</p>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {analysisImages.map((img, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => {
+                                          setViewingImages(analysisImages);
+                                          setViewingImageIndex(idx);
+                                        }}
+                                        className="group relative aspect-video rounded-lg overflow-hidden border border-slate-200 bg-slate-100"
+                                      >
+                                        <img src={img.url} alt={img.label} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors flex items-center justify-center">
+                                          <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
+                                        <span className="absolute left-2 bottom-2 px-2 py-0.5 rounded-md bg-slate-900/75 text-white text-xs font-medium">
+                                          {img.label}
+                                        </span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="flex items-center gap-4 text-xs text-slate-400 pt-1">
+                                {a.createdAt && (
+                                  <span>Created: {new Date(a.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                )}
+                                {a.updatedAt && a.updatedAt !== a.createdAt && (
+                                  <span>Updated: {new Date(a.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                )}
+                              </div>
+
+                              <button
+                                onClick={() => handleOpenLossAnalysis(viewingTrade)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-rose-500 text-white rounded-xl hover:from-orange-600 hover:to-rose-600 shadow-md transition-all text-sm font-semibold"
+                              >
+                                <FileText className="w-4 h-4" />
+                                View Full Analysis
+                              </button>
                             </div>
-                            {analysesMap[viewingTrade.id].description && (
-                              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
-                                <p className="text-xs text-slate-500 uppercase font-medium mb-1">Notes</p>
-                                <p className="text-sm text-slate-700 whitespace-pre-wrap">{analysesMap[viewingTrade.id].description}</p>
-                              </div>
-                            )}
-                            {analysesMap[viewingTrade.id].createdAt && (
-                              <p className="text-xs text-slate-400">
-                                Analyzed on {new Date(analysesMap[viewingTrade.id].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                              </p>
-                            )}
-                            <button
-                              onClick={() => handleOpenLossAnalysis(viewingTrade)}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-rose-500 text-white rounded-xl hover:from-orange-600 hover:to-rose-600 shadow-md transition-all text-sm font-semibold"
-                            >
-                              <FileText className="w-4 h-4" />
-                              View Full Analysis
-                            </button>
-                          </div>
-                        ) : (
+                          );
+                        })() : (
                           <div className="rounded-xl border border-dashed border-rose-200 bg-rose-50/50 px-4 py-5 text-center">
                             <FileText className="w-8 h-8 text-rose-300 mx-auto mb-2" />
-                            <p className="text-sm font-medium text-rose-800">No loss analysis recorded</p>
+                            <p className="text-sm font-medium text-rose-800">No Loss Analysis Added</p>
                             <p className="text-xs text-rose-600 mt-1">Analyze this trade to track mistakes</p>
                             <button
                               onClick={() => handleOpenLossAnalysis(viewingTrade)}
@@ -2175,47 +2303,45 @@ export default function TradeJournal() {
       )}
 
       {/* Bulk Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-red-100 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">Delete Trades</h3>
-            </div>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete <span className="font-semibold">{selectedTrades.length}</span> trade{selectedTrades.length > 1 ? 's' : ''}? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 shadow-lg shadow-red-500/25"
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash className="w-4 h-4" />
-                    Delete
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Trades"
+        icon={<AlertTriangle className="w-6 h-6" />}
+        size="sm"
+        footer={
+          <>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-sm font-medium transition-colors"
+              disabled={isDeleting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center gap-2 text-sm font-medium shadow-lg shadow-red-500/25 transition-colors"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash className="w-4 h-4" />
+                  Delete
+                </>
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="text-slate-600">
+          Are you sure you want to delete <span className="font-semibold">{selectedTrades.length}</span> trade{selectedTrades.length > 1 ? 's' : ''}? This action cannot be undone.
+        </p>
+      </Modal>
 
       {/* Loss Analysis Modal */}
       <LossReasonModal
@@ -2225,51 +2351,72 @@ export default function TradeJournal() {
         tradeData={lossAnalysisModal.tradeData || undefined}
         existingAnalysis={lossAnalysisModal.existingAnalysis}
         mode={lossAnalysisModal.mode}
+        onSaved={(analysis) => {
+          const tid = typeof analysis.tradeId === 'object' ? String(analysis.tradeId.id || analysis.tradeId._id || analysis.tradeId) : analysis.tradeId;
+          if (tid) {
+            setAnalysesMap(prev => ({ ...prev, [tid]: analysis }));
+          }
+        }}
       />
 
-      {/* Checklist Modal */}
+      {/* Checklist Modal (trade creation flow) */}
       {checklistModal.isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-2xl">
-            <StrategyChecklist
-              strategies={strategiesWithChecklist}
-              onComplete={(checklistId, isValid, sessionId) => {
-                setChecklistModal({
-                  isOpen: false,
-                  completedChecklistId: isValid ? checklistId : null,
-                  completedSessionId: isValid ? sessionId : null
-                });
-                if (isValid) {
-                  setTimeout(() => handleSubmit(), 100);
-                }
-              }}
-              onCancel={() => setChecklistModal({ isOpen: false, completedChecklistId: null, completedSessionId: null })}
-            />
-          </div>
-        </div>
+        <StrategyChecklist
+          strategies={strategiesWithChecklist}
+          onComplete={(checklistId, isValid, sessionId) => {
+            setChecklistModal({
+              isOpen: false,
+              completedChecklistId: isValid ? checklistId : null,
+              completedSessionId: isValid ? sessionId : null
+            });
+            if (isValid) {
+              setTimeout(() => handleSubmit(checklistId, sessionId), 100);
+            }
+          }}
+          onCancel={() => setChecklistModal({ isOpen: false, completedChecklistId: null, completedSessionId: null })}
+        />
+      )}
+
+      {/* Create Checklist From Details */}
+      {createChecklistFlow.isOpen && (
+        <StrategyChecklist
+          strategies={strategiesWithChecklist}
+          onComplete={handleChecklistCreated}
+          onCancel={() => setCreateChecklistFlow({ isOpen: false, tradeId: null })}
+        />
+      )}
+
+      {/* Edit Checklist Modal */}
+      {editChecklistModal.isOpen && (
+        <StrategyChecklist
+          strategies={strategiesWithChecklist}
+          onComplete={handleEditChecklistComplete}
+          onCancel={() => setEditChecklistModal({ isOpen: false })}
+        />
       )}
 
       {/* Link Checklist Modal */}
       {linkChecklistModal.isOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Link2 className="w-5 h-5 text-blue-600" />
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 sm:p-6">
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#22c55e,_transparent_32%),radial-gradient(circle_at_top_right,_#38bdf8,_transparent_30%)]" />
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-white/10 rounded-xl flex-shrink-0">
+                    <Link2 className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Link Checklist</h3>
-                    <p className="text-sm text-gray-500">Link an active checklist to {selectedTrades.length} trade(s)</p>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-bold">Link Checklist</h3>
+                    <p className="text-sm text-blue-100">Link an active checklist to {selectedTrades.length} trade(s)</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setLinkChecklistModal({ isOpen: false, activeChecklists: [], selectedChecklistId: '', isLinking: false })}
-                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-2 bg-white/10 hover:bg-red-500 hover:text-white rounded-full transition-colors flex-shrink-0"
                   disabled={linkChecklistModal.isLinking}
                 >
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -2349,16 +2496,24 @@ export default function TradeJournal() {
         </div>
       )}
 
+      {/* Checklist Details Modal */}
+      <ChecklistDetailsModal
+        isOpen={checklistDetailsModal.isOpen}
+        onClose={() => setChecklistDetailsModal({ isOpen: false, tradeId: null, checklistId: undefined })}
+        tradeId={checklistDetailsModal.tradeId || ''}
+        checklistId={checklistDetailsModal.checklistId}
+        onCreateChecklist={handleCreateChecklist}
+        onLinkExisting={(tradeId) => {
+          setChecklistDetailsModal({ isOpen: false, tradeId: null, checklistId: undefined });
+          setSelectedTrades([tradeId]);
+          setTimeout(() => openLinkChecklistModal(), 0);
+        }}
+      />
+
       {/* View Checklist Modal */}
       {viewChecklistModal.isOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200"
-          onClick={() => setViewChecklistModal({ isOpen: false, checklist: null, isLoading: false })}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200">
             {viewChecklistModal.isLoading ? (
               <div className="p-12 flex flex-col items-center justify-center">
                 <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
@@ -2366,36 +2521,37 @@ export default function TradeJournal() {
               </div>
             ) : viewChecklistModal.checklist ? (
               <>
-                <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
+                <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
                         <span className={`px-2 py-0.5 rounded text-xs font-bold ${viewChecklistModal.checklist.isValid
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
+                            ? 'bg-emerald-400/20 text-emerald-200'
+                            : 'bg-red-400/20 text-red-200'
                           }`}>
-                          {viewChecklistModal.checklist.isValid ? '🟢 VALID' : '🔴 INVALID'}
+                          {viewChecklistModal.checklist.isValid ? 'VALID' : 'INVALID'}
                         </span>
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${viewChecklistModal.checklist.status === 'LINKED'
-                            ? 'bg-purple-100 text-purple-700'
-                            : 'bg-blue-100 text-blue-700'
+                            ? 'bg-violet-400/20 text-violet-200'
+                            : 'bg-blue-400/20 text-blue-200'
                           }`}>
-                          {viewChecklistModal.checklist.status === 'LINKED' ? '🔒 LINKED' : '🟢 ACTIVE'}
+                          {viewChecklistModal.checklist.status === 'LINKED' ? 'LINKED' : 'ACTIVE'}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-slate-900">{viewChecklistModal.checklist.strategyName}</h3>
-                      <p className="text-sm font-mono text-slate-600 mt-1">
+                      <h3 className="text-lg font-bold">{viewChecklistModal.checklist.strategyName}</h3>
+                      <p className="text-sm font-mono text-blue-100 mt-1">
                         {viewChecklistModal.checklist.sessionId}
                       </p>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-blue-200 mt-1">
                         {new Date(viewChecklistModal.checklist.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <button
                       onClick={() => setViewChecklistModal({ isOpen: false, checklist: null, isLoading: false })}
-                      className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+                      className="p-2 bg-white/10 hover:bg-red-500 hover:text-white rounded-full transition-colors flex-shrink-0"
+                      title="Close"
                     >
-                      <X className="w-5 h-5 text-slate-500" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

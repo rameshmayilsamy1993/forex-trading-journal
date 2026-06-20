@@ -89,8 +89,8 @@ export default function ExportMenu({ type = 'trades', accountId, firmId, classNa
     { value: 'all' as ExportPeriod, label: 'All Trades', icon: Download, description: 'Export everything' },
   ];
 
-  const title = type === 'missed-trades' ? 'Export Missed Trades' : 'Export Trade Journal';
-  const titleDesc = type === 'missed-trades' ? 'Download as Word document' : 'Download as Word document';
+  const title = type === 'missed-trades' ? 'Export CRT Missed Trades' : 'Export Trade Journal';
+  const titleDesc = type === 'missed-trades' ? 'Download CRT missed trades as Word document' : 'Download as Word document';
 
   return (
     <div className={cn("relative", className)} ref={dropdownRef}>

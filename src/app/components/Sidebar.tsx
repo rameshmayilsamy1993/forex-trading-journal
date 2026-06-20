@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard, BookOpen, Building2, Wallet, BarChart3,
   EyeOff, Calendar, Settings as SettingsIcon, FileUp,
@@ -9,6 +9,27 @@ import {
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
+
+const HIDDEN_TABS_KEY = 'fx-journal-hidden-tabs';
+
+const DEFAULT_HIDDEN: Tab[] = [
+  'bias-input', 'bias-history',
+  'liquidity-input', 'liquidity-history',
+  'crt-input', 'crt-history',
+  'reminders',
+];
+
+function loadHiddenTabs(): Set<Tab> {
+  try {
+    const stored = localStorage.getItem(HIDDEN_TABS_KEY);
+    if (stored) return new Set(JSON.parse(stored) as Tab[]);
+  } catch {}
+  return new Set(DEFAULT_HIDDEN);
+}
+
+function saveHiddenTabs(hidden: Set<Tab>) {
+  localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
+}
 
 export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'reminders' | 'xauusd-calculator' | 'forex-lot-calculator';
 
@@ -28,6 +49,13 @@ const navigationGroups: NavGroup[] = [
     title: 'Dashboard',
     items: [
       { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: 'TOOLS',
+    items: [
+      { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
+      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
     ],
   },
   {
@@ -55,8 +83,8 @@ const navigationGroups: NavGroup[] = [
   {
     title: 'Analysis',
     items: [
-      { id: 'missed', label: 'Missed Trades', icon: EyeOff },
-      { id: 'missed-calendar', label: 'Missed Calendar', icon: Calendar },
+      { id: 'missed', label: 'CRT Missed Trades', icon: EyeOff },
+      { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
       { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
     ],
@@ -68,13 +96,6 @@ const navigationGroups: NavGroup[] = [
       { id: 'firms', label: 'Prop Firms', icon: Building2 },
       { id: 'strategy-master', label: 'Strategies', icon: Settings2 },
       { id: 'settings', label: 'Settings', icon: SettingsIcon },
-    ],
-  },
-  {
-    title: 'TOOLS',
-    items: [
-      { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
-      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
     ],
   },
 ];
@@ -100,6 +121,17 @@ export default function Sidebar({
   isMobileOpen,
   onMobileClose,
 }: SidebarProps) {
+  const [hiddenTabs, setHiddenTabs] = useState<Set<Tab>>(loadHiddenTabs);
+
+  useEffect(() => {
+    saveHiddenTabs(hiddenTabs);
+  }, [hiddenTabs]);
+
+  const filterHidden = (groups: NavGroup[]): NavGroup[] =>
+    groups.map(g => ({ ...g, items: g.items.filter(i => !hiddenTabs.has(i.id)) })).filter(g => g.items.length > 0);
+
+  const visibleGroups = filterHidden(navigationGroups);
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -146,7 +178,7 @@ export default function Sidebar({
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-2.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          {navigationGroups.map((group, groupIndex) => (
+          {visibleGroups.map((group, groupIndex) => (
             <div key={group.title} className={cn(groupIndex > 0 && "mt-5")}>
               {!isCollapsed && (
                 <p className="px-3 mb-1.5 text-[10px] font-semibold text-slate-600 uppercase tracking-[0.18em]">
@@ -205,4 +237,4 @@ export default function Sidebar({
   );
 }
 
-export { navigationGroups };
+export { navigationGroups, HIDDEN_TABS_KEY, DEFAULT_HIDDEN, loadHiddenTabs, saveHiddenTabs };

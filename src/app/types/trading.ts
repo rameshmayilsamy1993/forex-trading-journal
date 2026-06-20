@@ -27,6 +27,8 @@ export type TradingSession = string;
 export type SSMTType = 'NO' | 'GBPUSD' | 'EURUSD' | 'DXY';
 export type SMTType = 'No' | 'Yes with GBPUSD' | 'Yes with EURUSD' | 'Yes with DXY';
 export type Model1Type = 'Yes (Both EUR and GBP)' | 'Yes (EUR)' | 'Yes (GBP)' | 'No';
+export type Model1ConfirmationType = 'Yes (EURUSD, GBPUSD, DXY)' | 'Yes (EURUSD, GBPUSD)' | 'Yes (EURUSD)' | 'No';
+export type SsmtConfirmationType = 'Yes (GBPUSD, DXY)' | 'Yes (GBPUSD)' | 'Yes (DXY)' | 'Yes (EURUSD, DXY)' | 'Yes (EURUSD)' | 'No';
 
 export type MasterType = 'strategy' | 'keyLevel' | 'session';
 
@@ -116,7 +118,7 @@ export interface TradeStats {
   largestLoss: number;
 }
 
-export type MissedTradeStatus = 'MISSED' | 'REVIEWED';
+export type MissedTradeStatus = 'MISSED' | 'REVIEWED' | 'PLANNED' | 'EXECUTED_LATER';
 
 export interface MissedTrade {
   id: string;
@@ -129,6 +131,9 @@ export interface MissedTrade {
   rr: number;
   date: string;
   time?: string;
+  turtleSoupTime?: string;
+  dailyQuarter?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+  sixHourQuarter?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
   session?: string;
   strategy?: string;
   keyLevel?: string;
@@ -143,6 +148,8 @@ export interface MissedTrade {
   profitLoss?: number;
   realPL?: number;
   status: MissedTradeStatus;
+  model1Confirmation?: Model1ConfirmationType;
+  ssmtConfirmation?: SsmtConfirmationType;
   screenshots?: {
     before?: string;
     after?: string;

@@ -1,11 +1,35 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Settings as SettingsIcon, DollarSign } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, Settings as SettingsIcon, DollarSign, Eye, EyeOff } from 'lucide-react';
 import { MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PageHeader, CardContainer, SectionCard } from './ui/DesignSystem';
+
+const HIDDEN_TABS_KEY = 'fx-journal-hidden-tabs';
+
+const MENU_ITEMS = [
+  { id: 'bias-input', label: 'Bias Input (CISD)' },
+  { id: 'bias-history', label: 'Bias History' },
+  { id: 'liquidity-input', label: 'Liquidity Input' },
+  { id: 'liquidity-history', label: 'Liquidity History' },
+  { id: 'crt-input', label: 'CRT Tracker' },
+  { id: 'crt-history', label: 'CRT History' },
+  { id: 'reminders', label: 'Reminders' },
+];
+
+function loadHiddenTabs(): Set<string> {
+  try {
+    const stored = localStorage.getItem(HIDDEN_TABS_KEY);
+    if (stored) return new Set(JSON.parse(stored) as string[]);
+  } catch {}
+  return new Set(MENU_ITEMS.map(m => m.id));
+}
+
+function saveHiddenTabs(hidden: Set<string>) {
+  localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
+}
 
 const MASTER_TYPES = [
   { value: 'strategy', label: 'Strategy' },
@@ -16,7 +40,8 @@ const MASTER_TYPES = [
 export default function Settings() {
   const [masters, setMasters] = useState<MasterData[]>([]);
   const [pairs, setPairs] = useState<string[]>([]);
-  const [activeSection, setActiveSection] = useState<'masters' | 'pairs'>('masters');
+  const [activeSection, setActiveSection] = useState<'masters' | 'pairs' | 'menu'>('masters');
+  const [hiddenTabs, setHiddenTabs] = useState<Set<string>>(loadHiddenTabs);
   const [newMasterName, setNewMasterName] = useState('');
   const [newMasterType, setNewMasterType] = useState<'strategy' | 'keyLevel' | 'session'>('strategy');
   const [newPair, setNewPair] = useState('');
@@ -166,6 +191,16 @@ export default function Settings() {
             }`}
           >
             Trading Pairs
+          </button>
+          <button
+            onClick={() => setActiveSection('menu')}
+            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
+              activeSection === 'menu'
+                ? 'text-pink-700 border-b-2 border-pink-600 bg-pink-50/50'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Menu Visibility
           </button>
         </div>
 
@@ -340,6 +375,76 @@ export default function Settings() {
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'menu' && (
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <EyeOff className="w-5 h-5 text-pink-600" />
+                  <h3 className="text-sm font-semibold text-gray-900">Menu Visibility</h3>
+                </div>
+                <p className="text-xs text-gray-600 mb-3">
+                  Toggle sidebar menu items on/off. Hidden items will be removed from the sidebar but can be re-enabled here at any time.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {MENU_ITEMS.map(item => {
+                  const isHidden = hiddenTabs.has(item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-4 py-3 hover:shadow-sm transition-all duration-200"
+                    >
+                      <span className="text-sm font-medium text-slate-700">{item.label}</span>
+                      <button
+                        onClick={() => {
+                          const next = new Set(hiddenTabs);
+                          if (isHidden) next.delete(item.id);
+                          else next.add(item.id);
+                          setHiddenTabs(next);
+                          saveHiddenTabs(next);
+                        }}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                          isHidden
+                            ? 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                        }`}
+                      >
+                        {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        {isHidden ? 'Hidden' : 'Visible'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={() => {
+                    setHiddenTabs(new Set());
+                    saveHiddenTabs(new Set());
+                  }}
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25 transition-all duration-200"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Show All
+                </Button>
+                <Button
+                  onClick={() => {
+                    const allHidden = new Set(MENU_ITEMS.map(m => m.id));
+                    setHiddenTabs(allHidden);
+                    saveHiddenTabs(allHidden);
+                  }}
+                  variant="outline"
+                  className="border-slate-300 text-slate-600"
+                >
+                  <EyeOff className="w-4 h-4 mr-2" />
+                  Hide All
+                </Button>
               </div>
             </div>
           )}

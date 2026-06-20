@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, CalendarDays, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, CalendarDays, X, Clock } from 'lucide-react';
 import { MissedTrade } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -7,7 +7,39 @@ import { PageHeader, CardContainer } from './ui/DesignSystem';
 import { LoadingSpinner } from './ui/Loading';
 import { ErrorBoundary } from './ErrorBoundary';
 import { formatPrice } from '../utils/calculations';
+import { cn } from './ui/utils';
 import DOMPurify from 'dompurify';
+
+const QUARTER_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
+  Q1: { bg: 'bg-blue-100', text: 'text-blue-700', ring: 'ring-blue-500/20' },
+  Q2: { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-500/20' },
+  Q3: { bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-500/20' },
+  Q4: { bg: 'bg-purple-100', text: 'text-purple-700', ring: 'ring-purple-500/20' },
+};
+
+function QuarterBadge({ quarter }: { quarter?: string }) {
+  if (!quarter) return null;
+  const style = QUARTER_STYLES[quarter] || QUARTER_STYLES.Q1;
+  return (
+    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ring-1', style.bg, style.text, style.ring)}>
+      {quarter}
+    </span>
+  );
+}
+
+function Model1Badge({ value }: { value?: string }) {
+  if (!value || value === 'No') {
+    return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
+  }
+  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300/50">{value}</span>;
+}
+
+function SsmtBadge({ value }: { value?: string }) {
+  if (!value || value === 'No') {
+    return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
+  }
+  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 ring-1 ring-blue-300/50">{value}</span>;
+}
 
 interface DayData {
   date: Date;
@@ -29,11 +61,9 @@ export default function MissedTradesCalendar() {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [missedData, pairsData] = await Promise.all([
+        const [missedData] = await Promise.all([
           apiService.getMissedTrades().catch(() => []),
-          apiService.settings.getPairs().catch(() => [])
         ]);
-        
         setMissedTrades(Array.isArray(missedData) ? missedData : []);
       } catch (error) {
         console.error('Failed to load data:', error);
@@ -223,8 +253,8 @@ export default function MissedTradesCalendar() {
     return (
       <div className="max-w-7xl mx-auto space-y-6">
         <PageHeader
-          title="Missed Trades Calendar"
-          subtitle="View your missed trading opportunities"
+          title="CRT Missed Trade Calendar"
+          subtitle="View your CRT missed trading opportunities with quarter tracking"
           icon={CalendarDays}
           color="red"
         />
@@ -237,8 +267,8 @@ export default function MissedTradesCalendar() {
     <ErrorBoundary>
       <div className="max-w-7xl mx-auto space-y-6">
         <PageHeader
-          title="Missed Trades Calendar"
-          subtitle="View your missed trading opportunities"
+          title="CRT Missed Trade Calendar"
+          subtitle="View your CRT missed trading opportunities with quarter tracking"
           icon={CalendarDays}
           color="red"
         />
@@ -403,7 +433,7 @@ export default function MissedTradesCalendar() {
             </div>
             {weeklyData.length === 0 ? (
               <div className="p-4 text-center text-sm text-slate-500 bg-slate-50 rounded-xl border border-slate-100">
-                No missed trades this month
+                No CRT missed trades this month
               </div>
             ) : (
               weeklyData.map((w, i) => (
@@ -442,7 +472,7 @@ export default function MissedTradesCalendar() {
                     {selectedDay.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </h3>
                   <p className="text-sm text-slate-500 mt-1">
-                    {selectedDay.trades.length} missed {selectedDay.trades.length === 1 ? 'trade' : 'trades'}
+                    {selectedDay.trades.length} CRT missed {selectedDay.trades.length === 1 ? 'trade' : 'trades'}
                   </p>
                 </div>
                 <div className="text-right">
@@ -474,6 +504,10 @@ export default function MissedTradesCalendar() {
                             {trade.type}
                           </span>
                           <span className="font-medium text-slate-900">{trade.pair}</span>
+                          <QuarterBadge quarter={trade.dailyQuarter} />
+                          <QuarterBadge quarter={trade.sixHourQuarter} />
+                          <Model1Badge value={trade.model1Confirmation} />
+                          <SsmtBadge value={trade.ssmtConfirmation} />
                         </div>
                         <span className={`font-bold ${
                           getRealPL(trade) >= 0 ? 'text-green-600' : 'text-red-600'

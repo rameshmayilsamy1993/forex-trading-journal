@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { CheckCircle2, Circle, AlertCircle, ChevronDown, Loader2, FileText } from 'lucide-react';
+import { CheckCircle2, Circle, AlertCircle, ChevronDown, Loader2, ClipboardCheck } from 'lucide-react';
 import { MasterData, ChecklistItemResult } from '../types/trading';
 import { cn } from './ui/utils';
 import { Button } from './ui/button';
+import Modal from './ui/Modal';
 import apiService from '../services/apiService';
 
 interface StrategyChecklistProps {
@@ -23,6 +24,7 @@ export default function StrategyChecklist({
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showStrategyDropdown, setShowStrategyDropdown] = useState(false);
+  const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
 
   const strategiesWithChecklist = useMemo(() => 
     strategies.filter(s => s.checklist && s.checklist.length > 0),
@@ -30,6 +32,11 @@ export default function StrategyChecklist({
   );
 
   const currentChecklist = selectedStrategy?.checklist || [];
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!selectedStrategy) return false;
+    return Array.from(checkedItems.values()).some(v => v === true) || notes.length > 0;
+  }, [selectedStrategy, checkedItems, notes]);
 
   const progress = useMemo(() => {
     const total = currentChecklist.length;
@@ -62,6 +69,14 @@ export default function StrategyChecklist({
     setCheckedItems(new Map());
     setNotes('');
     setShowStrategyDropdown(false);
+  };
+
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedConfirm(true);
+    } else if (onCancel) {
+      onCancel();
+    }
   };
 
   const handleSubmit = async () => {
@@ -98,31 +113,81 @@ export default function StrategyChecklist({
 
   if (strategiesWithChecklist.length === 0) {
     return (
-      <div className={cn("p-6 bg-amber-50 border border-amber-200 rounded-xl", className)}>
-        <div className="flex items-center gap-3 text-amber-800">
-          <AlertCircle className="w-5 h-5" />
-          <div>
-            <p className="font-medium">No Checklists Available</p>
-            <p className="text-sm">Add checklist items to your strategies in settings to enable pre-trade validation.</p>
+      <Modal
+        isOpen={true}
+        onClose={onCancel}
+        title="Pre-Trade Checklist"
+        subtitle="Complete before entering a trade"
+        icon={<ClipboardCheck className="w-6 h-6" />}
+        size="lg"
+        footer={
+          <>
+            {onCancel && (
+              <Button variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
+          </>
+        }
+      >
+        <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl">
+          <div className="flex items-center gap-3 text-amber-800">
+            <AlertCircle className="w-5 h-5" />
+            <div>
+              <p className="font-medium">No Checklists Available</p>
+              <p className="text-sm">Add checklist items to your strategies in settings to enable pre-trade validation.</p>
+            </div>
           </div>
         </div>
-      </div>
+      </Modal>
     );
   }
 
   return (
-    <div className={cn("bg-white rounded-xl shadow-lg border border-slate-200/50 overflow-hidden", className)}>
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center gap-3">
-          <FileText className="w-6 h-6" />
-          <div>
-            <h2 className="text-xl font-bold">Pre-Trade Checklist</h2>
-            <p className="text-blue-100 text-sm">Complete before entering a trade</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6 space-y-6">
+    <>
+      <Modal
+        isOpen={true}
+        onClose={handleClose}
+        title="Pre-Trade Checklist"
+        subtitle="Complete before entering a trade"
+        icon={<ClipboardCheck className="w-6 h-6" />}
+        size="lg"
+        footer={
+          <>
+            {onCancel && (
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+            )}
+            {selectedStrategy && (
+              <Button
+                onClick={handleSubmit}
+                disabled={!isValid || isSubmitting}
+                className={cn(
+                  !isValid && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : isValid ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Proceed to Trade
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="w-4 h-4 mr-2" />
+                    Complete Required Items
+                  </>
+                )}
+              </Button>
+            )}
+          </>
+        }
+      >
         {!selectedStrategy ? (
           <div className="space-y-4">
             <label className="block text-sm font-semibold text-slate-700">
@@ -132,14 +197,14 @@ export default function StrategyChecklist({
             <div className="relative">
               <button
                 onClick={() => setShowStrategyDropdown(!showStrategyDropdown)}
-                className="w-full px-4 py-3 text-left bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-between"
+                className="w-full px-4 py-3 text-left bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-between"
               >
-                <span className="text-slate-600">Choose a strategy...</span>
+                <span className="text-slate-500">Choose a strategy...</span>
                 <ChevronDown className={cn("w-5 h-5 text-slate-400 transition-transform", showStrategyDropdown && "rotate-180")} />
               </button>
 
               {showStrategyDropdown && (
-                <div className="absolute z-10 w-full mt-2 bg-white rounded-lg shadow-xl border border-slate-200 overflow-hidden">
+                <div className="absolute z-10 w-full mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
                   {strategiesWithChecklist.map(strategy => (
                     <button
                       key={strategy.id}
@@ -155,8 +220,8 @@ export default function StrategyChecklist({
             </div>
           </div>
         ) : (
-          <>
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
               <div>
                 <p className="text-sm text-slate-500">Selected Strategy</p>
                 <p className="font-bold text-slate-900">{selectedStrategy.name}</p>
@@ -197,7 +262,7 @@ export default function StrategyChecklist({
                       key={`${item.label}-${index}`}
                       onClick={() => toggleItem(item.label)}
                       className={cn(
-                        "w-full flex items-center gap-3 p-4 rounded-lg border transition-all",
+                        "w-full flex items-center gap-3 p-4 rounded-xl border transition-all",
                         isChecked
                           ? "bg-green-50 border-green-200"
                           : item.required && !isChecked
@@ -234,7 +299,7 @@ export default function StrategyChecklist({
             </div>
 
             {missingRequired.length > 0 && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div>
@@ -257,52 +322,38 @@ export default function StrategyChecklist({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add any additional notes about this trade..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl resize-none min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
                 rows={3}
               />
             </div>
-
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
-              {onCancel && (
-                <Button
-                  variant="outline"
-                  onClick={onCancel}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              )}
-              <Button
-                onClick={handleSubmit}
-                disabled={!isValid || isSubmitting}
-                className={cn(
-                  "flex-1",
-                  isValid
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-slate-300 cursor-not-allowed"
-                )}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : isValid ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Proceed to Trade
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    Complete Required Items
-                  </>
-                )}
-              </Button>
-            </div>
-          </>
+          </div>
         )}
-      </div>
-    </div>
+      </Modal>
+
+      {showUnsavedConfirm && (
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Unsaved Changes</h3>
+            <p className="text-sm text-slate-600 mb-6">
+              You have unsaved changes. Are you sure you want to close?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowUnsavedConfirm(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm font-medium transition-colors"
+              >
+                Continue Editing
+              </button>
+              <button
+                onClick={() => { setShowUnsavedConfirm(false); onCancel?.(); }}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-sm font-medium transition-colors"
+              >
+                Discard Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
