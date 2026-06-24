@@ -1,7 +1,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-const PYTHON_SCRIPT = path.resolve(__dirname, '../../../../python/MT5/run.py');
+const PYTHON_SCRIPT = path.resolve(__dirname, '../../../../../python/MT5/run.py');
 const PYTHON_CMD = process.env.PYTHON_PATH || 'python';
 
 const TIMEFRAMES = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1', 'MN1'];
