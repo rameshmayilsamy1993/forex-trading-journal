@@ -31,6 +31,7 @@ const CRTHistory = lazy(() => import('./components/CRTHistory'));
 const BreachedTrades = lazy(() => import('./components/BreachedTrades'));
 const XauusdCalculator = lazy(() => import('./components/XauusdCalculator'));
 const ForexLotCalculator = lazy(() => import('./components/ForexLotCalculator'));
+const MarketStatistics = lazy(() => import('./components/MarketStatistics'));
 
 function TabContent({ activeTab }: { activeTab: Tab }) {
   return (
@@ -59,6 +60,7 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
         {activeTab === 'settings' && <Settings />}
         {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
         {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
+        {activeTab === 'market-stats' && <MarketStatistics />}
       </ErrorBoundary>
     </Suspense>
   );

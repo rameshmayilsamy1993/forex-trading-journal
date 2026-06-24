@@ -5,7 +5,7 @@ import {
   Activity, FileSpreadsheet, ClipboardCheck, Settings2,
   ChevronLeft, ChevronRight, X, ActivitySquare, TrendingUp,
   TrendingDown, History, Layers, AlertTriangle, Calculator,
-  DollarSign
+  DollarSign, BarChart4
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
@@ -30,7 +30,7 @@ function saveHiddenTabs(hidden: Set<Tab>) {
   localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
 }
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats';
 
 interface NavItem {
   id: Tab;
@@ -55,6 +55,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
       { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
+      { id: 'market-stats', label: 'Market Statistics', icon: BarChart4 },
     ],
   },
   {
