@@ -190,7 +190,7 @@ export default function H4History() {
                               <td key={time} className="py-3 px-2 text-center">
                                 <div className="flex flex-col items-center gap-1">
                                   <span className={cn("px-2 py-0.5 rounded text-xs font-semibold", getDirectionColor(dir))}>
-                                    {dir === 'BULLISH' ? '↑' : dir === 'BEARISH' ? '↓' : '-'}
+                                    {dir === 'BULLISH' ? <TrendingUp className="w-4 h-4 text-emerald-600" /> : dir === 'BEARISH' ? <TrendingDown className="w-4 h-4 text-rose-600" /> : <span className="text-slate-300">-</span>}
                                   </span>
                                   <span className={cn("px-1 py-0.5 rounded text-[10px]", liq.color)}>
                                     {liq.label}

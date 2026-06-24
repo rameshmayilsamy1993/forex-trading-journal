@@ -313,7 +313,7 @@ export default function BiasHistory() {
                   <div key={date} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                 {/* Date Header */}
                 <div 
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white cursor-pointer hover:from-slate-100 hover:to-slate-50 transition-all duration-200"
+                  className="flex items-center justify-between p-4 bg-[#F8FAFC] cursor-pointer hover:bg-slate-100 transition-all duration-200"
                   onClick={() => toggleDateExpand(date)}
                 >
                   <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export default function BiasHistory() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+                        <tr className="border-b border-slate-200 bg-[#F8FAFC]">
                           <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Time</th>
                           <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Pair</th>
                           <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Monthly</th>

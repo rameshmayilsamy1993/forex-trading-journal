@@ -313,7 +313,7 @@ export default function CRTHistory() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
+                    <tr className="bg-[#F8FAFC] border-b border-slate-200">
                       <th className="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Timeframe</th>
                       <th className="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
                       <th className="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">CRT Direction</th>

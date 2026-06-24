@@ -263,7 +263,7 @@ export default function LiquidityHistory() {
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEntries]) => (
               <div key={date} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="p-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200 flex items-center justify-between">
+                <div className="p-4 bg-[#F8FAFC] border-b border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-slate-900">{formatDate(date)}</span>
                     <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">{dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''}</span>
@@ -272,7 +272,7 @@ export default function LiquidityHistory() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+                      <tr className="border-b border-slate-200 bg-[#F8FAFC]">
                         <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Time</th>
                         <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Pair</th>
                         <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Monthly</th>

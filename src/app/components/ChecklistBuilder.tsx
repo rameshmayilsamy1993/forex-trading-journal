@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { ChecklistItem } from '../types/trading';
 import { cn } from './ui/utils';
 import { Button } from './ui/button';
@@ -104,7 +104,7 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
                   disabled={index === 0}
                   className="p-1.5 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  ↑
+                  <ChevronUp className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
@@ -112,7 +112,7 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
                   disabled={index === items.length - 1}
                   className="p-1.5 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  ↓
+                  <ChevronDown className="w-4 h-4" />
                 </button>
               </div>
 
