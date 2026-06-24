@@ -9,8 +9,6 @@ interface ChecklistDetailsModalProps {
   onClose: () => void;
   tradeId: string;
   checklistId?: string;
-  onCreateChecklist?: (tradeId: string) => void;
-  onLinkExisting?: (tradeId: string) => void;
 }
 
 export default function ChecklistDetailsModal({
@@ -18,8 +16,6 @@ export default function ChecklistDetailsModal({
   onClose,
   tradeId,
   checklistId,
-  onCreateChecklist,
-  onLinkExisting
 }: ChecklistDetailsModalProps) {
   const [checklist, setChecklist] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -219,27 +215,8 @@ export default function ChecklistDetailsModal({
             <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
               <AlertCircle className="w-8 h-8 text-slate-400" />
             </div>
-            <p className="text-slate-600 font-medium mb-1">No checklist linked to this trade.</p>
-            <p className="text-sm text-slate-400 mb-6">A pre-trade checklist helps validate your setup before entering.</p>
-            <div className="flex flex-col gap-3 w-full max-w-xs">
-              {onCreateChecklist && (
-                <button
-                  onClick={() => onCreateChecklist(tradeId)}
-                  className="w-full px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all text-sm font-semibold shadow-lg shadow-blue-500/25"
-                >
-                  Create Checklist
-                </button>
-              )}
-              {onLinkExisting && (
-                <button
-                  onClick={() => onLinkExisting(tradeId)}
-                  className="w-full px-5 py-2.5 bg-white text-slate-700 rounded-xl hover:bg-slate-50 border border-slate-200 transition-all text-sm font-semibold"
-                >
-                  Link Existing Checklist
-                </button>
-              )}
-            </div>
-            <button onClick={onClose} className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
+            <p className="text-slate-600 font-medium">No checklist linked to this trade.</p>
+            <button onClick={onClose} className="mt-4 text-sm text-slate-400 hover:text-slate-600 transition-colors">
               Close
             </button>
           </div>

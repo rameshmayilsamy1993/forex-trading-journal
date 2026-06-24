@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Menu, User, LogOut, Bell, Clock } from 'lucide-react';
+import { Menu, User, LogOut, Clock } from 'lucide-react';
 import Sidebar, { Tab } from './components/Sidebar';
 import LiveISTClock from './components/common/LiveISTClock';
-import NotificationDropdown from './components/common/NotificationDropdown';
 import Dashboard from './components/Dashboard';
 import TradeJournal from './components/TradeJournal';
 import PropFirms from './components/PropFirms';
@@ -25,7 +24,6 @@ import LiquidityHistory from './components/LiquidityHistory';
 import CRTInput from './components/CRTInput';
 import CRTHistory from './components/CRTHistory';
 import BreachedTrades from './components/BreachedTrades';
-import Reminders from './components/Reminders';
 import XauusdCalculator from './components/XauusdCalculator';
 import ForexLotCalculator from './components/ForexLotCalculator';
 import apiService, { User as UserType } from './services/apiService';
@@ -84,7 +82,6 @@ export default function App() {
               <h1 className="text-lg font-semibold tracking-tight text-[#0F172A]">FX Journal</h1>
             </div>
             <div className="flex items-center gap-2">
-              <NotificationDropdown onNavigateToReminders={() => setActiveTab('reminders')} />
               <LiveISTClock />
             </div>
           </div>
@@ -92,7 +89,6 @@ export default function App() {
 
         {/* Desktop Header Bar */}
         <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5EAF2] items-center justify-end px-6 gap-3">
-          <NotificationDropdown onNavigateToReminders={() => setActiveTab('reminders')} />
           <LiveISTClock />
           <div className="w-px h-8 bg-[#E5EAF2]" />
           {currentUser && (
@@ -143,7 +139,6 @@ export default function App() {
               {activeTab === 'crt-input' && <CRTInput />}
               {activeTab === 'crt-history' && <CRTHistory />}
               {activeTab === 'breached-trades' && <BreachedTrades />}
-              {activeTab === 'reminders' && <Reminders />}
               {activeTab === 'settings' && <Settings />}
               {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
               {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}

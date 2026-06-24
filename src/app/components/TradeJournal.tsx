@@ -53,16 +53,7 @@ export default function TradeJournal() {
   // Analysis Map: tradeId → analysis
   const [analysesMap, setAnalysesMap] = useState<Record<string, any>>({});
 
-  // Checklist Modal State
-  const [checklistModal, setChecklistModal] = useState<{
-    isOpen: boolean;
-    completedChecklistId: string | null;
-    completedSessionId: string | null;
-  }>({ isOpen: false, completedChecklistId: null, completedSessionId: null });
-
-  // Active Sessions State
   const [activeSessions, setActiveSessions] = useState<any[]>([]);
-  const [selectedChecklistId, setSelectedChecklistId] = useState<string>('');
 
   // Link Checklist Modal State
   const [linkChecklistModal, setLinkChecklistModal] = useState<{
@@ -86,11 +77,7 @@ export default function TradeJournal() {
     checklistId: string | undefined;
   }>({ isOpen: false, tradeId: null, checklistId: undefined });
 
-  // Create Checklist From Details Flow
-  const [createChecklistFlow, setCreateChecklistFlow] = useState<{
-    isOpen: boolean;
-    tradeId: string | null;
-  }>({ isOpen: false, tradeId: null });
+
 
   // Edit Checklist Modal (distinct from create-flow checklist modal)
   const [editChecklistModal, setEditChecklistModal] = useState<{
@@ -195,11 +182,6 @@ export default function TradeJournal() {
     [accounts]
   );
 
-  const selectedStrategyHasChecklist = useMemo(() => {
-    if (!formData.strategy) return false;
-    return strategiesWithChecklist.some(s => s.name === formData.strategy);
-  }, [formData.strategy, strategiesWithChecklist]);
-
   const COMMISSION_PER_LOT = 5;
 
   const calculatedRR = useMemo(() => {
@@ -288,12 +270,6 @@ export default function TradeJournal() {
       return;
     }
 
-    // Check if strategy has a checklist - ONLY required in create mode
-    if (!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId && !selectedChecklistId) {
-      setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null });
-      return;
-    }
-
     const account = accounts.find(a => a.id === formData.accountId);
     if (!account) return;
 
@@ -337,10 +313,8 @@ export default function TradeJournal() {
       profit = calculateTradeProfit(trade);
     }
 
-    // Get selected checklist info
-    const selectedSession = activeSessions.find(s => s.id === selectedChecklistId);
-    const checklistIdToUse = overrideChecklistId || checklistModal.completedChecklistId || selectedChecklistId || formData.checklistId;
-    const checklistSessionToUse = overrideChecklistSession || checklistModal.completedSessionId || selectedSession?.sessionId || formData.checklistSession;
+    const checklistIdToUse = overrideChecklistId || formData.checklistId;
+    const checklistSessionToUse = overrideChecklistSession || formData.checklistSession;
 
     const newTrade: Omit<Trade, 'id'> = {
       accountId: formData.accountId,
@@ -562,11 +536,17 @@ export default function TradeJournal() {
   };
 
   const handleOpenChecklistDetails = (trade: Trade) => {
-    setChecklistDetailsModal({
-      isOpen: true,
-      tradeId: trade.id,
-      checklistId: (trade as any).checklistId || undefined
-    });
+    const checklistId = (trade as any).checklistId;
+    if (checklistId) {
+      setChecklistDetailsModal({
+        isOpen: true,
+        tradeId: trade.id,
+        checklistId
+      });
+    } else {
+      setSelectedTrades([trade.id]);
+      setTimeout(() => openLinkChecklistModal(), 0);
+    }
   };
 
   const handleEditChecklistComplete = async (checklistId: string, isValid: boolean, sessionId: string | undefined) => {
@@ -585,29 +565,6 @@ export default function TradeJournal() {
       alert('Failed to link checklist to trade.');
     }
     setEditChecklistModal({ isOpen: false });
-  };
-
-  const handleCreateChecklist = (tradeId: string) => {
-    setChecklistDetailsModal({ isOpen: false, tradeId: null, checklistId: undefined });
-    setCreateChecklistFlow({ isOpen: true, tradeId });
-  };
-
-  const handleChecklistCreated = async (checklistId: string, isValid: boolean, sessionId: string | undefined) => {
-    const tradeId = createChecklistFlow.tradeId;
-    if (!tradeId || !isValid || !checklistId) {
-      setCreateChecklistFlow({ isOpen: false, tradeId: null });
-      return;
-    }
-    try {
-      await apiService.checklists.linkToTrade(checklistId, tradeId);
-      setTrades(prev => prev.map(t =>
-        t.id === tradeId ? { ...t, checklistId, checklistSession: sessionId } : t
-      ));
-    } catch (err) {
-      console.error('Failed to link checklist to trade:', err);
-      alert('Checklist created but failed to link. Please use bulk link.');
-    }
-    setCreateChecklistFlow({ isOpen: false, tradeId: null });
   };
 
   const toggleSelect = (id: string) => {
@@ -850,8 +807,6 @@ export default function TradeJournal() {
   const resetForm = () => {
     setIsAdding(false);
     setEditingId(null);
-    setChecklistModal({ isOpen: false, completedChecklistId: null, completedSessionId: null });
-    setSelectedChecklistId('');
     setFormData({
       accountId: '',
       pair: '',
@@ -1605,25 +1560,10 @@ export default function TradeJournal() {
                         Change Checklist
                       </button>
                     )}
-                    {!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId && (
-                      <button
-                        onClick={() => setChecklistModal({ isOpen: true, completedChecklistId: null, completedSessionId: null })}
-                        className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 text-sm font-medium shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5"
-                      >
-                        <ClipboardCheck className="w-4 h-4" />
-                        Complete Checklist
-                      </button>
-                    )}
-                    {!isEditMode && selectedStrategyHasChecklist && checklistModal.completedChecklistId && (
-                      <span className="px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl flex items-center gap-2 text-sm font-medium border border-emerald-200">
-                        <Check className="w-4 h-4" />
-                        Checklist Completed
-                      </span>
-                    )}
+
                     <button
                       onClick={editingId ? () => handleEdit(editingId) : () => handleSubmit()}
-                      disabled={!isEditMode && selectedStrategyHasChecklist && !checklistModal.completedChecklistId}
-                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5"
                     >
                       <Check className="w-4 h-4" />
                       {editingId ? 'Update Trade' : 'Save Trade'}
@@ -1775,12 +1715,11 @@ export default function TradeJournal() {
                                 {(trade as any).checklistId ? (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit mx-auto">
                                     <Check className="w-3 h-3" />
-                                    Completed
+                                    Linked
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200 w-fit mx-auto">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                                    Missing
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 w-fit mx-auto">
+                                    &mdash; Not Linked
                                   </span>
                                 )}
                               </td>
@@ -2359,33 +2298,6 @@ export default function TradeJournal() {
         }}
       />
 
-      {/* Checklist Modal (trade creation flow) */}
-      {checklistModal.isOpen && (
-        <StrategyChecklist
-          strategies={strategiesWithChecklist}
-          onComplete={(checklistId, isValid, sessionId) => {
-            setChecklistModal({
-              isOpen: false,
-              completedChecklistId: isValid ? checklistId : null,
-              completedSessionId: isValid ? sessionId : null
-            });
-            if (isValid) {
-              setTimeout(() => handleSubmit(checklistId, sessionId), 100);
-            }
-          }}
-          onCancel={() => setChecklistModal({ isOpen: false, completedChecklistId: null, completedSessionId: null })}
-        />
-      )}
-
-      {/* Create Checklist From Details */}
-      {createChecklistFlow.isOpen && (
-        <StrategyChecklist
-          strategies={strategiesWithChecklist}
-          onComplete={handleChecklistCreated}
-          onCancel={() => setCreateChecklistFlow({ isOpen: false, tradeId: null })}
-        />
-      )}
-
       {/* Edit Checklist Modal */}
       {editChecklistModal.isOpen && (
         <StrategyChecklist
@@ -2502,12 +2414,6 @@ export default function TradeJournal() {
         onClose={() => setChecklistDetailsModal({ isOpen: false, tradeId: null, checklistId: undefined })}
         tradeId={checklistDetailsModal.tradeId || ''}
         checklistId={checklistDetailsModal.checklistId}
-        onCreateChecklist={handleCreateChecklist}
-        onLinkExisting={(tradeId) => {
-          setChecklistDetailsModal({ isOpen: false, tradeId: null, checklistId: undefined });
-          setSelectedTrades([tradeId]);
-          setTimeout(() => openLinkChecklistModal(), 0);
-        }}
       />
 
       {/* View Checklist Modal */}
@@ -2633,6 +2539,7 @@ export default function TradeJournal() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

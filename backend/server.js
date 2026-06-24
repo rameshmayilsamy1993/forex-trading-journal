@@ -46,8 +46,7 @@ const biasEventRoutes = require('./src/modules/biases/biasEvent.routes');
 const liquidityRoutes = require('./src/modules/liquidity/liquidity.routes');
 const h4Routes = require('./src/modules/h4/h4.routes');
 const crtRoutes = require('./src/modules/crt/crtEvent.routes');
-const reminderRoutes = require('./src/modules/reminders/reminder.routes');
-const { startScheduler } = require('./src/services/reminderScheduler');
+// Reminder routes and scheduler disabled
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -105,7 +104,6 @@ app.use('/api/bias', isAuthenticated, biasEventRoutes);
 app.use('/api/liquidity', isAuthenticated, liquidityRoutes);
 app.use('/api/h4', isAuthenticated, h4Routes);
 app.use('/api/crt-events', isAuthenticated, crtRoutes);
-app.use('/api/reminders', isAuthenticated, reminderRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
 app.use(notFoundMiddleware);
@@ -114,8 +112,6 @@ app.use(errorMiddleware);
 const startServer = async () => {
   await connectWithRetry();
   await seedAdminUser();
-  
-  startScheduler();
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

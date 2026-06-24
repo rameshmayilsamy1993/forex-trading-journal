@@ -16,7 +16,6 @@ const MENU_ITEMS = [
   { id: 'liquidity-history', label: 'Liquidity History' },
   { id: 'crt-input', label: 'CRT Tracker' },
   { id: 'crt-history', label: 'CRT History' },
-  { id: 'reminders', label: 'Reminders' },
 ];
 
 function loadHiddenTabs(): Set<string> {
