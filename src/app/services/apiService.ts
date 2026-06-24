@@ -1050,7 +1050,19 @@ const apiService = {
         method: 'POST',
       });
     },
-  }
+  },
+
+  marketStats: {
+    analyze: async (symbol: string, timeframe: string, lookback: number): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/market-stats/analyze`, {
+        method: 'POST',
+        body: JSON.stringify({ symbol, timeframe, lookback }),
+      });
+    },
+    exportUrl: (symbol: string, timeframe: string, lookback: number, format: string): string => {
+      return `${API_BASE_URL}/market-stats/export?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&lookback=${lookback}&format=${format}`;
+    },
+  },
 };
 
 export default apiService;
