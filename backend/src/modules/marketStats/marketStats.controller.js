@@ -76,17 +76,36 @@ const exportResults = async (req, res, next) => {
       return res.status(400).json({ message: 'format must be csv, xlsx, or json' });
     }
 
-    const results = await runPython(symbol, timeframe, Number(lookback));
+    const args = [
+      PYTHON_SCRIPT,
+      '--symbol', symbol.toUpperCase(),
+      '--timeframe', timeframe.toUpperCase(),
+      '--lookback', String(lookback),
+      '--export', format,
+    ];
 
-    const { get_download_bytes } = require(path.resolve(__dirname, '../../../../python/MT5/mt5_candle_stats/export'));
-    const fileBytes = get_download_bytes(results, format);
+    const proc = spawn(PYTHON_CMD, args);
+    let stdout = Buffer.alloc(0);
+    let stderr = '';
 
-    const mimeTypes = { csv: 'text/csv', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', json: 'application/json' };
-    const filename = `${symbol}_${timeframe}_${lookback}.${format}`;
+    proc.stdout.on('data', (data) => { stdout = Buffer.concat([stdout, data]); });
+    proc.stderr.on('data', (data) => { stderr += data.toString(); });
 
-    res.setHeader('Content-Type', mimeTypes[format]);
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(Buffer.from(fileBytes));
+    proc.on('close', (code) => {
+      if (code !== 0) {
+        return res.status(500).json({ message: stderr.trim() || `Python process exited with code ${code}` });
+      }
+      const mimeTypes = { csv: 'text/csv', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', json: 'application/json' };
+      const filename = `${symbol}_${timeframe}_${lookback}.${format}`;
+      const fileBytes = Buffer.from(stdout.toString().trim(), 'base64');
+      res.setHeader('Content-Type', mimeTypes[format]);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(fileBytes);
+    });
+
+    proc.on('error', (err) => {
+      res.status(500).json({ message: `Failed to start Python process: ${err.message}` });
+    });
   } catch (error) {
     next(error);
   }

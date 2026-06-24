@@ -54,8 +54,8 @@ const navigationGroups: NavGroup[] = [
     title: 'TOOLS',
     items: [
       { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
-      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
       { id: 'market-stats', label: 'Market Statistics', icon: BarChart4 },
+      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
     ],
   },
   {

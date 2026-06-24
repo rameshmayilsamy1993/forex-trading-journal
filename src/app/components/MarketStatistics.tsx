@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart4, TrendingUp, TrendingDown, Download, Loader2, Activity, Eye } from 'lucide-react';
-import { PageHeader, StatCard, SectionCard, CardContainer } from './ui/DesignSystem';
+import { PageHeader, StatCard, SectionCard } from './ui/DesignSystem';
 import apiService from '../services/apiService';
 
 const TIMEFRAMES = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1', 'MN1'];
@@ -72,8 +72,8 @@ export default function MarketStatistics() {
     try {
       const data = await apiService.marketStats.analyze(symbol, timeframe, Number(lookback));
       setResults(data);
-    } catch (err: any) {
-      setError(err.message || 'Analysis failed. Ensure MT5 is running on the server.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Analysis failed. Ensure MT5 is running on the server.');
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +91,7 @@ export default function MarketStatistics() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-3 space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 p-6">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-5">
               Analysis Parameters
@@ -196,7 +196,7 @@ export default function MarketStatistics() {
           )}
         </div>
 
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           {!results && !isLoading && !error && (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 p-12 text-center">
               <BarChart4 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
