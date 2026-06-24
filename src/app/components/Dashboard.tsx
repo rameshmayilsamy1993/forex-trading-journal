@@ -138,7 +138,7 @@ export default function Dashboard() {
 
       {/* Filters */}
       <CardContainer className="!p-0">
-        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
+        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-white">
           <div className="flex items-center gap-3">
             <Select value={selectedFirm || 'all'} onValueChange={(value: string) => { setSelectedFirm(value); setSelectedAccount('all'); }}>
               <SelectTrigger className="w-[200px]">
@@ -231,7 +231,7 @@ export default function Dashboard() {
               <div className="text-right">
                 <p className="text-sm text-[#64748B]">Total P/L</p>
                 <p
-                  className={`font-bold text-lg ${
+                  className={`font-bold text-lg tabular-nums ${
                     totalBalance - totalInitialBalance >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'
                   }`}
                 >

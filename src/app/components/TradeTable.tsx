@@ -305,7 +305,7 @@ export default function TradeTable({
                           {(() => {
                             const realPL = getTradeRealPL(trade);
                             return (
-                              <span className={`inline-flex items-center gap-1 font-bold ${realPL > 0 ? 'text-emerald-700' : realPL < 0 ? 'text-rose-700' : 'text-slate-400'}`}>
+                              <span className={`inline-flex items-center gap-1 font-bold tabular-nums ${realPL > 0 ? 'text-emerald-700' : realPL < 0 ? 'text-rose-700' : 'text-slate-400'}`}>
                                 {formatMoney(realPL, true)}
                               </span>
                             );
