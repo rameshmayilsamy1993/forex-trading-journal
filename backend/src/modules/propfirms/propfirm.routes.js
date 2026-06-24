@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getAll, create, update, remove } = require('./propfirm.controller');
+const { getAll, getPaginated, create, update, remove } = require('./propfirm.controller');
 
 router.get('/', getAll);
+router.get('/paginated', getPaginated);
 router.post('/', create);
 router.put('/:id', update);
 router.delete('/:id', remove);

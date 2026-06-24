@@ -1,5 +1,6 @@
 const { Account, ACCOUNT_STATUS } = require('./account.model');
 const Trade = require('../trades/trade.model').Trade;
+const { paginate } = require('../../services/pagination');
 
 const getAll = async (req, res, next) => {
   try {
@@ -22,6 +23,22 @@ const getAll = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+const getPaginated = async (req, res, next) => {
+  try {
+    const { cursor, limit, status } = req.query;
+    let filter = { userId: req.session.userId };
+    if (status) filter.status = status;
+    const result = await paginate(Account, filter, cursor || null, parseInt(limit) || 20, { populate: 'propFirmId' });
+    const tradableStatuses = ['ACTIVE', 'PASSED_1', 'PASSED_2', 'FUNDED'];
+    result.data = result.data.map(account => ({
+      ...account.toObject(),
+      isActive: tradableStatuses.includes(account.status),
+      canTrade: tradableStatuses.includes(account.status)
+    }));
+    res.json(result);
+  } catch (error) { next(error); }
 };
 
 const create = async (req, res, next) => {
@@ -92,4 +109,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, update, remove };
+module.exports = { getAll, getPaginated, create, update, remove };

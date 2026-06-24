@@ -10,13 +10,18 @@ export default function PropFirms() {
   const [firms, setFirms] = useState<PropFirm[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [formData, setFormData] = useState({ name: '', color: '#3B82F6' });
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const firmsData = await apiService.getPropFirms();
-        setFirms(firmsData);
+        const result = await apiService.get<{ data: PropFirm[]; nextCursor: string | null; hasMore: boolean }>('/prop-firms/paginated?limit=20');
+        setFirms(result.data);
+        setCursor(result.nextCursor);
+        setHasMore(result.hasMore);
       } catch (error) {
         console.error('Failed to load prop firms:', error);
       }
@@ -24,6 +29,21 @@ export default function PropFirms() {
     
     loadData();
   }, []);
+
+  const loadMoreFirms = async () => {
+    if (isLoadingMore || !hasMore || !cursor) return;
+    setIsLoadingMore(true);
+    try {
+      const result = await apiService.get<{ data: PropFirm[]; nextCursor: string | null; hasMore: boolean }>(`/prop-firms/paginated?cursor=${cursor}&limit=20`);
+      setFirms(prev => [...prev, ...result.data]);
+      setCursor(result.nextCursor);
+      setHasMore(result.hasMore);
+    } catch (error) {
+      console.error('Failed to load more prop firms:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleAdd = async () => {
     if (!formData.name.trim()) return;
@@ -230,6 +250,15 @@ export default function PropFirms() {
               </div>
             ))}
           </div>
+
+          {hasMore && (
+            <div className="flex justify-center py-4">
+              <button onClick={loadMoreFirms} disabled={isLoadingMore}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                {isLoadingMore ? 'Loading...' : 'Load More'}
+              </button>
+            </div>
+          )}
         </div>
       </CardContainer>
     </div>

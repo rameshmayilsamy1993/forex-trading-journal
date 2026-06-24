@@ -121,6 +121,9 @@ export default function Accounts() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     propFirmId: '',
@@ -132,12 +135,14 @@ export default function Accounts() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [accountsData, firmsData, tradesData] = await Promise.all([
-          apiService.getAccounts(),
+        const [accountsResult, firmsData, tradesData] = await Promise.all([
+          apiService.get<{ data: TradingAccount[]; nextCursor: string | null; hasMore: boolean }>('/accounts/paginated?limit=20'),
           apiService.getPropFirms(),
           apiService.getTrades(),
         ]);
-        setAccounts(accountsData);
+        setAccounts(accountsResult.data);
+        setCursor(accountsResult.nextCursor);
+        setHasMore(accountsResult.hasMore);
         setFirms(firmsData);
         setTrades(tradesData);
       } catch (error) {
@@ -147,6 +152,21 @@ export default function Accounts() {
 
     loadData();
   }, []);
+
+  const loadMoreAccounts = async () => {
+    if (isLoadingMore || !hasMore || !cursor) return;
+    setIsLoadingMore(true);
+    try {
+      const result = await apiService.get<{ data: TradingAccount[]; nextCursor: string | null; hasMore: boolean }>(`/accounts/paginated?cursor=${cursor}&limit=20`);
+      setAccounts(prev => [...prev, ...result.data]);
+      setCursor(result.nextCursor);
+      setHasMore(result.hasMore);
+    } catch (error) {
+      console.error('Failed to load more accounts:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleAdd = async () => {
     if (!formData.name.trim() || !formData.propFirmId || !formData.initialBalance) return;
@@ -402,6 +422,15 @@ export default function Accounts() {
                   );
                 })}
               </div>
+
+              {hasMore && (
+                <div className="flex justify-center py-4">
+                  <button onClick={loadMoreAccounts} disabled={isLoadingMore}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                    {isLoadingMore ? 'Loading...' : 'Load More'}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

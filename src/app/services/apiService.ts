@@ -964,6 +964,10 @@ const apiService = {
     },
   },
 
+  get: async <T = any>(path: string): Promise<T> => {
+    return fetchWithAuth(`${API_BASE_URL}${path}`);
+  },
+
   reminders: {
     getAll: async () => {
       return fetchWithAuth(`${API_BASE_URL}/reminders`);

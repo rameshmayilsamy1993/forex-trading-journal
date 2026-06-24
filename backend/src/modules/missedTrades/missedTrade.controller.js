@@ -3,6 +3,7 @@ const { Trade, SSMT_TYPES } = require('../trades/trade.model');
 const { getCachedPairs } = require('../../services/tradeService');
 const { sanitizeMissedReason } = require('../../services/sanitizeService');
 const { deleteImage } = require('../../config/cloudinary');
+const { paginate } = require('../../services/pagination');
 
 const getAll = async (req, res, next) => {
   try {
@@ -25,6 +26,24 @@ const getAll = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+const getPaginated = async (req, res, next) => {
+  try {
+    const { cursor, limit, ssmtType, dailyQuarter, sixHourQuarter, status, pair, type, model1Confirmation, ssmtConfirmation } = req.query;
+    let filter = { userId: req.session.userId };
+    if (ssmtType && SSMT_TYPES.includes(ssmtType)) filter.ssmtType = ssmtType;
+    if (dailyQuarter) filter.dailyQuarter = dailyQuarter;
+    if (sixHourQuarter) filter.sixHourQuarter = sixHourQuarter;
+    if (status) filter.status = status;
+    if (pair) filter.pair = pair;
+    if (type) filter.type = type;
+    if (model1Confirmation) filter.model1Confirmation = model1Confirmation;
+    if (ssmtConfirmation) filter.ssmtConfirmation = ssmtConfirmation;
+
+    const result = await paginate(MissedTrade, filter, cursor || null, parseInt(limit) || 20, { sort: { date: -1, _id: -1 } });
+    res.json(result);
+  } catch (error) { next(error); }
 };
 
 const create = async (req, res, next) => {
@@ -162,4 +181,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, update, remove };
+module.exports = { getAll, getPaginated, create, update, remove };

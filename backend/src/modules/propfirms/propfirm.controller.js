@@ -1,4 +1,5 @@
 const PropFirm = require('./propfirm.model');
+const { paginate } = require('../../services/pagination');
 
 const getAll = async (req, res, next) => {
   try {
@@ -7,6 +8,14 @@ const getAll = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+const getPaginated = async (req, res, next) => {
+  try {
+    const { cursor, limit } = req.query;
+    const result = await paginate(PropFirm, { userId: req.session.userId }, cursor || null, parseInt(limit) || 20);
+    res.json(result);
+  } catch (error) { next(error); }
 };
 
 const create = async (req, res, next) => {
@@ -50,4 +59,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, update, remove };
+module.exports = { getAll, getPaginated, create, update, remove };

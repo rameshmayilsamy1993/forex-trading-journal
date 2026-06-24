@@ -124,54 +124,11 @@ function SsmtBadge({ value }: { value?: string }) {
   return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 ring-1 ring-blue-300/50">{value}</span>;
 }
 
-const SAMPLE_MISSED_TRADES: MissedTrade[] = [
-  {
-    id: '1',
-    accountId: '',
-    pair: 'EURUSD',
-    type: 'BUY',
-    entryPrice: 1.0850,
-    stopLoss: 1.0820,
-    takeProfit: 1.0950,
-    rr: 1.67,
-    date: '2024-01-15',
-    time: '10:30',
-    turtleSoupTime: '2024-01-15T09:15',
-    dailyQuarter: 'Q3',
-    sixHourQuarter: 'Q2',
-    session: 'LONDON',
-    strategy: '4HR FVG + 15MIN',
-    keyLevel: '4HR FVG',
-    reason: 'Late Entry',
-    emotion: 'Hesitant',
-    status: 'MISSED',
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    accountId: '',
-    pair: 'XAUUSD',
-    type: 'SELL',
-    entryPrice: 2035.50,
-    stopLoss: 2040.00,
-    takeProfit: 2020.00,
-    rr: 2.0,
-    date: '2024-01-14',
-    time: '15:45',
-    turtleSoupTime: '2024-01-14T13:30',
-    dailyQuarter: 'Q1',
-    sixHourQuarter: 'Q4',
-    session: 'NEW YORK',
-    strategy: '4HR CRT + 15MIN MODEL #1',
-    keyLevel: '4HR OB',
-    reason: 'Fear',
-    status: 'REVIEWED',
-    createdAt: new Date().toISOString()
-  }
-];
-
 export default function MissedTradeJournal() {
-  const [missedTrades, setMissedTrades] = useState<MissedTrade[]>(SAMPLE_MISSED_TRADES);
+  const [missedTrades, setMissedTrades] = useState<MissedTrade[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [masters, setMasters] = useState<MasterData[]>([]);
   const [pairs, setPairs] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -224,13 +181,15 @@ export default function MissedTradeJournal() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [missedTradesData, mastersData, pairsData] = await Promise.all([
-          apiService.getMissedTrades(),
+        const [paginatedResult, mastersData, pairsData] = await Promise.all([
+          apiService.get<{ data: MissedTrade[]; nextCursor: string | null; hasMore: boolean }>('/missed-trades/paginated?limit=20'),
           apiService.getMasters(),
           apiService.settings.getPairs()
         ]);
-        if (missedTradesData.length > 0) {
-          setMissedTrades(missedTradesData);
+        if (paginatedResult.data && paginatedResult.data.length > 0) {
+          setMissedTrades(paginatedResult.data);
+          setCursor(paginatedResult.nextCursor);
+          setHasMore(paginatedResult.hasMore);
         }
         setMasters(mastersData);
         setPairs(pairsData || []);
@@ -242,6 +201,23 @@ export default function MissedTradeJournal() {
     };
     loadData();
   }, []);
+
+  const loadMoreMissedTrades = async () => {
+    if (isLoadingMore || !hasMore || !cursor) return;
+    setIsLoadingMore(true);
+    try {
+      const result = await apiService.get<{ data: MissedTrade[]; nextCursor: string | null; hasMore: boolean }>(`/missed-trades/paginated?cursor=${cursor}&limit=20`);
+      if (result.data && result.data.length > 0) {
+        setMissedTrades(prev => [...prev, ...result.data]);
+        setCursor(result.nextCursor);
+        setHasMore(result.hasMore);
+      }
+    } catch (error) {
+      console.error('Failed to load more:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const sessions = useMemo(() => masters.filter(m => m.type === 'session'), [masters]);
   const strategies = useMemo(() => masters.filter(m => m.type === 'strategy'), [masters]);
@@ -1120,6 +1096,16 @@ export default function MissedTradeJournal() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Load More */}
+      {filteredMissedTrades.length > 0 && hasMore && (
+        <div className="flex justify-center py-4">
+          <button onClick={loadMoreMissedTrades} disabled={isLoadingMore}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            {isLoadingMore ? 'Loading...' : 'Load More'}
+          </button>
         </div>
       )}
 
