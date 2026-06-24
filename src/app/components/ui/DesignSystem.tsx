@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from './utils';
 import { Button } from './button';
 
@@ -112,14 +112,14 @@ export function StatCard({ label, value, icon: Icon, color = 'blue', trend, clas
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-[#E5EAF2] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] shadow-[0_4px_16px_rgba(15,23,42,0.06)]',
+        'bg-white rounded-2xl border border-[#E5EAF2] p-5 transition-all duration-200 hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] shadow-[0_4px_16px_rgba(15,23,42,0.06)]',
         className,
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-xs uppercase tracking-[0.12em] text-[#64748B] font-semibold">{label}</p>
-          <p className={cn('text-2xl font-bold mt-1.5 tracking-tight', theme.text)}>
+          <p className={cn('text-2xl font-bold mt-1.5 tracking-tight tabular-nums', theme.text)}>
             {value}
           </p>
           {trend && (
@@ -129,7 +129,7 @@ export function StatCard({ label, value, icon: Icon, color = 'blue', trend, clas
                 trend.positive !== false ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700',
               )}
             >
-              {trend.positive !== false ? '↑' : '↓'} {trend.value}
+              {trend.positive !== false ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />} {trend.value}
             </p>
           )}
         </div>
@@ -184,7 +184,7 @@ export function SectionCard({ title, subtitle, icon: Icon, color = 'blue', child
   return (
     <div className={cn('bg-white rounded-2xl border border-[#E5EAF2] overflow-hidden shadow-[0_4px_16px_rgba(15,23,42,0.06)]', className)}>
       {(title || action) && (
-        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-gradient-to-r from-white to-[#F8FAFC]">
+        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {Icon && (

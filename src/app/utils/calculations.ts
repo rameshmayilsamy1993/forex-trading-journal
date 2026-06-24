@@ -30,7 +30,7 @@ export const formatPrice = (value?: number, pair?: string): string => {
 
   if (pair) {
     const upper = pair.toUpperCase();
-    if (upper === 'XAUUSD' || upper === 'BTCUSD') return value.toFixed(2);
+    if (['XAUUSD', 'BTCUSD', 'GC1!', 'MGC1!', 'MCG1!', 'QO1!'].includes(upper)) return value.toFixed(2);
     if (upper === 'USDJPY' || upper === 'JPYUSD') return value.toFixed(3);
     if (['EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'USDCAD', 'USDCHF', 'EURGBP', 'EURAUD', 'EURJPY', 'GBPJPY', 'AUDJPY'].includes(upper)) return value.toFixed(5);
   }

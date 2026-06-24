@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, X, Check, Building2, Wallet, AlertTriangle } from 'lucide-react';
 import { TradingAccount, PropFirm, Trade, AccountStatus } from '../types/trading';
 import apiService from '../services/apiService';
+import { showConfirm } from '../hooks/useToast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -193,7 +194,7 @@ export default function Accounts() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this account?')) {
+    if (await showConfirm('Are you sure you want to delete this account?')) {
       try {
         await apiService.deleteAccount(id);
         setAccounts(accounts.filter(account => account.id !== id));

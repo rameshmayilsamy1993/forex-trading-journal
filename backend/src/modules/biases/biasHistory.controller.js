@@ -30,7 +30,7 @@ const saveBias = async (req, res, next) => {
       const previousWeekly = previousEntry?.weeklyBias || 'NEUTRAL';
       const previousMonthly = previousEntry?.monthlyBias || 'NEUTRAL';
 
-      const dailyBias = daily;
+      const dailyBias = h1;
       const weeklyBias = h4;
       const monthlyBias = daily;
 

@@ -21,4 +21,6 @@ const masterSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true }
 }, schemaOptions);
 
+masterSchema.index({ userId: 1, type: 1 });
+
 module.exports = mongoose.model('Master', masterSchema);

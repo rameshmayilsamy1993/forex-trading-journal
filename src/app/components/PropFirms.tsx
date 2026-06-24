@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, X, Check, Building2 } from 'lucide-react';
 import { PropFirm } from '../types/trading';
 import apiService from '../services/apiService';
 import { Input } from './ui/input';
+import { showConfirm } from '../hooks/useToast';
 import { PageHeader, CardContainer, StatCard } from './ui/DesignSystem';
 
 export default function PropFirms() {
@@ -61,7 +62,7 @@ export default function PropFirms() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this prop firm? This will also affect associated accounts.')) {
+    if (await showConfirm('Are you sure you want to delete this prop firm? This will also affect associated accounts.')) {
       try {
         await apiService.deletePropFirm(id);
         setFirms(firms.filter(firm => firm.id !== id));

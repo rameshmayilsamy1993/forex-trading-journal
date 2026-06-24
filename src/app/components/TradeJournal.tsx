@@ -20,6 +20,7 @@ import ExportMenu from './ExportMenu';
 import StrategyChecklist from './StrategyChecklist';
 import ChecklistDetailsModal from './ChecklistDetailsModal';
 import Modal from './ui/Modal';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './ui/table';
 
 
 export default function TradeJournal() {
@@ -945,7 +946,7 @@ export default function TradeJournal() {
 
       <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-slate-200/50">
         <span className="text-sm text-slate-500 font-medium">Filters:</span>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-4 items-center">
           <Select
             value={filterAccount || 'all'}
             onValueChange={(value: string) => setFilterAccount(value)}
@@ -1633,50 +1634,48 @@ export default function TradeJournal() {
                 )}
 
                 {filteredTrades.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[900px]">
-                        <thead>
-                          <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-                            <th className="w-12 py-3 px-4">
-                              <input
-                                type="checkbox"
-                                checked={selectedTrades.length === filteredTrades.length && filteredTrades.length > 0}
-                                onChange={toggleSelectAll}
-                                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                              />
-                            </th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[140px]">Date</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[300px]">Account</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Pair</th>
-                            <th className="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Type</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider hidden sm:table-cell w-[120px]">Entry</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider hidden sm:table-cell w-[120px]">Exit</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Real P/L</th>
-                            <th className="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[120px]">Checklist</th>
-                            <th className="text-right py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider w-[140px]">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
+                  <Table className="rounded-2xl">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <input
+                            type="checkbox"
+                            checked={selectedTrades.length === filteredTrades.length && filteredTrades.length > 0}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          />
+                        </TableHead>
+                        <TableHead className="w-[140px]">Date</TableHead>
+                        <TableHead className="w-[300px]">Account</TableHead>
+                        <TableHead className="w-[120px]">Pair</TableHead>
+                        <TableHead className="w-[120px]">Type</TableHead>
+                        <TableHead className="text-right hidden sm:table-cell w-[120px]">Entry</TableHead>
+                        <TableHead className="text-right hidden sm:table-cell w-[120px]">Exit</TableHead>
+                        <TableHead className="text-right w-[120px]">Real P/L</TableHead>
+                        <TableHead className="text-center w-[120px]">Checklist</TableHead>
+                        <TableHead className="text-right w-[140px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                           {filteredTrades.map(trade => (
-                            <tr key={trade.id} className={`group hover:bg-slate-50 hover:shadow-sm transition-all duration-200 ${selectedTrades.includes(trade.id) ? 'bg-blue-50/50' : ''}`}>
-                              <td className="py-3 px-4 align-middle">
+                            <TableRow key={trade.id} className={`group ${selectedTrades.includes(trade.id) ? 'bg-blue-50/50' : ''}`}>
+                              <TableCell>
                                 <input
                                   type="checkbox"
                                   checked={selectedTrades.includes(trade.id)}
                                   onChange={() => toggleSelect(trade.id)}
                                   className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                 />
-                              </td>
-                              <td className="py-3 px-4 text-sm text-slate-900 align-middle">
+                              </TableCell>
+                              <TableCell>
                                 <div>
                                   {getLocalDateString(trade.entryDate)}
                                   {trade.entryTime && (
                                     <div className="text-xs text-slate-400">{trade.entryTime}</div>
                                   )}
                                 </div>
-                              </td>
-                              <td className="py-3 px-4 text-sm align-middle">
+                              </TableCell>
+                              <TableCell>
                                 <div className="flex items-center gap-2">
                                   <div
                                     className="w-2.5 h-2.5 rounded-full ring-2 ring-white shadow-sm"
@@ -1684,24 +1683,24 @@ export default function TradeJournal() {
                                   />
                                   <span className="font-medium text-slate-800">{getAccountName(trade.accountId)}</span>
                                 </div>
-                              </td>
-                              <td className="py-3 px-4 text-sm align-middle">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                              </TableCell>
+                              <TableCell>
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800">
                                   {trade.pair}
                                 </span>
-                              </td>
-                              <td className="py-3 px-4 text-sm align-middle">
+                              </TableCell>
+                              <TableCell>
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${trade.type === 'BUY' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                                   }`}>
                                   {trade.type === 'BUY' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                                   {trade.type}
                                 </span>
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right font-mono text-slate-700 hidden sm:table-cell align-middle">{formatPrice(trade.entryPrice, trade.pair)}</td>
-                              <td className="py-3 px-4 text-sm text-right font-mono text-slate-700 hidden sm:table-cell align-middle">
+                              </TableCell>
+                              <TableCell className="text-right font-mono hidden sm:table-cell">{formatPrice(trade.entryPrice, trade.pair)}</TableCell>
+                              <TableCell className="text-right font-mono hidden sm:table-cell">
                                 {trade.exitPrice ? formatPrice(trade.exitPrice, trade.pair) : '-'}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-right align-middle">
+                              </TableCell>
+                              <TableCell className="text-right tabular-nums">
                                 {(() => {
                                   const realPL = getTradeRealPL(trade);
                                   return (
@@ -1710,8 +1709,8 @@ export default function TradeJournal() {
                                     </span>
                                   );
                                 })()}
-                              </td>
-                              <td className="py-3 px-4 text-sm text-center align-middle">
+                              </TableCell>
+                              <TableCell className="text-center">
                                 {(trade as any).checklistId ? (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit mx-auto">
                                     <Check className="w-3 h-3" />
@@ -1722,12 +1721,12 @@ export default function TradeJournal() {
                                     &mdash; Not Linked
                                   </span>
                                 )}
-                              </td>
-                              <td className="py-3 px-4 text-right align-middle">
+                              </TableCell>
+                              <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
                                   <button
                                     onClick={() => handleOpenChecklistDetails(trade)}
-                                    className={`p-2 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm ${(trade as any).checklistId ? 'text-violet-500 hover:text-violet-700 hover:bg-violet-50' : 'text-slate-400 hover:text-violet-700 hover:bg-violet-50'}`}
+                                    className={`p-1.5 rounded-lg transition-all duration-150 ${(trade as any).checklistId ? 'text-violet-500 hover:text-violet-700 hover:bg-violet-50' : 'text-slate-400 hover:text-violet-700 hover:bg-violet-50'}`}
                                     title="Checklist"
                                   >
                                     <ClipboardCheck className="w-4 h-4" />
@@ -1735,7 +1734,7 @@ export default function TradeJournal() {
                                   {getTradeRealPL(trade) < 0 && (
                                     <button
                                       onClick={() => handleOpenLossAnalysis(trade)}
-                                      className={`p-2 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm ${analysesMap[trade.id] ? 'text-orange-500 hover:text-orange-700 hover:bg-orange-50' : 'text-rose-400 hover:text-rose-700 hover:bg-rose-50'}`}
+                                      className={`p-1.5 rounded-lg transition-all duration-150 ${analysesMap[trade.id] ? 'text-orange-500 hover:text-orange-700 hover:bg-orange-50' : 'text-rose-400 hover:text-rose-700 hover:bg-rose-50'}`}
                                       title={analysesMap[trade.id] ? 'View Loss Analysis' : 'Create Loss Analysis'}
                                     >
                                       <FileText className="w-4 h-4" />
@@ -1743,33 +1742,31 @@ export default function TradeJournal() {
                                   )}
                                   <button
                                     onClick={() => setViewingTrade(trade)}
-                                    className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-150"
                                     title="View trade"
                                   >
                                     <Eye className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => startEdit(trade)}
-                                    className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-150"
                                     title="Edit"
                                   >
                                     <Edit2 className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleDelete(trade.id)}
-                                    className="p-2 text-rose-400 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-700 hover:bg-rose-50 transition-all duration-150"
                                     title="Delete"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
                                 </div>
-                              </td>
-                            </tr>
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                        </TableBody>
+                    </Table>
                 )}
               </div>
             </>
@@ -1779,9 +1776,9 @@ export default function TradeJournal() {
 
       {/* Trade Details Modal */}
       {viewingTrade && (
-        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 z-50">
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-white/20 animate-in zoom-in-95 duration-200">
-            <div className="relative overflow-hidden bg-slate-950 text-white flex-shrink-0">
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700 text-white flex-shrink-0">
               <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_#22c55e,_transparent_32%),radial-gradient(circle_at_top_right,_#38bdf8,_transparent_30%)]" />
               <div className="relative p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
@@ -1840,7 +1837,7 @@ export default function TradeJournal() {
                     </button>
                     <button
                       onClick={() => setViewingTrade(null)}
-                      className="p-2 bg-white/10 hover:bg-red-500 hover:text-white rounded-full transition-colors"
+                      className="p-2 bg-white/10 hover:bg-white/25 text-white/80 hover:text-white rounded-full transition-colors"
                       title="Close"
                     >
                       <X className="w-5 h-5" />
@@ -1887,7 +1884,7 @@ export default function TradeJournal() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto bg-slate-50 p-6">
               <div className="grid grid-cols-1 xl:grid-cols-[1.25fr_0.75fr] gap-5">
                 <div className="space-y-5">
                   <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

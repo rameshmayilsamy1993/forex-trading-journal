@@ -200,10 +200,6 @@ const linkToTrade = async (req, res, next) => {
 
     const Trade = require('../trades/trade.model').Trade;
 
-    if (!checklist.linkedTrades.includes(tradeId)) {
-      checklist.linkedTrades.push(tradeId);
-    }
-
     await Trade.updateOne(
       { _id: tradeId, userId: req.session.userId },
       { 

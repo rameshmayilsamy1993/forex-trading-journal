@@ -1,54 +1,82 @@
-import { useState, useEffect } from 'react';
-import { Menu, User, LogOut, Clock } from 'lucide-react';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { Menu, User, LogOut } from 'lucide-react';
 import Sidebar, { Tab } from './components/Sidebar';
 import LiveISTClock from './components/common/LiveISTClock';
-import Dashboard from './components/Dashboard';
-import TradeJournal from './components/TradeJournal';
-import PropFirms from './components/PropFirms';
-import Accounts from './components/Accounts';
-import Reports from './components/Reports';
-import Masters from './components/Masters';
-import Settings from './components/Settings';
-import MissedTradeJournal from './components/MissedTradeJournal';
-import MissedTradesCalendar from './components/MissedTradesCalendar';
-import TradingCalendar from './components/TradingCalendar';
-import TradeImport from './components/TradeImport';
-import ConvertCsv from './pages/ConvertCsv';
-import ChecklistExecutionPage from './components/ChecklistExecutionPage';
-import MasterStrategyPage from './components/MasterStrategyPage';
-import BiasMapping from './components/BiasMapping';
-import BiasInput from './components/BiasInput';
-import BiasHistory from './components/BiasHistory';
-import LiquidityInput from './components/LiquidityInput';
-import LiquidityHistory from './components/LiquidityHistory';
-import CRTInput from './components/CRTInput';
-import CRTHistory from './components/CRTHistory';
-import BreachedTrades from './components/BreachedTrades';
-import XauusdCalculator from './components/XauusdCalculator';
-import ForexLotCalculator from './components/ForexLotCalculator';
-import apiService, { User as UserType } from './services/apiService';
+import { useAuthContext } from './context/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { LoadingSpinner } from './components/ui/Loading';
+import { Toaster } from './components/ui/sonner';
+
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const TradeJournal = lazy(() => import('./components/TradeJournal'));
+const PropFirms = lazy(() => import('./components/PropFirms'));
+const Accounts = lazy(() => import('./components/Accounts'));
+const Reports = lazy(() => import('./components/Reports'));
+const Masters = lazy(() => import('./components/Masters'));
+const Settings = lazy(() => import('./components/Settings'));
+const MissedTradeJournal = lazy(() => import('./components/MissedTradeJournal'));
+const MissedTradesCalendar = lazy(() => import('./components/MissedTradesCalendar'));
+const TradingCalendar = lazy(() => import('./components/TradingCalendar'));
+const TradeImport = lazy(() => import('./components/TradeImport'));
+const ConvertCsv = lazy(() => import('./pages/ConvertCsv'));
+const ChecklistExecutionPage = lazy(() => import('./components/ChecklistExecutionPage'));
+const MasterStrategyPage = lazy(() => import('./components/MasterStrategyPage'));
+const BiasMapping = lazy(() => import('./components/BiasMapping'));
+const BiasInput = lazy(() => import('./components/BiasInput'));
+const BiasHistory = lazy(() => import('./components/BiasHistory'));
+const LiquidityInput = lazy(() => import('./components/LiquidityInput'));
+const LiquidityHistory = lazy(() => import('./components/LiquidityHistory'));
+const CRTInput = lazy(() => import('./components/CRTInput'));
+const CRTHistory = lazy(() => import('./components/CRTHistory'));
+const BreachedTrades = lazy(() => import('./components/BreachedTrades'));
+const XauusdCalculator = lazy(() => import('./components/XauusdCalculator'));
+const ForexLotCalculator = lazy(() => import('./components/ForexLotCalculator'));
+
+function TabContent({ activeTab }: { activeTab: Tab }) {
+  return (
+    <Suspense fallback={<LoadingSpinner message="Loading..." />}>
+      <ErrorBoundary>
+        {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'journal' && <TradeJournal />}
+        {activeTab === 'import' && <TradeImport />}
+        {activeTab === 'convert' && <ConvertCsv />}
+        {activeTab === 'checklist' && <ChecklistExecutionPage />}
+        {activeTab === 'calendar' && <TradingCalendar />}
+        {activeTab === 'missed' && <MissedTradeJournal />}
+        {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
+        {activeTab === 'firms' && <PropFirms />}
+        {activeTab === 'accounts' && <Accounts />}
+        {activeTab === 'reports' && <Reports />}
+        {activeTab === 'strategy-master' && <MasterStrategyPage />}
+        {activeTab === 'bias' && <BiasMapping />}
+        {activeTab === 'bias-input' && <BiasInput />}
+        {activeTab === 'bias-history' && <BiasHistory />}
+        {activeTab === 'liquidity-input' && <LiquidityInput />}
+        {activeTab === 'liquidity-history' && <LiquidityHistory />}
+        {activeTab === 'crt-input' && <CRTInput />}
+        {activeTab === 'crt-history' && <CRTHistory />}
+        {activeTab === 'breached-trades' && <BreachedTrades />}
+        {activeTab === 'settings' && <Settings />}
+        {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
+        {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
+      </ErrorBoundary>
+    </Suspense>
+  );
+}
 
 export default function App() {
+  const { user: currentUser, logout: handleLogout } = useAuthContext();
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   useEffect(() => {
-    setCurrentUser(apiService.auth.getStoredUser());
-
     const handleNavigation = (e: CustomEvent) => {
       setActiveTab(e.detail as Tab);
     };
     window.addEventListener('navigate-to-tab', handleNavigation as EventListener);
     return () => window.removeEventListener('navigate-to-tab', handleNavigation as EventListener);
   }, []);
-
-  const handleLogout = async () => {
-    await apiService.auth.logout();
-    window.location.href = '/login';
-  };
 
   return (
     <div className="min-h-screen bg-[#F5F7FB]">
@@ -63,19 +91,18 @@ export default function App() {
         onMobileClose={() => setIsMobileOpen(false)}
       />
 
-      {/* Main Content Area */}
       <div
         className={`transition-all duration-300 min-h-screen ${
           isCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
         }`}
       >
-        {/* Top Header (Mobile only) */}
         <header className="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-[#E5EAF2] px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsMobileOpen(true)}
                 className="p-2 -ml-2 hover:bg-[#F1F5F9] rounded-xl transition-colors"
+                aria-label="Open navigation menu"
               >
                 <Menu className="w-5 h-5 text-[#64748B]" />
               </button>
@@ -87,7 +114,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* Desktop Header Bar */}
         <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5EAF2] items-center justify-end px-6 gap-3">
           <LiveISTClock />
           <div className="w-px h-8 bg-[#E5EAF2]" />
@@ -108,6 +134,7 @@ export default function App() {
                 onClick={handleLogout}
                 className="p-2 text-[#64748B] hover:text-[#DC2626] hover:bg-red-50 rounded-xl transition-colors"
                 title="Sign out"
+                aria-label="Sign out"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -115,37 +142,13 @@ export default function App() {
           )}
         </header>
 
-        {/* Page Content */}
         <main className="p-4 lg:p-6">
           <div className="max-w-[1800px] mx-auto">
-            <ErrorBoundary>
-              {activeTab === 'dashboard' && <Dashboard />}
-              {activeTab === 'journal' && <TradeJournal />}
-              {activeTab === 'import' && <TradeImport />}
-              {activeTab === 'convert' && <ConvertCsv />}
-              {activeTab === 'checklist' && <ChecklistExecutionPage />}
-              {activeTab === 'calendar' && <TradingCalendar />}
-              {activeTab === 'missed' && <MissedTradeJournal />}
-              {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
-              {activeTab === 'firms' && <PropFirms />}
-              {activeTab === 'accounts' && <Accounts />}
-              {activeTab === 'reports' && <Reports />}
-              {activeTab === 'strategy-master' && <MasterStrategyPage />}
-              {activeTab === 'bias' && <BiasMapping />}
-              {activeTab === 'bias-input' && <BiasInput />}
-              {activeTab === 'bias-history' && <BiasHistory />}
-              {activeTab === 'liquidity-input' && <LiquidityInput />}
-              {activeTab === 'liquidity-history' && <LiquidityHistory />}
-              {activeTab === 'crt-input' && <CRTInput />}
-              {activeTab === 'crt-history' && <CRTHistory />}
-              {activeTab === 'breached-trades' && <BreachedTrades />}
-              {activeTab === 'settings' && <Settings />}
-              {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
-              {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
-            </ErrorBoundary>
+            <TabContent activeTab={activeTab} />
           </div>
         </main>
       </div>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }

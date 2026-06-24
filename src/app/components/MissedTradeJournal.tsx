@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn,
 import { MissedTrade, MasterData, SMTType, Model1Type, Model1ConfirmationType, SsmtConfirmationType } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { showSuccess, showError, showConfirm } from '../hooks/useToast';
 import { Input } from './ui/input';
 import TimePicker from './ui/TimePicker';
 import { Button } from './ui/button';
@@ -381,7 +382,7 @@ export default function MissedTradeJournal() {
 
   const handleSubmit = async () => {
     if (!formData.pair || !formData.entryPrice || !formData.stopLoss || !formData.takeProfit || !formData.date || !formData.reason) {
-      alert('Please fill in all required fields');
+      showError('Please fill in all required fields');
       return;
     }
 
@@ -446,7 +447,7 @@ export default function MissedTradeJournal() {
 
   const handleEdit = async (id: string) => {
     if (!formData.pair || !formData.entryPrice || !formData.stopLoss || !formData.takeProfit || !formData.date || !formData.reason) {
-      alert('Please fill in all required fields');
+      showError('Please fill in all required fields');
       return;
     }
 
@@ -504,7 +505,7 @@ export default function MissedTradeJournal() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this missed trade?')) {
+    if (await showConfirm('Are you sure you want to delete this missed trade?')) {
       try {
         await apiService.deleteMissedTrade(id);
         setMissedTrades(missedTrades.filter(t => t.id !== id));
@@ -537,7 +538,7 @@ export default function MissedTradeJournal() {
         });
       } catch (error) {
         console.error('Failed to upload image:', error);
-        alert('Failed to upload image. Please try again.');
+        showError('Failed to upload image. Please try again.');
       } finally {
         setUploadingImage(null);
       }

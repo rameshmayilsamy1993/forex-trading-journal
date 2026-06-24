@@ -15,4 +15,6 @@ const propFirmSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
+propFirmSchema.index({ userId: 1 });
+
 module.exports = mongoose.model('PropFirm', propFirmSchema);

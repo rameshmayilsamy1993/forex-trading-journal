@@ -44,6 +44,9 @@ checklistSessionSchema.pre('save', async function(next) {
   next();
 });
 
+checklistSessionSchema.index({ userId: 1, createdAt: -1 });
+checklistSessionSchema.index({ userId: 1, status: 1 });
+
 const ChecklistSession = mongoose.models.ChecklistSession 
   ? mongoose.models.ChecklistSession 
   : mongoose.model('ChecklistSession', checklistSessionSchema);

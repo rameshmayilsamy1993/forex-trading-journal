@@ -18,4 +18,6 @@ const accountSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
+accountSchema.index({ userId: 1 });
+
 module.exports = { Account: mongoose.model('Account', accountSchema), ACCOUNT_STATUS };

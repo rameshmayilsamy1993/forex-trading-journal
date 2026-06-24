@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, X, Check, Settings as SettingsIcon, DollarSign, Ey
 import { MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { Button } from './ui/button';
+import { showSuccess, showError, showConfirm } from '../hooks/useToast';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PageHeader, CardContainer, SectionCard } from './ui/DesignSystem';
@@ -84,7 +85,7 @@ export default function Settings() {
   };
 
   const handleDeleteMaster = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!await showConfirm('Are you sure you want to delete this item?')) return;
     
     try {
       await apiService.deleteMaster(id);
@@ -99,7 +100,7 @@ export default function Settings() {
     
     const upperPair = newPair.trim().toUpperCase();
     if (pairs.includes(upperPair)) {
-      alert('This pair already exists');
+      showError('This pair already exists');
       return;
     }
     
@@ -117,7 +118,7 @@ export default function Settings() {
   };
 
   const handleDeletePair = async (pairToDelete: string) => {
-    if (!confirm(`Are you sure you want to delete "${pairToDelete}"?`)) return;
+    if (!await showConfirm(`Are you sure you want to delete "${pairToDelete}"?`)) return;
     
     setIsLoading(true);
     try {

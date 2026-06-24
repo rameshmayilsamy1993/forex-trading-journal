@@ -39,4 +39,6 @@ const missedTradeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
+missedTradeSchema.index({ userId: 1, date: -1 });
+
 module.exports = mongoose.model('MissedTrade', missedTradeSchema);

@@ -49,7 +49,7 @@ export function useAsync<T>(
   return { ...state, execute, reset };
 }
 
-export function useSafeState<T>(initialValue: T): [T, (value: T | ((prev: T) => T) => void] {
+export function useSafeState<T>(initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
   const [value, setValue] = useState<T>(() => {
     if (initialValue === null || initialValue === undefined) {
       console.warn('useSafeState: Initial value is null or undefined');
@@ -59,7 +59,7 @@ export function useSafeState<T>(initialValue: T): [T, (value: T | ((prev: T) => 
   });
 
   const safeSetValue = useCallback((newValue: T | ((prev: T) => T)) => {
-    setState(prev => {
+    setValue(prev => {
       const resolved = typeof newValue === 'function'
         ? (newValue as (prev: T) => T)(prev)
         : newValue;

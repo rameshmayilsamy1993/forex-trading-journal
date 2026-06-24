@@ -39,4 +39,7 @@ const tradeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, schemaOptions);
 
+tradeSchema.index({ userId: 1, createdAt: -1 });
+tradeSchema.index({ userId: 1, accountId: 1 });
+
 module.exports = { Trade: mongoose.model('Trade', tradeSchema), SSMT_TYPES };

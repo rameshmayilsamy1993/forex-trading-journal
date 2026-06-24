@@ -168,7 +168,7 @@ export default function Sidebar({
             )}
           </div>
           {!isCollapsed && (
-            <button onClick={onMobileClose} className="lg:hidden p-2 hover:bg-white/[0.06] rounded-lg transition-colors">
+            <button onClick={onMobileClose} className="lg:hidden p-2 hover:bg-white/[0.06] rounded-lg transition-colors" aria-label="Close navigation menu">
               <X className="w-4 h-4 text-slate-400" />
             </button>
           )}
@@ -223,6 +223,7 @@ export default function Sidebar({
         <button
           onClick={() => onCollapsedChange(!isCollapsed)}
           className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-[#1E293B] border border-white/[0.08] rounded-full items-center justify-center shadow-lg shadow-slate-950/30 hover:bg-[#334155] transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
             <ChevronRight className="w-3 h-3 text-slate-400" />
