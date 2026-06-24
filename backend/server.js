@@ -46,6 +46,7 @@ const biasEventRoutes = require('./src/modules/biases/biasEvent.routes');
 const liquidityRoutes = require('./src/modules/liquidity/liquidity.routes');
 const h4Routes = require('./src/modules/h4/h4.routes');
 const crtRoutes = require('./src/modules/crt/crtEvent.routes');
+const marketStatsRoutes = require('./src/modules/marketStats/marketStats.routes');
 // Reminder routes and scheduler disabled
 
 const app = express();
@@ -104,6 +105,7 @@ app.use('/api/bias', isAuthenticated, biasEventRoutes);
 app.use('/api/liquidity', isAuthenticated, liquidityRoutes);
 app.use('/api/h4', isAuthenticated, h4Routes);
 app.use('/api/crt-events', isAuthenticated, crtRoutes);
+app.use('/api/market-stats', isAuthenticated, marketStatsRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
 app.use(notFoundMiddleware);
