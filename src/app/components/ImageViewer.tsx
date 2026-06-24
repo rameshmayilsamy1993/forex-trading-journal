@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { getThumbnail, getResponsiveUrl } from '../utils/cloudinary';
 
 interface ImageViewerProps {
   images: { url: string; label: string }[];
@@ -123,9 +124,10 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }: Image
       >
         <img
           ref={imgRef}
-          src={images[currentIndex].url}
+          src={getResponsiveUrl(images[currentIndex].url, 800)}
           alt={images[currentIndex].label}
           className="max-w-full max-h-full object-contain select-none"
+          loading="lazy"
           style={{ 
             transform: `scale(${zoom}) rotate(${rotation}deg)`,
             transition: isDragging ? 'none' : 'transform 0.15s ease-out'
@@ -183,7 +185,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }: Image
                 i === currentIndex ? 'border-blue-500' : 'border-white/30 hover:border-white/60'
               }`}
             >
-              <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+              <img src={getThumbnail(img.url)} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
             </button>
           ))}
         </div>
