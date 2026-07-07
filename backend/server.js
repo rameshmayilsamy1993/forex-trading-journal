@@ -48,6 +48,8 @@ const h4Routes = require('./src/modules/h4/h4.routes');
 const crtRoutes = require('./src/modules/crt/crtEvent.routes');
 const marketStatsRoutes = require('./src/modules/marketStats/marketStats.routes');
 const monthlyReviewRoutes = require('./src/modules/monthlyReviews/monthlyReview.routes');
+const weeklyReviewRoutes = require('./src/modules/weeklyReviews/weeklyReview.routes');
+const dailyReviewRoutes = require('./src/modules/dailyReviews/dailyReview.routes');
 // Reminder routes and scheduler disabled
 
 const app = express();
@@ -108,6 +110,8 @@ app.use('/api/h4', isAuthenticated, h4Routes);
 app.use('/api/crt-events', isAuthenticated, crtRoutes);
 app.use('/api/market-stats', isAuthenticated, marketStatsRoutes);
 app.use('/api/monthly-reviews', isAuthenticated, monthlyReviewRoutes);
+app.use('/api/weekly-reviews', isAuthenticated, weeklyReviewRoutes);
+app.use('/api/daily-reviews', isAuthenticated, dailyReviewRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
 app.use(notFoundMiddleware);
