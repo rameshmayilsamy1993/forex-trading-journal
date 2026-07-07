@@ -3,9 +3,9 @@ import {
   LayoutDashboard, BookOpen, Building2, Wallet, BarChart3,
   EyeOff, Calendar, Settings as SettingsIcon, FileUp,
   Activity, FileSpreadsheet, ClipboardCheck, Settings2,
-  ChevronLeft, ChevronRight, X, ActivitySquare, TrendingUp,
+  ChevronDown, ChevronLeft, ChevronRight, X, TrendingUp,
   TrendingDown, History, Layers, AlertTriangle, Calculator,
-  DollarSign, BarChart4
+  DollarSign, BarChart4, Sparkles, NotebookText
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
@@ -30,12 +30,13 @@ function saveHiddenTabs(hidden: Set<Tab>) {
   localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
 }
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats' | 'monthly-review' | 'monthly-review-detail';
 
 interface NavItem {
   id: Tab;
   label: string;
   icon: React.ElementType;
+  children?: NavItem[];
 }
 
 interface NavGroup {
@@ -82,10 +83,15 @@ const navigationGroups: NavGroup[] = [
   {
     title: 'Analysis',
     items: [
-      { id: 'missed', label: 'CRT Missed Trades', icon: EyeOff },
-      { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
+      {
+        id: 'missed', label: 'CRT Missed Trades', icon: EyeOff,
+        children: [
+          { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
+        ],
+      },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
       { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
+      { id: 'monthly-review', label: 'Monthly Market Review', icon: NotebookText },
     ],
   },
   {
@@ -110,6 +116,15 @@ interface SidebarProps {
   onMobileClose: () => void;
 }
 
+// Shared sidebar nav item classes for consistent spacing
+const NAV_BASE = "w-full flex items-center gap-2.5 rounded-xl text-sidebar-menu transition-all duration-200 relative group";
+const NAV_ACTIVE = "bg-gradient-to-r from-[#7C3AED]/20 to-transparent text-white shadow-[0_0_20px_rgba(124,58,237,0.15)]";
+const NAV_INACTIVE = "text-slate-400 hover:text-white hover:bg-white/[0.04]";
+const NAV_ICON = "w-[18px] h-[18px] flex-shrink-0 transition-all duration-200";
+const NAV_ICON_ACTIVE = "text-[#7C3AED]";
+const NAV_ICON_INACTIVE = "text-slate-500 group-hover:text-white";
+const ACTIVE_INDICATOR = "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#7C3AED] rounded-r-full shadow-[0_0_8px_rgba(124,58,237,0.5)]";
+
 export default function Sidebar({
   activeTab,
   onTabChange,
@@ -121,15 +136,93 @@ export default function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const [hiddenTabs, setHiddenTabs] = useState<Set<Tab>>(loadHiddenTabs);
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     saveHiddenTabs(hiddenTabs);
   }, [hiddenTabs]);
 
+  // Auto-expand parent when a child is active
+  useEffect(() => {
+    setExpandedMenus(prev => {
+      const next = new Set(prev);
+      for (const group of navigationGroups) {
+        for (const item of group.items) {
+          if (item.children?.some(c => c.id === activeTab)) {
+            next.add(item.id);
+          }
+        }
+      }
+      return next;
+    });
+  }, [activeTab]);
+
+  const toggleMenu = (id: string) => {
+    setExpandedMenus(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const filterHidden = (groups: NavGroup[]): NavGroup[] =>
-    groups.map(g => ({ ...g, items: g.items.filter(i => !hiddenTabs.has(i.id)) })).filter(g => g.items.length > 0);
+    groups.map(g => ({
+      ...g,
+      items: g.items
+        .map(i => ({
+          ...i,
+          children: i.children?.filter(c => !hiddenTabs.has(c.id)),
+        }))
+        .filter(i => !hiddenTabs.has(i.id) && (!i.children || i.children.length > 0)),
+    })).filter(g => g.items.length > 0);
 
   const visibleGroups = filterHidden(navigationGroups);
+
+  const renderNavItem = (item: NavItem, depth: number = 0) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedMenus.has(item.id);
+    const paddingLeft = depth === 0 ? "pl-5" : "pl-9";
+
+    return (
+      <div key={item.id}>
+        <button
+          onClick={() => {
+            onTabChange(item.id);
+            onMobileClose();
+            if (hasChildren) toggleMenu(item.id);
+          }}
+          className={cn(
+            NAV_BASE,
+            isCollapsed ? "justify-center px-2 py-2.5" : `${paddingLeft} pr-3 py-2.5`,
+            isActive ? NAV_ACTIVE : NAV_INACTIVE,
+          )}
+          title={isCollapsed ? item.label : undefined}
+        >
+          {!isCollapsed && isActive && <span className={ACTIVE_INDICATOR} />}
+          <Icon className={cn(NAV_ICON, isActive ? NAV_ICON_ACTIVE : NAV_ICON_INACTIVE)} />
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 text-left">{item.label}</span>
+              {hasChildren && (
+                <ChevronDown className={cn(
+                  "w-4 h-4 text-slate-500 transition-transform duration-200",
+                  isExpanded && "rotate-180",
+                )} />
+              )}
+            </>
+          )}
+        </button>
+        {hasChildren && !isCollapsed && isExpanded && (
+          <div className="mt-0.5 space-y-0.5">
+            {item.children!.map(child => renderNavItem(child, 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -145,7 +238,7 @@ export default function Sidebar({
       <aside
         className={cn(
           "fixed top-0 left-0 h-screen z-50 transition-all duration-300 flex flex-col",
-          "bg-[#0B1620] border-r border-white/[0.06] shadow-2xl shadow-slate-950/40",
+          "bg-[#0F172A] border-r border-white/[0.06] shadow-2xl shadow-slate-950/40",
           isCollapsed ? "w-[72px]" : "w-[260px]",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
@@ -158,13 +251,13 @@ export default function Sidebar({
           )}
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#2563EB] via-[#4F46E5] to-[#7C3AED] rounded-xl flex items-center justify-center shadow-lg shadow-[#2563EB]/30 ring-1 ring-white/[0.1]">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 bg-gradient-to-br from-[#7C3AED] via-[#6D28D9] to-[#4F46E5] rounded-xl flex items-center justify-center shadow-lg shadow-[#7C3AED]/40 ring-1 ring-white/[0.1]">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
               <div>
-                <h1 className="text-base font-semibold tracking-tight text-white">FX Journal</h1>
-                <p className="text-[10px] text-slate-500">Trading Platform</p>
+                <h1 className="text-section-title text-white">FX Journal</h1>
+                <p className="text-caption text-slate-400">Trading Platform</p>
               </div>
             )}
           </div>
@@ -180,41 +273,12 @@ export default function Sidebar({
           {visibleGroups.map((group, groupIndex) => (
             <div key={group.title} className={cn(groupIndex > 0 && "mt-5")}>
               {!isCollapsed && (
-                <p className="px-3 mb-1.5 text-[10px] font-semibold text-slate-600 uppercase tracking-[0.18em]">
+                <p className="px-3 mb-1.5 text-sidebar-group text-slate-600">
                   {group.title}
                 </p>
               )}
               <div className="space-y-0.5">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        onTabChange(item.id);
-                        onMobileClose();
-                      }}
-                      className={cn(
-                        "w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 relative",
-                        isCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
-                        isActive
-                          ? "bg-gradient-to-r from-[#2563EB]/20 to-transparent text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-5 before:bg-[#2563EB] before:rounded-r-full"
-                          : "text-slate-400 hover:text-white hover:bg-white/[0.04]",
-                      )}
-                      title={isCollapsed ? item.label : undefined}
-                    >
-                      <Icon
-                        className={cn(
-                          "w-[18px] h-[18px] flex-shrink-0 transition-all duration-200",
-                          isActive ? "text-[#2563EB]" : "text-slate-500 group-hover:text-white",
-                        )}
-                      />
-                      {!isCollapsed && <span>{item.label}</span>}
-                    </button>
-                  );
-                })}
+                {group.items.map(item => renderNavItem(item, 0))}
               </div>
             </div>
           ))}

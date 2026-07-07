@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Menu, User, LogOut } from 'lucide-react';
+import { Menu, User, LogOut, Bell, Settings as SettingsIcon, Sparkles } from 'lucide-react';
 import Sidebar, { Tab } from './components/Sidebar';
 import LiveISTClock from './components/common/LiveISTClock';
 import { useAuthContext } from './context/AuthContext';
@@ -32,6 +32,8 @@ const BreachedTrades = lazy(() => import('./components/BreachedTrades'));
 const XauusdCalculator = lazy(() => import('./components/XauusdCalculator'));
 const ForexLotCalculator = lazy(() => import('./components/ForexLotCalculator'));
 const MarketStatistics = lazy(() => import('./components/MarketStatistics'));
+const MonthlyReviewList = lazy(() => import('./components/MonthlyMarketReview/MonthlyReviewList'));
+const MonthlyReviewDetail = lazy(() => import('./components/MonthlyMarketReview/MonthlyReviewDetail'));
 
 function TabContent({ activeTab }: { activeTab: Tab }) {
   return (
@@ -61,6 +63,8 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
         {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
         {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
         {activeTab === 'market-stats' && <MarketStatistics />}
+        {activeTab === 'monthly-review' && <MonthlyReviewList />}
+        {activeTab === 'monthly-review-detail' && <MonthlyReviewDetail />}
       </ErrorBoundary>
     </Suspense>
   );
@@ -98,17 +102,17 @@ export default function App() {
           isCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
         }`}
       >
-        <header className="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-[#E5EAF2] px-4 py-3">
+        <header className="lg:hidden sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB]/60 px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsMobileOpen(true)}
-                className="p-2 -ml-2 hover:bg-[#F1F5F9] rounded-xl transition-colors"
+                className="p-2 -ml-2 hover:bg-violet-50 rounded-xl transition-colors"
                 aria-label="Open navigation menu"
               >
-                <Menu className="w-5 h-5 text-[#64748B]" />
+                <Menu className="w-5 h-5 text-slate-600" />
               </button>
-              <h1 className="text-lg font-semibold tracking-tight text-[#0F172A]">FX Journal</h1>
+              <h1 className="text-card-title text-[#0F172A]">FX Journal</h1>
             </div>
             <div className="flex items-center gap-2">
               <LiveISTClock />
@@ -116,29 +120,37 @@ export default function App() {
           </div>
         </header>
 
-        <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5EAF2] items-center justify-end px-6 gap-3">
+        <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB]/60 items-center justify-end px-6 gap-3">
           <LiveISTClock />
-          <div className="w-px h-8 bg-[#E5EAF2]" />
+          <div className="w-px h-6 bg-slate-200/60" />
+          <button className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all duration-200 relative" title="Notifications">
+            <Bell className="w-3.5 h-3.5" />
+            <span className="absolute top-1 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
+          </button>
+          <button className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all duration-200" title="Settings">
+            <SettingsIcon className="w-3.5 h-3.5" />
+          </button>
+          <div className="w-px h-6 bg-slate-200/60" />
           {currentUser && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#2563EB] to-[#4F46E5] rounded-lg flex items-center justify-center shadow-sm">
-                  <User className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] rounded-lg flex items-center justify-center shadow-sm shadow-violet-500/20 ring-2 ring-white/60">
+                  <User className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-[#0F172A]">{currentUser.name}</span>
+                  <span className="text-body font-semibold text-[#0F172A]">{currentUser.name}</span>
                   {currentUser.role === 'admin' && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-[#2563EB]/10 text-[#2563EB] rounded font-medium w-fit">Admin</span>
+                    <span className="text-micro px-1.5 py-0.5 bg-violet-100 text-violet-700 rounded w-fit mt-0.5">Admin</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="p-2 text-[#64748B] hover:text-[#DC2626] hover:bg-red-50 rounded-xl transition-colors"
+                className="p-2 text-[#64748B] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
                 title="Sign out"
                 aria-label="Sign out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
