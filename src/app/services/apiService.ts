@@ -1063,6 +1063,77 @@ const apiService = {
       return `${API_BASE_URL}/market-stats/export?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&lookback=${lookback}&format=${format}`;
     },
   },
+
+  monthlyReviews: {
+    getAll: async (filters?: {
+      pair?: string; month?: number; year?: number;
+      bias?: string; search?: string; page?: number; limit?: number;
+    }): Promise<{ reviews: any[]; total: number; page: number; limit: number }> => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.month) params.set('month', filters.month.toString());
+      if (filters?.year) params.set('year', filters.year.toString());
+      if (filters?.bias) params.set('bias', filters.bias);
+      if (filters?.search) params.set('search', filters.search);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+      const qs = params.toString();
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews${qs ? `?${qs}` : ''}`);
+    },
+
+    getById: async (id: string): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${id}`);
+    },
+
+    create: async (data: {
+      pair: string; month: number; year: number; title?: string;
+      bias?: string; summary?: string; imagePath?: string; imageCaption?: string;
+    }): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    delete: async (id: string): Promise<void> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${id}`, {
+        method: 'DELETE',
+      });
+    },
+
+    getEntries: async (reviewId: string): Promise<any[]> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries`);
+    },
+
+    createEntry: async (reviewId: string, data: {
+      entryTitle?: string; comment?: string; images?: { url: string; publicId: string; caption?: string }[];
+    }): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateEntry: async (reviewId: string, entryId: string, data: any): Promise<any> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries/${entryId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    deleteEntry: async (reviewId: string, entryId: string): Promise<void> => {
+      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries/${entryId}`, {
+        method: 'DELETE',
+      });
+    },
+  },
 };
 
 export default apiService;

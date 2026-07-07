@@ -47,6 +47,7 @@ const liquidityRoutes = require('./src/modules/liquidity/liquidity.routes');
 const h4Routes = require('./src/modules/h4/h4.routes');
 const crtRoutes = require('./src/modules/crt/crtEvent.routes');
 const marketStatsRoutes = require('./src/modules/marketStats/marketStats.routes');
+const monthlyReviewRoutes = require('./src/modules/monthlyReviews/monthlyReview.routes');
 // Reminder routes and scheduler disabled
 
 const app = express();
@@ -106,6 +107,7 @@ app.use('/api/liquidity', isAuthenticated, liquidityRoutes);
 app.use('/api/h4', isAuthenticated, h4Routes);
 app.use('/api/crt-events', isAuthenticated, crtRoutes);
 app.use('/api/market-stats', isAuthenticated, marketStatsRoutes);
+app.use('/api/monthly-reviews', isAuthenticated, monthlyReviewRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
 app.use(notFoundMiddleware);
