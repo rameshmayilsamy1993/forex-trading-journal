@@ -1,6 +1,6 @@
-import { PropFirm, TradingAccount, Trade, MasterData } from '../types/trading';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import api, { apiGet, apiPost, apiPut, apiDelete, apiPostForm } from '../../services/api';
+import { uploadImage, uploadMultiple, deleteImage } from '../../services/uploadService';
+import type { PropFirm, TradingAccount, Trade, MasterData } from '../types/trading';
 
 export interface User {
   id: string;
@@ -10,71 +10,23 @@ export interface User {
   createdAt: string;
 }
 
-interface ApiError extends Error {
-  status?: number;
-}
-
-const handleResponse = async (response: Response) => {
-  if (response.status === 401) {
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-    throw new Error('Session expired - Please login again');
-  }
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }));
-    const err: ApiError = new Error(error.message || 'Request failed');
-    err.status = response.status;
-    throw err;
-  }
-  
-  return response.json();
-};
-
-const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const response = await fetch(url, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-  return handleResponse(response);
-};
-
 const apiService = {
   auth: {
     login: async (email: string, password: string) => {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await handleResponse(response);
+      const data = await apiPost<{ user: User }>('/auth/login', { email, password });
       localStorage.setItem('user', JSON.stringify(data.user));
       return data;
     },
 
     register: async (name: string, email: string, password: string) => {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const data = await handleResponse(response);
+      const data = await apiPost('/auth/register', { name, email, password });
       localStorage.setItem('user', JSON.stringify(data));
       return data;
     },
 
     logout: async () => {
       try {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
-          method: 'POST',
-          credentials: 'include',
-        });
+        await apiPost('/auth/logout');
       } finally {
         localStorage.removeItem('user');
       }
@@ -82,15 +34,9 @@ const apiService = {
 
     getCurrentUser: async (): Promise<User | null> => {
       try {
-        const response = await fetch(`${API_BASE_URL}/auth/me`, {
-          credentials: 'include',
-        });
-        if (response.status === 401) {
-          localStorage.removeItem('user');
-          return null;
-        }
-        return handleResponse(response);
+        return await apiGet<User>('/auth/me');
       } catch {
+        localStorage.removeItem('user');
         return null;
       }
     },
@@ -101,43 +47,31 @@ const apiService = {
     },
 
     changePassword: async (currentPassword: string, newPassword: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/auth/change-password`, {
-        method: 'POST',
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
+      return apiPost('/auth/change-password', { currentPassword, newPassword });
     },
   },
 
   getPropFirms: async (): Promise<PropFirm[]> => {
-    return fetchWithAuth(`${API_BASE_URL}/prop-firms`);
+    return apiGet('/prop-firms');
   },
-  
+
   createPropFirm: async (firm: Omit<PropFirm, 'id' | 'createdAt'>): Promise<PropFirm> => {
-    return fetchWithAuth(`${API_BASE_URL}/prop-firms`, {
-      method: 'POST',
-      body: JSON.stringify(firm),
-    });
+    return apiPost('/prop-firms', firm);
   },
-  
+
   updatePropFirm: async (id: string, firm: Partial<PropFirm>): Promise<PropFirm> => {
-    return fetchWithAuth(`${API_BASE_URL}/prop-firms/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(firm),
-    });
+    return apiPut(`/prop-firms/${id}`, firm);
   },
-  
+
   deletePropFirm: async (id: string): Promise<void> => {
-    return fetchWithAuth(`${API_BASE_URL}/prop-firms/${id}`, {
-      method: 'DELETE',
-    });
+    return apiDelete(`/prop-firms/${id}`);
   },
-  
+
   getAccounts: async (status?: string): Promise<TradingAccount[]> => {
-    let url = `${API_BASE_URL}/accounts`;
-    if (status) url += `?status=${status}`;
-    return fetchWithAuth(url);
+    const url = status ? `/accounts?status=${status}` : '/accounts';
+    return apiGet(url);
   },
-  
+
   createAccount: async (account: {
     name: string;
     propFirmId: string;
@@ -146,146 +80,100 @@ const apiService = {
     currency: string;
     status: string;
   }): Promise<TradingAccount> => {
-    return fetchWithAuth(`${API_BASE_URL}/accounts`, {
-      method: 'POST',
-      body: JSON.stringify(account),
-    });
+    return apiPost('/accounts', account);
   },
-  
+
   updateAccount: async (id: string, account: Partial<TradingAccount>): Promise<TradingAccount> => {
-    return fetchWithAuth(`${API_BASE_URL}/accounts/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(account),
-    });
+    return apiPut(`/accounts/${id}`, account);
   },
-  
+
   deleteAccount: async (id: string): Promise<void> => {
-    return fetchWithAuth(`${API_BASE_URL}/accounts/${id}`, {
-      method: 'DELETE',
-    });
+    return apiDelete(`/accounts/${id}`);
   },
-  
+
   getTrades: async (filters?: { accountId?: string; firmId?: string; ssmtType?: string; includeBreached?: boolean }): Promise<Trade[]> => {
-    let url = `${API_BASE_URL}/trades`;
     const params = new URLSearchParams();
     if (filters?.accountId) params.append('accountId', filters.accountId);
     if (filters?.firmId) params.append('firmId', filters.firmId);
     if (filters?.ssmtType) params.append('ssmtType', filters.ssmtType);
     if (filters?.includeBreached) params.append('includeBreached', 'true');
-    const queryString = params.toString();
-    if (queryString) url += `?${queryString}`;
-    return fetchWithAuth(url);
+    const qs = params.toString();
+    return apiGet(`/trades${qs ? `?${qs}` : ''}`);
   },
-  
+
   createTrade: async (trade: Omit<Trade, 'id'>): Promise<Trade> => {
-    return fetchWithAuth(`${API_BASE_URL}/trades`, {
-      method: 'POST',
-      body: JSON.stringify(trade),
-    });
+    return apiPost('/trades', trade);
   },
-  
+
   updateTrade: async (id: string, trade: Partial<Trade>): Promise<Trade> => {
-    return fetchWithAuth(`${API_BASE_URL}/trades/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(trade),
-    });
+    return apiPut(`/trades/${id}`, trade);
   },
-  
+
   deleteTrade: async (id: string): Promise<void> => {
-    return fetchWithAuth(`${API_BASE_URL}/trades/${id}`, {
-      method: 'DELETE',
-    });
+    return apiDelete(`/trades/${id}`);
   },
 
   deleteTrades: async (ids: string[]): Promise<{ deletedCount: number }> => {
-    return fetchWithAuth(`${API_BASE_URL}/trades/bulk-delete`, {
-      method: 'POST',
-      body: JSON.stringify({ ids }),
-    });
+    return apiPost('/trades/bulk-delete', { ids });
   },
 
   getMissedTrades: async (filters?: { pair?: string; reason?: string }): Promise<any[]> => {
-    let url = `${API_BASE_URL}/missed-trades`;
-    if (filters?.pair || filters?.reason) {
-      const params = new URLSearchParams();
-      if (filters.pair) params.append('pair', filters.pair);
-      if (filters.reason) params.append('reason', filters.reason);
-      url += `?${params.toString()}`;
-    }
-    return fetchWithAuth(url);
+    const params = new URLSearchParams();
+    if (filters?.pair) params.append('pair', filters.pair);
+    if (filters?.reason) params.append('reason', filters.reason);
+    const qs = params.toString();
+    return apiGet(`/missed-trades${qs ? `?${qs}` : ''}`);
   },
 
   createMissedTrade: async (trade: any): Promise<any> => {
-    return fetchWithAuth(`${API_BASE_URL}/missed-trades`, {
-      method: 'POST',
-      body: JSON.stringify(trade),
-    });
+    return apiPost('/missed-trades', trade);
   },
 
   updateMissedTrade: async (id: string, trade: any): Promise<any> => {
-    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(trade),
-    });
+    return apiPut(`/missed-trades/${id}`, trade);
   },
 
   deleteMissedTrade: async (id: string): Promise<void> => {
-    return fetchWithAuth(`${API_BASE_URL}/missed-trades/${id}`, {
-      method: 'DELETE',
-    });
+    return apiDelete(`/missed-trades/${id}`);
   },
 
   getMasters: async (type?: string): Promise<MasterData[]> => {
-    const url = type ? `${API_BASE_URL}/masters?type=${type}` : `${API_BASE_URL}/masters`;
-    return fetchWithAuth(url);
+    const url = type ? `/masters?type=${type}` : '/masters';
+    return apiGet(url);
   },
 
   createMaster: async (master: Omit<MasterData, 'id'>): Promise<MasterData> => {
-    return fetchWithAuth(`${API_BASE_URL}/masters`, {
-      method: 'POST',
-      body: JSON.stringify(master),
-    });
+    return apiPost('/masters', master);
   },
 
   updateMaster: async (id: string, master: Partial<MasterData>): Promise<MasterData> => {
-    return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(master),
-    });
+    return apiPut(`/masters/${id}`, master);
   },
 
   deleteMaster: async (id: string): Promise<void> => {
-    return fetchWithAuth(`${API_BASE_URL}/masters/${id}`, {
-      method: 'DELETE',
-    });
+    return apiDelete(`/masters/${id}`);
   },
 
   settings: {
     getPairs: async (): Promise<string[]> => {
-      const data = await fetchWithAuth(`${API_BASE_URL}/settings/pairs`);
+      const data = await apiGet<{ pairs: string[] }>('/settings/pairs');
       return data.pairs || [];
     },
-    
+
     updatePairs: async (pairs: string[]): Promise<{ message: string; pairs: string[] }> => {
-      return fetchWithAuth(`${API_BASE_URL}/settings/pairs`, {
-        method: 'POST',
-        body: JSON.stringify({ pairs }),
-      });
+      return apiPost('/settings/pairs', { pairs });
     },
-    
+
     getAll: async (): Promise<any[]> => {
-      return fetchWithAuth(`${API_BASE_URL}/settings`);
+      return apiGet('/settings');
     },
-    
+
     get: async (key: string): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/settings?key=${key}`);
+      return apiGet(`/settings?key=${key}`);
     },
-    
+
     save: async (key: string, value: any): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/settings`, {
-        method: 'POST',
-        body: JSON.stringify({ key, value }),
-      });
+      return apiPost('/settings', { key, value });
     },
   },
 
@@ -293,74 +181,30 @@ const apiService = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('accountId', accountId);
-
-    const response = await fetch(`${API_BASE_URL}/trades/import`, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-    return handleResponse(response);
+    return apiPostForm('/trades/import', formData);
   },
 
   previewTrades: async (file: File, accountId: string): Promise<{ total: number; preview: any[]; stats: any }> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('accountId', accountId);
+    return apiPostForm('/trades/preview', formData);
+  },
 
-    const response = await fetch(`${API_BASE_URL}/trades/preview`, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-    return handleResponse(response);
+  importConverted: async (trades: any[], accountId: string): Promise<{ total: number; inserted: number; skipped: number; errors: any[] }> => {
+    return apiPost('/trades/import-converted', { trades, accountId });
   },
 
   convertMT5: async (file: File): Promise<{ total: number; converted: number; errors: any[]; data: any[] }> => {
     const formData = new FormData();
     formData.append('file', file);
-
-    const response = await fetch(`${API_BASE_URL}/import/convert-mt5`, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-    return handleResponse(response);
+    return apiPostForm('/import/convert-mt5', formData);
   },
 
   upload: {
-    single: async (file: File): Promise<{ url: string; publicId: string; originalName: string }> => {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch(`${API_BASE_URL}/upload`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-      return handleResponse(response);
-    },
-
-    multiple: async (files: File[]): Promise<{ url: string; publicId: string; originalName: string }[]> => {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('images', file);
-      });
-
-      const response = await fetch(`${API_BASE_URL}/upload/multiple`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-      return handleResponse(response);
-    },
-
-    delete: async (publicId: string): Promise<void> => {
-      const response = await fetch(`${API_BASE_URL}/upload/${encodeURIComponent(publicId)}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
-    },
+    single: uploadImage,
+    multiple: uploadMultiple,
+    delete: deleteImage,
   },
 
   checklists: {
@@ -369,36 +213,28 @@ const apiService = {
       if (options?.tradeId) params.append('tradeId', options.tradeId);
       if (options?.page) params.append('page', options.page.toString());
       if (options?.limit) params.append('limit', options.limit.toString());
-      
-      const queryString = params.toString();
-      const url = `${API_BASE_URL}/checklists${queryString ? `?${queryString}` : ''}`;
-      return fetchWithAuth(url);
+      const qs = params.toString();
+      return apiGet(`/checklists${qs ? `?${qs}` : ''}`);
     },
 
     getActiveSessions: async () => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/active`);
+      return apiGet('/checklists/active');
     },
 
     getActiveList: async () => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/active-list`);
+      return apiGet('/checklists/active-list');
     },
 
     linkToTrades: async (checklistId: string, tradeIds: string[]) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/link`, {
-        method: 'POST',
-        body: JSON.stringify({ checklistId, tradeIds }),
-      });
+      return apiPost('/checklists/link', { checklistId, tradeIds });
     },
 
     unlinkFromTrades: async (checklistId: string, tradeIds: string[]) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/unlink`, {
-        method: 'POST',
-        body: JSON.stringify({ checklistId, tradeIds }),
-      });
+      return apiPost('/checklists/unlink', { checklistId, tradeIds });
     },
 
     getById: async (id: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}`);
+      return apiGet(`/checklists/${id}`);
     },
 
     create: async (data: {
@@ -409,10 +245,7 @@ const apiService = {
       tradeType?: string;
       entryPrice?: number;
     }) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiPost('/checklists', data);
     },
 
     update: async (id: string, data: {
@@ -420,28 +253,20 @@ const apiService = {
       notes?: string;
       tradeId?: string;
     }) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return apiPut(`/checklists/${id}`, data);
     },
 
     linkToTrade: async (id: string, tradeId: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}/link-trade`, {
-        method: 'POST',
-        body: JSON.stringify({ tradeId }),
-      });
+      return apiPost(`/checklists/${id}/link-trade`, { tradeId });
     },
 
     delete: async (id: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/checklists/${id}`, {
-        method: 'DELETE',
-      });
+      return apiDelete(`/checklists/${id}`);
     },
   },
 
   reports: {
-    exportTrades: async (options?: { 
+    exportTrades: async (options?: {
       period?: 'daily' | 'weekly' | 'monthly' | 'all';
       date?: string;
       accountId?: string;
@@ -452,18 +277,8 @@ const apiService = {
       if (options?.date) params.append('date', options.date);
       if (options?.accountId) params.append('accountId', options.accountId);
       if (options?.firmId) params.append('firmId', options.firmId);
-
-      const response = await fetch(`${API_BASE_URL}/reports/trades?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Export failed' }));
-        throw new Error(error.message || 'Export failed');
-      }
-
-      return response.blob();
+      const response = await api.get(`/reports/trades?${params}`, { responseType: 'blob' });
+      return response.data;
     },
 
     exportMissedTrades: async (options?: {
@@ -473,18 +288,8 @@ const apiService = {
       const params = new URLSearchParams();
       if (options?.period) params.append('period', options.period);
       if (options?.date) params.append('date', options.date);
-
-      const response = await fetch(`${API_BASE_URL}/reports/missed-trades?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Export failed' }));
-        throw new Error(error.message || 'Export failed');
-      }
-
-      return response.blob();
+      const response = await api.get(`/reports/missed-trades?${params}`, { responseType: 'blob' });
+      return response.data;
     },
   },
 
@@ -499,28 +304,18 @@ const apiService = {
       checklist?: { rule: string; broken: boolean }[];
       disciplineScore?: number;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/loss-analysis`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPost('/loss-analysis', data);
     },
 
     get: async (tradeId: string) => {
-      const response = await fetch(`${API_BASE_URL}/loss-analysis/${tradeId}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      if (response.status === 404) {
-        return null;
+      try {
+        return await apiGet(`/loss-analysis/${tradeId}`);
+      } catch (error: any) {
+        if (error?.response?.status === 404) {
+          return null;
+        }
+        throw error;
       }
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Request failed' }));
-        throw new Error(error.message || 'Request failed');
-      }
-      return response.json();
     },
 
     update: async (id: string, data: {
@@ -532,13 +327,7 @@ const apiService = {
       checklist?: { rule: string; broken: boolean }[];
       disciplineScore?: number;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/loss-analysis/${id}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPut(`/loss-analysis/${id}`, data);
     },
 
     list: async (options?: {
@@ -554,23 +343,15 @@ const apiService = {
       if (options?.endDate) params.set('endDate', options.endDate);
       if (options?.page) params.set('page', options.page.toString());
       if (options?.limit) params.set('limit', options.limit.toString());
-
-      const response = await fetch(`${API_BASE_URL}/loss-analysis/list?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/loss-analysis/list?${params}`);
     },
   },
 
   biases: {
     getAll: async () => {
-      const response = await fetch(`${API_BASE_URL}/biases`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet('/biases');
     },
+
     save: async (bias: {
       pair: string;
       monthlyBias: string;
@@ -578,14 +359,9 @@ const apiService = {
       dailyBias: string;
       notes?: string;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/biases/manual`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(bias),
-      });
-      return handleResponse(response);
+      return apiPost('/biases/manual', bias);
     },
+
     update: async (bias: {
       pair: string;
       monthlyBias: string;
@@ -593,20 +369,11 @@ const apiService = {
       dailyBias: string;
       notes?: string;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/biases/manual`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(bias),
-      });
-      return handleResponse(response);
+      return apiPut('/biases/manual', bias);
     },
+
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/biases/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiDelete(`/biases/${id}`);
     },
   },
 
@@ -620,14 +387,9 @@ const apiService = {
       notes?: string;
       pairs?: string[];
     }) => {
-      const response = await fetch(`${API_BASE_URL}/bias/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPost('/bias/save', data);
     },
+
     getHistory: async (filters?: {
       pair?: string;
       startDate?: string;
@@ -641,37 +403,22 @@ const apiService = {
       if (filters?.endDate) params.set('endDate', filters.endDate);
       if (filters?.page) params.set('page', filters.page.toString());
       if (filters?.limit) params.set('limit', filters.limit.toString());
+      return apiGet(`/bias/history?${params}`);
+    },
 
-      const response = await fetch(`${API_BASE_URL}/bias/history?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
-    },
     getLatest: async (pair?: string) => {
-      const params = pair ? new URLSearchParams({ pair }) : '';
-      const response = await fetch(`${API_BASE_URL}/bias/latest${params ? '?' + params : ''}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      const params = pair ? `?pair=${pair}` : '';
+      return apiGet(`/bias/latest${params}`);
     },
+
     getByDate: async (date: string, pair?: string) => {
       const params = new URLSearchParams({ date });
       if (pair) params.set('pair', pair);
-
-      const response = await fetch(`${API_BASE_URL}/bias/by-date?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/bias/by-date?${params}`);
     },
+
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/bias/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiDelete(`/bias/${id}`);
     },
   },
 
@@ -684,14 +431,9 @@ const apiService = {
       notes?: string;
       pairs?: string[];
     }) => {
-      const response = await fetch(`${API_BASE_URL}/bias/event`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPost('/bias/event', data);
     },
+
     getAll: async (filters?: {
       pair?: string;
       startDate?: string;
@@ -705,45 +447,27 @@ const apiService = {
       if (filters?.endDate) params.set('endDate', filters.endDate);
       if (filters?.page) params.set('page', filters.page.toString());
       if (filters?.limit) params.set('limit', filters.limit.toString());
+      return apiGet(`/bias/events?${params}`);
+    },
 
-      const response = await fetch(`${API_BASE_URL}/bias/events?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
-    },
     getByPair: async (pair: string) => {
-      const response = await fetch(`${API_BASE_URL}/bias/events/${pair}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/bias/events/${pair}`);
     },
+
     getLatest: async (pair?: string) => {
-      const params = pair ? new URLSearchParams({ pair }) : '';
-      const response = await fetch(`${API_BASE_URL}/bias/latest-events${params ? '?' + params : ''}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      const params = pair ? `?pair=${pair}` : '';
+      return apiGet(`/bias/latest-events${params}`);
     },
+
     getTimeline: async (pair?: string, date?: string) => {
       const params = new URLSearchParams();
       if (pair) params.set('pair', pair);
       if (date) params.set('date', date);
-
-      const response = await fetch(`${API_BASE_URL}/bias/timeline?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/bias/timeline?${params}`);
     },
+
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/bias/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiDelete(`/bias/${id}`);
     },
   },
 
@@ -756,14 +480,9 @@ const apiService = {
       notes?: string;
       pairs?: string[];
     }) => {
-      const response = await fetch(`${API_BASE_URL}/liquidity/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPost('/liquidity/save', data);
     },
+
     getAll: async (filters?: {
       pair?: string;
       startDate?: string;
@@ -777,27 +496,16 @@ const apiService = {
       if (filters?.endDate) params.set('endDate', filters.endDate);
       if (filters?.page) params.set('page', filters.page.toString());
       if (filters?.limit) params.set('limit', filters.limit.toString());
+      return apiGet(`/liquidity?${params}`);
+    },
 
-      const response = await fetch(`${API_BASE_URL}/liquidity?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
-    },
     getLatest: async (pair?: string) => {
-      const params = pair ? new URLSearchParams({ pair }) : '';
-      const response = await fetch(`${API_BASE_URL}/liquidity/latest${params ? '?' + params : ''}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      const params = pair ? `?pair=${pair}` : '';
+      return apiGet(`/liquidity/latest${params}`);
     },
+
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/liquidity/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiDelete(`/liquidity/${id}`);
     },
   },
 
@@ -814,14 +522,9 @@ const apiService = {
       }>;
       notes?: string;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/h4/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPost('/h4/save', data);
     },
+
     getAll: async (filters?: {
       pair?: string;
       startDate?: string;
@@ -835,29 +538,17 @@ const apiService = {
       if (filters?.endDate) params.set('endDate', filters.endDate);
       if (filters?.page) params.set('page', filters.page.toString());
       if (filters?.limit) params.set('limit', filters.limit.toString());
-
-      const response = await fetch(`${API_BASE_URL}/h4?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/h4?${params}`);
     },
+
     getByDate: async (date: string, pair?: string) => {
       const params = new URLSearchParams({ date });
       if (pair) params.set('pair', pair);
-
-      const response = await fetch(`${API_BASE_URL}/h4/by-date?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/h4/by-date?${params}`);
     },
+
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/h4/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiDelete(`/h4/${id}`);
     },
   },
 
@@ -885,21 +576,14 @@ const apiService = {
       if (filters?.search) params.set('search', filters.search);
       if (filters?.page) params.set('page', filters.page.toString());
       if (filters?.limit) params.set('limit', filters.limit.toString());
-
-      const response = await fetch(`${API_BASE_URL}/crt-events?${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/crt-events?${params}`);
     },
+
     getSummary: async (filters?: { pair?: string }) => {
       const params = filters?.pair ? `?pair=${filters.pair}` : '';
-      const response = await fetch(`${API_BASE_URL}/crt-events/summary${params}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/crt-events/summary${params}`);
     },
+
     create: async (data: {
       pair: string;
       timeframe: string;
@@ -917,21 +601,13 @@ const apiService = {
       image?: string;
       notes?: string;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/crt-events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPost('/crt-events', data);
     },
+
     getById: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/crt-events/${id}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiGet(`/crt-events/${id}`);
     },
+
     update: async (id: string, data: {
       date?: string;
       time?: string;
@@ -947,38 +623,29 @@ const apiService = {
       image?: string;
       notes?: string;
     }) => {
-      const response = await fetch(`${API_BASE_URL}/crt-events/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      return handleResponse(response);
+      return apiPut(`/crt-events/${id}`, data);
     },
+
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/crt-events/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      return handleResponse(response);
+      return apiDelete(`/crt-events/${id}`);
     },
   },
 
   get: async <T = any>(path: string): Promise<T> => {
-    return fetchWithAuth(`${API_BASE_URL}${path}`);
+    return apiGet(path.startsWith('/') ? path : `/${path}`);
   },
 
   reminders: {
     getAll: async () => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders`);
+      return apiGet('/reminders');
     },
 
     getUpcoming: async () => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/upcoming`);
+      return apiGet('/reminders/upcoming');
     },
 
     getById: async (id: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}`);
+      return apiGet(`/reminders/${id}`);
     },
 
     create: async (data: {
@@ -996,10 +663,7 @@ const apiService = {
       notes?: string;
       isActive?: boolean;
     }) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiPost('/reminders', data);
     },
 
     update: async (id: string, data: {
@@ -1017,50 +681,38 @@ const apiService = {
       notes?: string;
       isActive?: boolean;
     }) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return apiPut(`/reminders/${id}`, data);
     },
 
     delete: async (id: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}`, {
-        method: 'DELETE',
-      });
+      return apiDelete(`/reminders/${id}`);
     },
 
     toggleActive: async (id: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}/toggle`, {
-        method: 'POST',
-      });
+      return apiPost(`/reminders/${id}/toggle`);
     },
 
     resetAlerts: async (id: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/${id}/reset-alerts`, {
-        method: 'POST',
-      });
+      return apiPost(`/reminders/${id}/reset-alerts`);
     },
 
     getNotifications: async () => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/notifications`);
+      return apiGet('/reminders/notifications');
     },
 
     markNotificationRead: async (notificationId: string) => {
-      return fetchWithAuth(`${API_BASE_URL}/reminders/notifications/${notificationId}/read`, {
-        method: 'POST',
-      });
+      return apiPost(`/reminders/notifications/${notificationId}/read`);
     },
   },
 
   marketStats: {
     analyze: async (symbol: string, timeframe: string, lookback: number): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/market-stats/analyze`, {
-        method: 'POST',
-        body: JSON.stringify({ symbol, timeframe, lookback }),
-      });
+      return apiPost('/market-stats/analyze', { symbol, timeframe, lookback });
     },
+
     exportUrl: (symbol: string, timeframe: string, lookback: number, format: string): string => {
-      return `${API_BASE_URL}/market-stats/export?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&lookback=${lookback}&format=${format}`;
+      const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+      return `${base}/market-stats/export?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&lookback=${lookback}&format=${format}`;
     },
   },
 
@@ -1078,60 +730,142 @@ const apiService = {
       if (filters?.page) params.set('page', filters.page.toString());
       if (filters?.limit) params.set('limit', filters.limit.toString());
       const qs = params.toString();
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews${qs ? `?${qs}` : ''}`);
+      return apiGet(`/monthly-reviews${qs ? `?${qs}` : ''}`);
     },
 
     getById: async (id: string): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${id}`);
+      return apiGet(`/monthly-reviews/${id}`);
     },
 
     create: async (data: {
       pair: string; month: number; year: number; title?: string;
       bias?: string; summary?: string; imagePath?: string; imageCaption?: string;
     }): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiPost('/monthly-reviews', data);
     },
 
     update: async (id: string, data: any): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return apiPut(`/monthly-reviews/${id}`, data);
     },
 
     delete: async (id: string): Promise<void> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${id}`, {
-        method: 'DELETE',
-      });
+      return apiDelete(`/monthly-reviews/${id}`);
     },
 
     getEntries: async (reviewId: string): Promise<any[]> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries`);
+      return apiGet(`/monthly-reviews/${reviewId}/entries`);
     },
 
     createEntry: async (reviewId: string, data: {
       entryTitle?: string; comment?: string; images?: { url: string; publicId: string; caption?: string }[];
     }): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiPost(`/monthly-reviews/${reviewId}/entries`, data);
     },
 
     updateEntry: async (reviewId: string, entryId: string, data: any): Promise<any> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries/${entryId}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return apiPut(`/monthly-reviews/${reviewId}/entries/${entryId}`, data);
     },
 
     deleteEntry: async (reviewId: string, entryId: string): Promise<void> => {
-      return fetchWithAuth(`${API_BASE_URL}/monthly-reviews/${reviewId}/entries/${entryId}`, {
-        method: 'DELETE',
-      });
+      return apiDelete(`/monthly-reviews/${reviewId}/entries/${entryId}`);
+    },
+  },
+
+  weeklyReviews: {
+    getAll: async (filters?: {
+      pair?: string; weekNumber?: number; year?: number;
+      bias?: string; search?: string; page?: number; limit?: number;
+    }): Promise<{ reviews: any[]; total: number; page: number; limit: number }> => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.weekNumber) params.set('weekNumber', filters.weekNumber.toString());
+      if (filters?.year) params.set('year', filters.year.toString());
+      if (filters?.bias) params.set('bias', filters.bias);
+      if (filters?.search) params.set('search', filters.search);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+      const qs = params.toString();
+      return apiGet(`/weekly-reviews${qs ? `?${qs}` : ''}`);
+    },
+
+    getById: async (id: string): Promise<any> => {
+      return apiGet(`/weekly-reviews/${id}`);
+    },
+
+    create: async (data: any): Promise<any> => {
+      return apiPost('/weekly-reviews', data);
+    },
+
+    update: async (id: string, data: any): Promise<any> => {
+      return apiPut(`/weekly-reviews/${id}`, data);
+    },
+
+    delete: async (id: string): Promise<void> => {
+      return apiDelete(`/weekly-reviews/${id}`);
+    },
+
+    getEntries: async (reviewId: string): Promise<any[]> => {
+      return apiGet(`/weekly-reviews/${reviewId}/entries`);
+    },
+
+    createEntry: async (reviewId: string, data: any): Promise<any> => {
+      return apiPost(`/weekly-reviews/${reviewId}/entries`, data);
+    },
+
+    updateEntry: async (reviewId: string, entryId: string, data: any): Promise<any> => {
+      return apiPut(`/weekly-reviews/${reviewId}/entries/${entryId}`, data);
+    },
+
+    deleteEntry: async (reviewId: string, entryId: string): Promise<void> => {
+      return apiDelete(`/weekly-reviews/${reviewId}/entries/${entryId}`);
+    },
+  },
+
+  dailyReviews: {
+    getAll: async (filters?: {
+      pair?: string; date?: string; bias?: string; search?: string; page?: number; limit?: number;
+    }): Promise<{ reviews: any[]; total: number; page: number; limit: number }> => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.date) params.set('date', filters.date);
+      if (filters?.bias) params.set('bias', filters.bias);
+      if (filters?.search) params.set('search', filters.search);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+      const qs = params.toString();
+      return apiGet(`/daily-reviews${qs ? `?${qs}` : ''}`);
+    },
+
+    getById: async (id: string): Promise<any> => {
+      return apiGet(`/daily-reviews/${id}`);
+    },
+
+    create: async (data: any): Promise<any> => {
+      return apiPost('/daily-reviews', data);
+    },
+
+    update: async (id: string, data: any): Promise<any> => {
+      return apiPut(`/daily-reviews/${id}`, data);
+    },
+
+    delete: async (id: string): Promise<void> => {
+      return apiDelete(`/daily-reviews/${id}`);
+    },
+
+    getEntries: async (reviewId: string): Promise<any[]> => {
+      return apiGet(`/daily-reviews/${reviewId}/entries`);
+    },
+
+    createEntry: async (reviewId: string, data: any): Promise<any> => {
+      return apiPost(`/daily-reviews/${reviewId}/entries`, data);
+    },
+
+    updateEntry: async (reviewId: string, entryId: string, data: any): Promise<any> => {
+      return apiPut(`/daily-reviews/${reviewId}/entries/${entryId}`, data);
+    },
+
+    deleteEntry: async (reviewId: string, entryId: string): Promise<void> => {
+      return apiDelete(`/daily-reviews/${reviewId}/entries/${entryId}`);
     },
   },
 };

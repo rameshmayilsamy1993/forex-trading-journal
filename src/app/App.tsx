@@ -34,6 +34,13 @@ const ForexLotCalculator = lazy(() => import('./components/ForexLotCalculator'))
 const MarketStatistics = lazy(() => import('./components/MarketStatistics'));
 const MonthlyReviewList = lazy(() => import('./components/MonthlyMarketReview/MonthlyReviewList'));
 const MonthlyReviewDetail = lazy(() => import('./components/MonthlyMarketReview/MonthlyReviewDetail'));
+const MonthlyReviewForm = lazy(() => import('./components/MonthlyMarketReview/MonthlyReviewForm'));
+const WeeklyReviewList = lazy(() => import('./components/WeeklyMarketReview/WeeklyReviewList'));
+const WeeklyReviewDetail = lazy(() => import('./components/WeeklyMarketReview/WeeklyReviewDetail'));
+const WeeklyReviewForm = lazy(() => import('./components/WeeklyMarketReview/WeeklyReviewForm'));
+const DailyReviewList = lazy(() => import('./components/DailyMarketReview/DailyReviewList'));
+const DailyReviewDetail = lazy(() => import('./components/DailyMarketReview/DailyReviewDetail'));
+const DailyReviewForm = lazy(() => import('./components/DailyMarketReview/DailyReviewForm'));
 
 function TabContent({ activeTab }: { activeTab: Tab }) {
   return (
@@ -65,6 +72,13 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
         {activeTab === 'market-stats' && <MarketStatistics />}
         {activeTab === 'monthly-review' && <MonthlyReviewList />}
         {activeTab === 'monthly-review-detail' && <MonthlyReviewDetail />}
+        {activeTab === 'monthly-review-form' && <MonthlyReviewForm />}
+        {activeTab === 'weekly-review' && <WeeklyReviewList />}
+        {activeTab === 'weekly-review-detail' && <WeeklyReviewDetail />}
+        {activeTab === 'weekly-review-form' && <WeeklyReviewForm />}
+        {activeTab === 'daily-review' && <DailyReviewList />}
+        {activeTab === 'daily-review-detail' && <DailyReviewDetail />}
+        {activeTab === 'daily-review-form' && <DailyReviewForm />}
       </ErrorBoundary>
     </Suspense>
   );
