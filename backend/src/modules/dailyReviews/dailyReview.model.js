@@ -30,7 +30,7 @@ const dailyReviewSchema = new mongoose.Schema({
   expectedSmt: { type: String, default: '' },
   expectedSession: { type: String, default: '' },
   killZone: { type: String, default: '' },
-  biasConfidence: { type: Number },
+  biasConfidence: { type: Number, min: 0, max: 100 },
   status: { type: String, enum: ['Draft', 'Published'], default: 'Draft' },
 }, schemaOptions);
 
