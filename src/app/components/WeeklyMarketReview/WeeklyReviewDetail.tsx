@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import apiService from '../../services/apiService';
 import TimelineEntry from '../MonthlyMarketReview/TimelineEntry';
 import ImageGallery from '../MonthlyMarketReview/ImageGallery';
-import AddEntryDialog from '../MonthlyMarketReview/AddEntryDialog';
+import AddEntryDialog from './AddEntryDialog';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Skeleton } from '../ui/skeleton';
