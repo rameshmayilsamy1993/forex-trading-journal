@@ -141,13 +141,13 @@ export default function BiasInput() {
       <PageHeader
         title="Bias Input"
         subtitle="Enter CISD values for each timeframe"
-        color="blue"
+        color="purple"
       />
 
       {/* Date Picker */}
       <CardContainer>
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-slate-700">Date:</label>
+          <label className="text-body-sm">Date:</label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -177,7 +177,7 @@ export default function BiasInput() {
 
       {/* Pair Selection */}
       <CardContainer>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Select Pairs</h3>
+        <h3 className="text-card-title mb-4">Select Pairs</h3>
         <div className="flex flex-wrap gap-2">
           {pairs.map(pair => (
             <button
@@ -185,7 +185,7 @@ export default function BiasInput() {
               onClick={() => handlePairToggle(pair)}
               className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                 selectedPairs.includes(pair)
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  ? 'border-[#7C3AED] bg-violet-50 text-[#7C3AED]'
                   : 'border-slate-200 hover:border-slate-300'
               }`}
             >
@@ -198,12 +198,12 @@ export default function BiasInput() {
 
       {/* CISD Inputs */}
       <CardContainer>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">CISD Inputs</h3>
+        <h3 className="text-card-title mb-4">CISD Inputs</h3>
         
         <div className="space-y-6">
           {/* Daily CISD */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-body-sm">
               Daily CISD (Drives Monthly Bias)
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -220,7 +220,7 @@ export default function BiasInput() {
                     }`}
                   >
                     <Icon className="w-6 h-6" />
-                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="text-button">{option.label}</span>
                   </button>
                 );
               })}
@@ -229,7 +229,7 @@ export default function BiasInput() {
 
           {/* H4 CISD */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-body-sm">
               H4 CISD (Drives Weekly Bias)
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -246,7 +246,7 @@ export default function BiasInput() {
                     }`}
                   >
                     <Icon className="w-6 h-6" />
-                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="text-button">{option.label}</span>
                   </button>
                 );
               })}
@@ -255,7 +255,7 @@ export default function BiasInput() {
 
           {/* H1 CISD */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-body-sm">
               H1 CISD (Drives Daily Bias)
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -272,7 +272,7 @@ export default function BiasInput() {
                     }`}
                   >
                     <Icon className="w-6 h-6" />
-                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="text-button">{option.label}</span>
                   </button>
                 );
               })}
@@ -282,7 +282,7 @@ export default function BiasInput() {
 
         {/* Notes */}
         <div className="mt-6 space-y-2">
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-body-sm">
             Notes (optional)
           </label>
           <Textarea
@@ -309,7 +309,7 @@ export default function BiasInput() {
       {/* Current Biases Display */}
       {selectedPairs.length > 0 && (
         <CardContainer>
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Current Bias (from CISD)</h3>
+          <h3 className="text-card-title mb-4">Current Bias (from CISD)</h3>
           {isLoadingBias ? (
             <LoadingSpinner />
           ) : (
@@ -321,17 +321,17 @@ export default function BiasInput() {
                     <div className="font-semibold w-20">{pair}</div>
                     <div className="flex gap-4">
                       <div className={`px-3 py-1 rounded ${getColor(bias?.monthlyBias || 'NEUTRAL')}`}>
-                        <span className="text-xs text-slate-500 block">Monthly</span>
+                        <span className="text-caption block">Monthly</span>
                         {getIcon(bias?.monthlyBias || 'NEUTRAL')}
                         <span className="ml-1">{bias?.monthlyBias || 'NEUTRAL'}</span>
                       </div>
                       <div className={`px-3 py-1 rounded ${getColor(bias?.weeklyBias || 'NEUTRAL')}`}>
-                        <span className="text-xs text-slate-500 block">Weekly</span>
+                        <span className="text-caption block">Weekly</span>
                         {getIcon(bias?.weeklyBias || 'NEUTRAL')}
                         <span className="ml-1">{bias?.weeklyBias || 'NEUTRAL'}</span>
                       </div>
                       <div className={`px-3 py-1 rounded ${getColor(bias?.dailyBias || 'NEUTRAL')}`}>
-                        <span className="text-xs text-slate-500 block">Daily</span>
+                        <span className="text-caption block">Daily</span>
                         {getIcon(bias?.dailyBias || 'NEUTRAL')}
                         <span className="ml-1">{bias?.dailyBias || 'NEUTRAL'}</span>
                       </div>

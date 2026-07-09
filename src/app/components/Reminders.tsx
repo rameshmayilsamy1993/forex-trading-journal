@@ -303,7 +303,7 @@ export default function Reminders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-page-title font-bold text-slate-900 flex items-center gap-2">
             <Bell className="w-6 h-6 text-blue-600" />
             Reminders
           </h1>
@@ -330,7 +330,7 @@ export default function Reminders() {
 
       {contextNotifications.filter(n => !n.isRead).length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800 font-medium">
+          <p className="text-body text-blue-800">
             You have {contextNotifications.filter(n => !n.isRead).length} unread notification(s)
           </p>
         </div>
@@ -338,13 +338,13 @@ export default function Reminders() {
 
       {showForm && (
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">
+          <h2 className="text-card-title mb-4">
             {editingId ? 'Edit Reminder' : 'Create New Reminder'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-body-sm text-slate-700 mb-1">
                   Title *
                 </label>
                 <Input
@@ -356,7 +356,7 @@ export default function Reminders() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-body-sm text-slate-700 mb-1">
                   Pair (optional)
                 </label>
                 <Select
@@ -375,7 +375,7 @@ export default function Reminders() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-body-sm text-slate-700 mb-1">
                   Date
                 </label>
                 <Input
@@ -386,7 +386,7 @@ export default function Reminders() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-body-sm text-slate-700 mb-1">
                   Time
                 </label>
                 <Input
@@ -397,7 +397,7 @@ export default function Reminders() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-body-sm text-slate-700 mb-1">
                   Repeat
                 </label>
                 <Select
@@ -415,7 +415,7 @@ export default function Reminders() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-body-sm text-slate-700 mb-1">
                   Alarm Sound
                 </label>
                 <Select
@@ -435,7 +435,7 @@ export default function Reminders() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-body-sm text-slate-700 mb-2">
                 Reminder Alerts
               </label>
               <div className="flex flex-wrap gap-4">
@@ -447,7 +447,7 @@ export default function Reminders() {
                       reminders: { ...formData.reminders, before10Min: checked as boolean }
                     })}
                   />
-                  <span className="text-sm">10 min before</span>
+                  <span className="text-body-sm">10 min before</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox
@@ -457,7 +457,7 @@ export default function Reminders() {
                       reminders: { ...formData.reminders, before5Min: checked as boolean }
                     })}
                   />
-                  <span className="text-sm">5 min before</span>
+                  <span className="text-body-sm">5 min before</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox
@@ -467,13 +467,13 @@ export default function Reminders() {
                       reminders: { ...formData.reminders, onTime: checked as boolean }
                     })}
                   />
-                  <span className="text-sm">On time</span>
+                  <span className="text-body-sm">On time</span>
                 </label>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-body-sm text-slate-700 mb-1">
                 Notes
               </label>
               <Textarea
@@ -489,7 +489,7 @@ export default function Reminders() {
                 checked={formData.isActive}
                 onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
               />
-              <span className="text-sm text-slate-700">Active</span>
+              <span className="text-body-sm text-slate-700">Active</span>
             </div>
 
             <div className="flex gap-2">
@@ -512,7 +512,7 @@ export default function Reminders() {
         <button
           onClick={() => setActiveTab('upcoming')}
           className={cn(
-            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+            "px-4 py-2 text-button border-b-2 transition-colors",
             activeTab === 'upcoming' 
               ? "border-blue-600 text-blue-600" 
               : "border-transparent text-slate-500 hover:text-slate-700"
@@ -523,7 +523,7 @@ export default function Reminders() {
         <button
           onClick={() => setActiveTab('completed')}
           className={cn(
-            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+            "px-4 py-2 text-button border-b-2 transition-colors",
             activeTab === 'completed' 
               ? "border-blue-600 text-blue-600" 
               : "border-transparent text-slate-500 hover:text-slate-700"
@@ -534,7 +534,7 @@ export default function Reminders() {
         <button
           onClick={() => setActiveTab('missed')}
           className={cn(
-            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+            "px-4 py-2 text-button border-b-2 transition-colors",
             activeTab === 'missed' 
               ? "border-blue-600 text-blue-600" 
               : "border-transparent text-slate-500 hover:text-slate-700"
@@ -565,24 +565,24 @@ export default function Reminders() {
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-slate-900">{reminder.title}</h3>
                     {reminder.pair && (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                      <span className="text-caption px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
                         {reminder.pair}
                       </span>
                     )}
                     {reminder.repeatType === 'DAILY' && (
-                      <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded flex items-center gap-1">
+                      <span className="text-caption px-2 py-0.5 bg-purple-100 text-purple-700 rounded flex items-center gap-1">
                         <RotateCcw className="w-3 h-3" />
                         Daily
                       </span>
                     )}
                     {activeTab === 'upcoming' && reminder.isActive && (
-                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                      <span className="text-caption px-2 py-0.5 bg-green-100 text-green-700 rounded">
                         {getCountdown(reminder)}
                       </span>
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-4 mt-2 text-body text-slate-500">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       {reminder.date}
@@ -594,18 +594,18 @@ export default function Reminders() {
                   </div>
 
                   {reminder.notes && (
-                    <p className="text-sm text-slate-500 mt-2">{reminder.notes}</p>
+                    <p className="text-body text-slate-500 mt-2">{reminder.notes}</p>
                   )}
 
                   <div className="flex gap-2 mt-2">
                     {reminder.reminders.before10Min && (
-                      <span className="text-xs text-slate-400">10m</span>
+                      <span className="text-caption text-slate-400">10m</span>
                     )}
                     {reminder.reminders.before5Min && (
-                      <span className="text-xs text-slate-400">5m</span>
+                      <span className="text-caption text-slate-400">5m</span>
                     )}
                     {reminder.reminders.onTime && (
-                      <span className="text-xs text-slate-400">On time</span>
+                      <span className="text-caption text-slate-400">On time</span>
                     )}
                   </div>
                 </div>

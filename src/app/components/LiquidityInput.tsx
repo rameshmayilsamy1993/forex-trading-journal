@@ -132,12 +132,12 @@ export default function LiquidityInput() {
       <PageHeader
         title="Liquidity Input"
         subtitle="Track liquidity taken at key timeframe levels"
-        color="indigo"
+        color="purple"
       />
 
       {/* Pair Selection */}
       <CardContainer>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Select Pairs</h3>
+        <h3 className="text-card-title mb-4">Select Pairs</h3>
         <div className="flex flex-wrap gap-2">
           {pairs.map(pair => (
             <button
@@ -145,7 +145,7 @@ export default function LiquidityInput() {
               onClick={() => handlePairToggle(pair)}
               className={`px-4 py-2 rounded-lg border-2 transition-all hover:shadow-md ${
                 selectedPairs.includes(pair)
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                  ? 'border-[#7C3AED] bg-violet-50 text-[#7C3AED]'
                   : 'border-slate-200 hover:border-slate-300'
               }`}
             >
@@ -158,15 +158,15 @@ export default function LiquidityInput() {
 
       {/* Liquidity Inputs */}
       <CardContainer>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Liquidity Taken</h3>
+        <h3 className="text-card-title mb-4">Liquidity Taken</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Monthly */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-body-sm">
               Monthly Liquidity
             </label>
-            <p className="text-xs text-slate-500 mb-2">
+            <p className="text-caption mb-2">
               Previous Month High/Low taken?
             </p>
             <div className="space-y-2">
@@ -189,7 +189,7 @@ export default function LiquidityInput() {
                     )}
                     <Icon className="w-5 h-5" />
                     <div className="text-left">
-                      <div className="font-medium text-sm">{option.label}</div>
+                      <div className="text-button">{option.label}</div>
                     </div>
                   </button>
                 );
@@ -199,10 +199,10 @@ export default function LiquidityInput() {
 
           {/* Weekly */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-body-sm">
               Weekly Liquidity
             </label>
-            <p className="text-xs text-slate-500 mb-2">
+            <p className="text-caption mb-2">
               Previous Week High/Low taken?
             </p>
             <div className="space-y-2">
@@ -225,7 +225,7 @@ export default function LiquidityInput() {
                     )}
                     <Icon className="w-5 h-5" />
                     <div className="text-left">
-                      <div className="font-medium text-sm">{option.label}</div>
+                      <div className="text-button">{option.label}</div>
                     </div>
                   </button>
                 );
@@ -235,10 +235,10 @@ export default function LiquidityInput() {
 
           {/* Daily */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-body-sm">
               Daily Liquidity
             </label>
-            <p className="text-xs text-slate-500 mb-2">
+            <p className="text-caption mb-2">
               Previous Day High/Low taken?
             </p>
             <div className="space-y-2">
@@ -261,7 +261,7 @@ export default function LiquidityInput() {
                     )}
                     <Icon className="w-5 h-5" />
                     <div className="text-left">
-                      <div className="font-medium text-sm">{option.label}</div>
+                      <div className="text-button">{option.label}</div>
                     </div>
                   </button>
                 );
@@ -272,8 +272,8 @@ export default function LiquidityInput() {
 
 {/* Insights Preview */}
         <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-          <h4 className="text-sm font-semibold text-slate-700 mb-3"> Trading Insights</h4>
-          <div className="space-y-3 text-sm">
+          <h4 className="text-body-sm mb-3"> Trading Insights</h4>
+          <div className="space-y-3 text-body">
             {[
               { label: 'Monthly', value: formData.monthlyLiquidity },
               { label: 'Weekly', value: formData.weeklyLiquidity },
@@ -289,7 +289,7 @@ export default function LiquidityInput() {
 
         {/* Notes */}
         <div className="mt-6 space-y-2">
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-body-sm">
             Notes (optional)
           </label>
           <Textarea
@@ -316,7 +316,7 @@ export default function LiquidityInput() {
       {/* Current Liquidity Display */}
       {selectedPairs.length > 0 && (
         <CardContainer>
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Current Liquidity</h3>
+          <h3 className="text-card-title mb-4">Current Liquidity</h3>
           {isLoading ? (
             <LoadingSpinner />
           ) : (
@@ -327,13 +327,13 @@ export default function LiquidityInput() {
                   <div key={pair} className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
                     <div className="font-semibold w-20">{pair}</div>
                     <div className="flex gap-2 flex-wrap">
-                      <span className={cn("px-3 py-1 rounded-full text-xs font-semibold", getLiquidityColor(liquidity?.monthlyLiquidity || 'NONE'))}>
+                      <span className={cn("px-3 py-1 rounded-full text-caption", getLiquidityColor(liquidity?.monthlyLiquidity || 'NONE'))}>
                         M: {liquidity?.monthlyLiquidity || 'NONE'}
                       </span>
-                      <span className={cn("px-3 py-1 rounded-full text-xs font-semibold", getLiquidityColor(liquidity?.weeklyLiquidity || 'NONE'))}>
+                      <span className={cn("px-3 py-1 rounded-full text-caption", getLiquidityColor(liquidity?.weeklyLiquidity || 'NONE'))}>
                         W: {liquidity?.weeklyLiquidity || 'NONE'}
                       </span>
-                      <span className={cn("px-3 py-1 rounded-full text-xs font-semibold", getLiquidityColor(liquidity?.dailyLiquidity || 'NONE'))}>
+                      <span className={cn("px-3 py-1 rounded-full text-caption", getLiquidityColor(liquidity?.dailyLiquidity || 'NONE'))}>
                         D: {liquidity?.dailyLiquidity || 'NONE'}
                       </span>
                     </div>

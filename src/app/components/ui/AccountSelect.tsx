@@ -94,7 +94,7 @@ export default function AccountSelect({
           </span>
           <Badge
             variant="outline"
-            className={`text-[10px] px-1.5 py-0 ${config.bgColor} ${config.color} border-0`}
+            className={`text-micro px-1.5 py-0 ${config.bgColor} ${config.color} border-0`}
           >
             {account.status === 'BREACHED' || account.status === 'DISABLED'
               ? `${config.label} - Unavailable`
@@ -121,7 +121,7 @@ export default function AccountSelect({
         {!selectedAccount.canTrade && (
           <Badge
             variant="outline"
-            className={`text-[10px] px-1.5 py-0 ${config.bgColor} ${config.color} border-0`}
+            className={`text-micro px-1.5 py-0 ${config.bgColor} ${config.color} border-0`}
           >
             Unavailable
           </Badge>
@@ -154,7 +154,7 @@ export default function AccountSelect({
           <>
             {activeAccounts.length > 0 && (
               <SelectGroup>
-                <SelectLabel className="text-xs font-semibold text-green-600 px-2">
+                <SelectLabel className="text-caption text-green-600 px-2">
                   Active Accounts
                 </SelectLabel>
                 {activeAccounts.map(account => renderAccountItem(account, false))}
@@ -164,7 +164,7 @@ export default function AccountSelect({
             {nonActiveAccounts.length > 0 && (
               <SelectGroup>
                 {activeAccounts.length > 0 && <SelectSeparator />}
-                <SelectLabel className="text-xs font-semibold text-slate-400 px-2">
+                <SelectLabel className="text-caption text-slate-400 px-2">
                   Archived / Non-Active Accounts
                 </SelectLabel>
                 {nonActiveAccounts.map(account => renderAccountItem(account, true))}

@@ -45,28 +45,13 @@ export default function LiveISTClock() {
   }, []);
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E5EAF2] rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
-      <div className="relative">
-        <Clock className="w-4 h-4 text-[#2563EB]" />
-        <span
-          className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-[#16A34A] rounded-full"
-          style={{
-            animation: 'pulse 1s ease-in-out infinite',
-            boxShadow: '0 0 4px rgba(22, 163, 74, 0.6)',
-          }}
-        />
-      </div>
-
-      <div className="flex flex-col leading-tight">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sm font-semibold text-[#0F172A] font-mono tracking-wide">
-            {istTime.time}
-          </span>
-          <span className="text-[10px] font-medium text-[#2563EB] uppercase tracking-wider">
-            IST
-          </span>
-        </div>
-        <span className="text-[10px] text-[#64748B]">{istTime.date}</span>
+    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/70 backdrop-blur-xl border border-white/40 rounded-lg shadow-sm transition-all duration-200">
+      <Clock className="w-3 h-3 text-[#64748B]" />
+      <div className="flex items-baseline gap-1">
+        <span className="text-micro text-[#64748B] font-mono tabular-nums">
+          {istTime.time}
+        </span>
+        <span className="text-micro text-[#94A3B8] uppercase">IST</span>
       </div>
     </div>
   );

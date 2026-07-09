@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Download, ChevronDown, FileText, Calendar, Loader2 } from 'lucide-react';
 import { cn } from './ui/utils';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import api from '../../services/api';
 
 type ExportPeriod = 'daily' | 'weekly' | 'monthly' | 'all';
 type ExportType = 'trades' | 'missed-trades';
@@ -41,19 +40,13 @@ export default function ExportMenu({ type = 'trades', accountId, firmId, classNa
       if (accountId) params.append('accountId', accountId);
       if (firmId) params.append('firmId', firmId);
 
-      const endpoint = type === 'missed-trades' ? 'reports/missed-trades' : 'reports/trades';
-      const response = await fetch(`${API_BASE_URL}/${endpoint}?${params.toString()}`, {
-        method: 'GET',
-        credentials: 'include',
+      const endpoint = type === 'missed-trades' ? '/reports/missed-trades' : '/reports/trades';
+      const response = await api.get(`${endpoint}?${params.toString()}`, {
+        responseType: 'blob',
       });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Export failed' }));
-        throw new Error(error.message || 'Export failed');
-      }
-
-      const blob = await response.blob();
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const blob = response.data;
+      const contentDisposition = response.headers['content-disposition'];
       let filename = `${type === 'missed-trades' ? 'missed' : 'trade'}-journal-${period}`;
       
       if (contentDisposition) {
@@ -119,8 +112,8 @@ export default function ExportMenu({ type = 'trades', accountId, firmId, classNa
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-            <p className="text-sm font-semibold text-slate-900">{title}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{titleDesc}</p>
+            <p className="text-body-sm text-slate-900">{title}</p>
+            <p className="text-caption text-slate-500 mt-0.5">{titleDesc}</p>
           </div>
           
           <div className="py-2">
@@ -150,8 +143,8 @@ export default function ExportMenu({ type = 'trades', accountId, firmId, classNa
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{period.label}</p>
-                    <p className="text-xs text-slate-500">{period.description}</p>
+                    <p className="text-body-sm text-slate-900">{period.label}</p>
+                    <p className="text-caption text-slate-500">{period.description}</p>
                   </div>
                 </button>
               );

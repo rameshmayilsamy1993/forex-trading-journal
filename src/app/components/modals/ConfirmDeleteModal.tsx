@@ -21,8 +21,8 @@ export default function ConfirmDeleteModal({ isOpen, count, isDeleting, onConfir
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold">Delete Trades</h3>
-                <p className="text-sm text-rose-100">This action cannot be undone</p>
+                <h3 className="text-card-title font-bold">Delete Trades</h3>
+                <p className="text-body text-rose-100">This action cannot be undone</p>
               </div>
             </div>
             <button onClick={onCancel} className="p-2 bg-white/10 hover:bg-white/25 rounded-full transition-colors">

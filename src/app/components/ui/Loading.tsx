@@ -6,7 +6,7 @@ export function LoadingSpinner({ message = 'Loading...' }: { message?: string })
           <div className="absolute inset-0 border-4 border-[#E5EAF2] rounded-full" />
           <div className="absolute inset-0 border-4 border-transparent border-t-[#2563EB] rounded-full animate-spin" />
         </div>
-        <p className="text-sm text-[#64748B]">{message}</p>
+        <p className="text-body text-[#64748B]">{message}</p>
       </div>
     </div>
   );
@@ -30,8 +30,8 @@ export function EmptyState({
           <Icon className="w-8 h-8 text-[#94A3B8]" />
         </div>
       )}
-      <h3 className="text-lg font-semibold text-[#0F172A] mb-1.5">{title}</h3>
-      {description && <p className="text-sm text-[#64748B] mb-4">{description}</p>}
+      <h3 className="text-card-title text-[#0F172A] mb-1.5">{title}</h3>
+      {description && <p className="text-body text-[#64748B] mb-4">{description}</p>}
       {action}
     </div>
   );

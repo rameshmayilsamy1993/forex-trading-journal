@@ -135,7 +135,7 @@ export default function StrategyChecklist({
             <AlertCircle className="w-5 h-5" />
             <div>
               <p className="font-medium">No Checklists Available</p>
-              <p className="text-sm">Add checklist items to your strategies in settings to enable pre-trade validation.</p>
+              <p className="text-body">Add checklist items to your strategies in settings to enable pre-trade validation.</p>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function StrategyChecklist({
       >
         {!selectedStrategy ? (
           <div className="space-y-4">
-            <label className="block text-sm font-semibold text-slate-700">
+            <label className="block text-body-sm font-semibold text-slate-700">
               Select Strategy <span className="text-red-500">*</span>
             </label>
             
@@ -209,10 +209,10 @@ export default function StrategyChecklist({
                     <button
                       key={strategy.id}
                       onClick={() => handleStrategySelect(strategy)}
-                      className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-b-0"
+                      className="w-full px-4 py-3 text-left hover:bg-violet-50 transition-colors border-b border-slate-100 last:border-b-0"
                     >
                       <p className="font-medium text-slate-900">{strategy.name}</p>
-                      <p className="text-sm text-slate-500">{strategy.checklist?.length} checklist items</p>
+                      <p className="text-body text-slate-500">{strategy.checklist?.length} checklist items</p>
                     </button>
                   ))}
                 </div>
@@ -223,12 +223,12 @@ export default function StrategyChecklist({
           <div className="space-y-6">
             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
               <div>
-                <p className="text-sm text-slate-500">Selected Strategy</p>
+                <p className="text-body text-slate-500">Selected Strategy</p>
                 <p className="font-bold text-slate-900">{selectedStrategy.name}</p>
               </div>
               <button
                 onClick={handleReset}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-button text-[#7C3AED] hover:text-[#6D28D9]"
               >
                 Change
               </button>
@@ -236,12 +236,12 @@ export default function StrategyChecklist({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-slate-700">
+                <label className="text-body-sm font-semibold text-slate-700">
                   Checklist Items
                 </label>
                 <div className="flex items-center gap-2">
                   <span className={cn(
-                    "text-sm font-medium",
+                    "text-body-sm",
                     isValid ? "text-green-600" : "text-amber-600"
                   )}>
                     {progress.completed}/{progress.requiredCompleted} required
@@ -286,7 +286,7 @@ export default function StrategyChecklist({
                       </span>
                       {item.required && (
                         <span className={cn(
-                          "text-xs font-semibold px-2 py-0.5 rounded",
+                          "text-caption font-semibold px-2 py-0.5 rounded",
                           isChecked ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                         )}>
                           REQUIRED
@@ -304,7 +304,7 @@ export default function StrategyChecklist({
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium text-red-800">Missing Required Items</p>
-                    <ul className="mt-1 text-sm text-red-700 space-y-1">
+                    <ul className="mt-1 text-body text-red-700 space-y-1">
                       {missingRequired.map(item => (
                         <li key={item}>• {item}</li>
                       ))}
@@ -315,14 +315,14 @@ export default function StrategyChecklist({
             )}
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-slate-700">
+              <label className="block text-body-sm font-semibold text-slate-700">
                 Notes (Optional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add any additional notes about this trade..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl resize-none min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl resize-none min-h-[80px] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/30 focus:bg-white transition-colors"
                 rows={3}
               />
             </div>
@@ -333,20 +333,20 @@ export default function StrategyChecklist({
       {showUnsavedConfirm && (
         <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Unsaved Changes</h3>
-            <p className="text-sm text-slate-600 mb-6">
+            <h3 className="text-card-title text-slate-900 mb-2">Unsaved Changes</h3>
+            <p className="text-body text-slate-600 mb-6">
               You have unsaved changes. Are you sure you want to close?
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowUnsavedConfirm(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] text-button transition-all"
               >
                 Continue Editing
               </button>
               <button
                 onClick={() => { setShowUnsavedConfirm(false); onCancel?.(); }}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-button transition-colors"
               >
                 Discard Changes
               </button>

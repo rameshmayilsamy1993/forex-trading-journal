@@ -55,13 +55,13 @@ export default function XauusdCalculator() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3 space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 p-6">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-5">
+            <h2 className="text-table-header text-slate-500 mb-5">
               Calculator
             </h2>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-body-sm text-slate-700 mb-2">
                   Risk Amount ($)
                 </label>
                 <div className="flex gap-2 mb-3 flex-wrap">
@@ -69,7 +69,7 @@ export default function XauusdCalculator() {
                     <button
                       key={amount}
                       onClick={() => setRiskInput(String(amount))}
-                      className={`flex-1 min-w-[80px] px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border-2 ${
+                      className={`flex-1 min-w-[80px] px-4 py-3 rounded-xl text-button transition-all duration-200 border-2 ${
                         riskInput === String(amount)
                           ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
                           : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50/50'
@@ -90,15 +90,15 @@ export default function XauusdCalculator() {
                     }
                   }}
                   placeholder="Enter any risk amount"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 text-input placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                 />
                 {riskError && (
-                  <p className="text-xs text-red-500 mt-1">{riskError}</p>
+                  <p className="text-caption text-red-500 mt-1">{riskError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-body-sm text-slate-700 mb-2">
                   Stop Loss Points
                 </label>
                 <input
@@ -112,14 +112,14 @@ export default function XauusdCalculator() {
                     }
                   }}
                   placeholder="e.g. 150, 200, 250"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 text-input placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                 />
                 <div className="flex gap-1.5 mt-2 flex-wrap">
                   {SL_EXAMPLES.map((ex) => (
                     <button
                       key={ex}
                       onClick={() => setStopLoss(String(ex))}
-                      className="px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                      className="px-2.5 py-1 text-caption text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
                     >
                       {ex}
                     </button>
@@ -132,9 +132,9 @@ export default function XauusdCalculator() {
           {lotSize > 0 && (
             <>
               <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/25 p-8 text-center">
-                <p className="text-sm font-medium text-blue-100 mb-1">Recommended Lot Size</p>
-                <p className="text-5xl font-bold text-white mb-3">{displayLot} <span className="text-2xl font-medium text-blue-200">Lots</span></p>
-                <div className="flex items-center justify-center gap-6 text-sm text-blue-100">
+                <p className="text-body-sm text-blue-100 mb-1">Recommended Lot Size</p>
+                <p className="text-5xl font-bold text-white mb-3">{displayLot} <span className="text-section-title text-blue-200">Lots</span></p>
+                <div className="flex items-center justify-center gap-6 text-body text-blue-100">
                   <span>Risk: ${riskAmount}</span>
                   <span className="w-1 h-1 rounded-full bg-blue-300" />
                   <span>SL: {slPoints} Points</span>
@@ -153,7 +153,7 @@ export default function XauusdCalculator() {
               </button>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 p-6">
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <h3 className="text-table-header text-slate-500 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" />
                   Profit Preview
                 </h3>
@@ -165,8 +165,8 @@ export default function XauusdCalculator() {
                     return (
                       <div key={rr.label} className={`${color.bg} ${color.border} border rounded-xl p-4 text-center`}>
                         <Icon className={`w-5 h-5 ${color.text} mx-auto mb-2`} />
-                        <p className={`text-lg font-bold ${color.text}`}>${profit.toLocaleString()}</p>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">{rr.label} R:R</p>
+                        <p className={`text-card-title font-bold ${color.text}`}>${profit.toLocaleString()}</p>
+                        <p className="text-caption text-slate-500 mt-0.5">{rr.label} R:R</p>
                       </div>
                     );
                   })}
@@ -178,18 +178,18 @@ export default function XauusdCalculator() {
 
         <div className="lg:col-span-2">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h3 className="text-table-header text-slate-500 mb-4 flex items-center gap-2">
               <Table2 className="w-4 h-4" />
               Quick Reference
             </h3>
-            <p className="text-xs text-slate-400 mb-4">When Risk = ${riskAmount}</p>
+            <p className="text-caption text-slate-400 mb-4">When Risk = ${riskAmount}</p>
 
             <div className="overflow-hidden rounded-xl border border-slate-200">
-              <table className="w-full text-sm">
+              <table className="w-full text-table-cell">
                 <thead>
                   <tr className="bg-slate-50">
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">SL</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Lot</th>
+                    <th className="px-4 py-2.5 text-left text-table-header text-slate-500">SL</th>
+                    <th className="px-4 py-2.5 text-right text-table-header text-slate-500">Lot</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -214,7 +214,7 @@ export default function XauusdCalculator() {
             <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
               <div className="flex items-start gap-2">
                 <ShieldAlert className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-amber-700">
+                <p className="text-caption text-amber-700">
                   This calculator is for XAUUSD only. Always verify with your broker's specifications.
                 </p>
               </div>

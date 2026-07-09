@@ -55,24 +55,24 @@ function NotificationItem({ notification, onMarkRead, onDismiss, onOpenReminder 
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                'text-sm font-medium truncate',
+                'text-body-sm truncate',
                 isUnread ? 'text-[#0F172A]' : 'text-[#64748B]',
               )}
             >
               {notification.reminderTitle}
             </span>
             {notification.reminderPair && (
-              <span className="text-xs px-2 py-0.5 bg-[#2563EB]/10 text-[#2563EB] rounded-full font-medium">
+              <span className="text-caption px-2 py-0.5 bg-[#2563EB]/10 text-[#2563EB] rounded-full">
                 {notification.reminderPair}
               </span>
             )}
           </div>
 
-          <p className="text-xs text-[#64748B] mt-1">
+          <p className="text-caption text-[#64748B] mt-1">
             {getNotificationTypeLabel(notification.type)}
           </p>
 
-          <div className="flex items-center gap-1 mt-1 text-xs text-[#94A3B8]">
+          <div className="flex items-center gap-1 mt-1 text-caption text-[#94A3B8]">
             <Clock className="w-3 h-3" />
             <span>{formatTime(notification.minutesUntil)}</span>
           </div>
@@ -83,7 +83,7 @@ function NotificationItem({ notification, onMarkRead, onDismiss, onOpenReminder 
         {!notification.isRead && (
           <button
             onClick={() => onMarkRead(notificationId)}
-            className="text-xs flex items-center gap-1 px-2 py-1 text-[#2563EB] hover:bg-[#2563EB]/10 rounded-lg transition-colors"
+            className="text-caption flex items-center gap-1 px-2 py-1 text-[#2563EB] hover:bg-[#2563EB]/10 rounded-lg transition-colors"
           >
             <Check className="w-3 h-3" />
             Mark read
@@ -91,14 +91,14 @@ function NotificationItem({ notification, onMarkRead, onDismiss, onOpenReminder 
         )}
         <button
           onClick={onOpenReminder}
-          className="text-xs flex items-center gap-1 px-2 py-1 text-[#64748B] hover:bg-[#F1F5F9] rounded-lg transition-colors"
+          className="text-caption flex items-center gap-1 px-2 py-1 text-[#64748B] hover:bg-[#F1F5F9] rounded-lg transition-colors"
         >
           <ExternalLink className="w-3 h-3" />
           Open
         </button>
         <button
           onClick={() => onDismiss(notificationId)}
-          className="text-xs flex items-center gap-1 px-2 py-1 text-[#94A3B8] hover:text-[#DC2626] hover:bg-red-50 rounded-lg transition-colors"
+          className="text-caption flex items-center gap-1 px-2 py-1 text-[#94A3B8] hover:text-[#DC2626] hover:bg-red-50 rounded-lg transition-colors"
         >
           <X className="w-3 h-3" />
         </button>
@@ -152,7 +152,7 @@ export default function NotificationDropdown({ onNavigateToReminders }: Notifica
       >
         <Bell className="w-5 h-5 text-[#64748B]" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-[#DC2626] text-white text-[10px] font-bold rounded-full px-1 shadow-sm">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-[#DC2626] text-white text-micro font-bold rounded-full px-1 shadow-sm">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -161,9 +161,9 @@ export default function NotificationDropdown({ onNavigateToReminders }: Notifica
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-[#E5EAF2] overflow-hidden z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5EAF2] bg-[#F8FAFC]">
-            <h3 className="text-sm font-semibold text-[#0F172A]">Notifications</h3>
+            <h3 className="text-body-sm text-[#0F172A]">Notifications</h3>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium">
+              <button onClick={markAllAsRead} className="text-caption text-[#2563EB] hover:text-[#1D4ED8]">
                 Mark all read
               </button>
             )}
@@ -173,7 +173,7 @@ export default function NotificationDropdown({ onNavigateToReminders }: Notifica
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-[#94A3B8]">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No notifications</p>
+                <p className="text-body">No notifications</p>
               </div>
             ) : (
               notifications.map(notification => (
@@ -192,7 +192,7 @@ export default function NotificationDropdown({ onNavigateToReminders }: Notifica
             <div className="px-4 py-2.5 border-t border-[#E5EAF2] bg-[#F8FAFC]">
               <button
                 onClick={handleOpenReminder}
-                className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
+                className="text-caption text-[#2563EB] hover:text-[#1D4ED8]"
               >
                 View all reminders →
               </button>

@@ -63,7 +63,7 @@ export default function ChecklistDetailsModal({
 
     if (lower === 'yes' || lower === 'bullish') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption bg-emerald-50 text-emerald-700 border border-emerald-200">
           <Check className="w-3 h-3" />
           {answer}
         </span>
@@ -72,7 +72,7 @@ export default function ChecklistDetailsModal({
 
     if (lower === 'no' || lower === 'bearish') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption bg-rose-50 text-rose-600 border border-rose-200">
           <X className="w-3 h-3" />
           {answer}
         </span>
@@ -83,7 +83,7 @@ export default function ChecklistDetailsModal({
       return (
         <button
           onClick={() => setPreviewImage(answer)}
-          className="group relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 hover:border-blue-400 transition-colors flex-shrink-0"
+          className="group relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 hover:border-[#7C3AED] transition-colors flex-shrink-0"
         >
           <img
             src={answer}
@@ -94,14 +94,14 @@ export default function ChecklistDetailsModal({
             }}
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium">View</span>
+            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-caption">View</span>
           </div>
         </button>
       );
     }
 
     return (
-      <span className="text-sm text-slate-800 font-medium">{answer}</span>
+      <span className="text-body text-slate-800">{answer}</span>
     );
   };
 
@@ -145,23 +145,23 @@ export default function ChecklistDetailsModal({
       >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-            <p className="mt-4 text-slate-500 text-sm">Loading checklist...</p>
+            <div className="w-10 h-10 border-4 border-violet-200 border-t-[#7C3AED] rounded-full animate-spin" />
+            <p className="mt-4 text-body text-slate-500">Loading checklist...</p>
           </div>
         ) : checklist ? (
           <div className="space-y-4">
             <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
               <div className="space-y-0.5 flex-1 min-w-0">
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Created</p>
-                <p className="text-sm text-slate-800 font-medium">
+                <p className="text-table-header text-slate-500 uppercase">Created</p>
+                <p className="text-body text-slate-800">
                   {formatDate(checklist.createdAt)} at {formatTime(checklist.createdAt)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${checklist.isValid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}`}>
+                <span className={`px-2.5 py-1 rounded-full text-caption ${checklist.isValid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}`}>
                   {checklist.isValid ? 'Valid' : 'Invalid'}
                 </span>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${checklist.status === 'LINKED' ? 'bg-violet-50 text-violet-700 border border-violet-200' : 'bg-blue-50 text-blue-700 border border-blue-200'}`}>
+                <span className={`px-2.5 py-1 rounded-full text-caption ${checklist.status === 'LINKED' ? 'bg-violet-50 text-violet-700 border border-violet-200' : 'bg-violet-50 text-[#7C3AED] border border-violet-200'}`}>
                   {checklist.status === 'LINKED' ? 'Linked' : 'Active'}
                 </span>
               </div>
@@ -173,7 +173,7 @@ export default function ChecklistDetailsModal({
                   <div key={index} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800">{item.label}</p>
+                        <p className="text-body-sm text-slate-800">{item.label}</p>
                       </div>
                       <div className="flex-shrink-0">
                         {renderAnswer(item)}
@@ -185,21 +185,21 @@ export default function ChecklistDetailsModal({
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-slate-400">
                 <AlertCircle className="w-8 h-8 mb-2" />
-                <p className="text-sm">No checklist items found</p>
+                <p className="text-body">No checklist items found</p>
               </div>
             )}
 
             {checklist.notes && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">Notes</p>
-                <p className="text-sm text-amber-800">{checklist.notes}</p>
+                <p className="text-table-header text-amber-700 uppercase mb-1">Notes</p>
+                <p className="text-body text-amber-800">{checklist.notes}</p>
               </div>
             )}
 
             {checklist.missingRequired && checklist.missingRequired.length > 0 && (
               <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
-                <p className="text-xs font-semibold text-rose-700 uppercase tracking-wider mb-1">Missing Required Items</p>
-                <ul className="text-sm text-rose-700 space-y-1">
+                <p className="text-table-header text-rose-700 uppercase mb-1">Missing Required Items</p>
+                <ul className="text-body text-rose-700 space-y-1">
                   {checklist.missingRequired.map((item: string, i: number) => (
                     <li key={i} className="flex items-center gap-1.5">
                       <X className="w-3 h-3 text-rose-500 flex-shrink-0" />
@@ -216,7 +216,7 @@ export default function ChecklistDetailsModal({
               <AlertCircle className="w-8 h-8 text-slate-400" />
             </div>
             <p className="text-slate-600 font-medium">No checklist linked to this trade.</p>
-            <button onClick={onClose} className="mt-4 text-sm text-slate-400 hover:text-slate-600 transition-colors">
+            <button onClick={onClose} className="mt-4 text-body-sm text-slate-400 hover:text-slate-600 transition-colors">
               Close
             </button>
           </div>

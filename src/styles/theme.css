@@ -1,7 +1,10 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Base */
   --font-size: 16px;
+
+  /* Colors */
   --background: #F5F7FB;
   --foreground: #0F172A;
   --card: #FFFFFF;
@@ -47,6 +50,8 @@
   --panel-bg: #FFFFFF;
   --panel-border: #E5EAF2;
   --panel-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  /* Font families */
   --font-sans: "Aptos", "Segoe UI Variable", "Inter", sans-serif;
   --font-display: "Aptos Display", "Segoe UI Variable Display", "Aptos", sans-serif;
   --font-mono: "SFMono-Regular", "Cascadia Mono", "Consolas", monospace;
@@ -93,64 +98,404 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY UTILITY CLASSES
+   Usage: className="text-page-title text-foreground"
+   ═══════════════════════════════════════════ */
+
+@utility text-display {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@utility text-display-lg {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@utility text-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@utility text-section-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+@utility text-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+@utility text-heading {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+@utility text-body-lg {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-body {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-body-sm {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-caption {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+@utility text-micro {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+@utility text-badge {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+@utility text-table-header {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility text-table-cell {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-sidebar-menu {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-sidebar-group {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@utility text-button {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+@utility text-input {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-placeholder {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-dropdown {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility text-tooltip {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+@utility text-metric {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* ═══════════════════════════════════════════
+   COMPACT / DENSE SCOPE
+   For pages that need tighter text and spacing
+   ═══════════════════════════════════════════ */
+
+@utility dense-text-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@utility dense-text-section {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+@utility dense-text-heading {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+@utility dense-text-body {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+@utility dense-text-caption {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+@utility dense-text-micro {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+@utility dense-text-table-header {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Dense scope - DesignSystem component overrides */
+.dense .bg-white.rounded-\[20px\].p-5 {
+  padding: 0.75rem !important;
+}
+
+.dense .px-5.py-4 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.dense .gap-6 {
+  gap: 0.75rem !important;
+}
+
+.dense .gap-4 {
+  gap: 0.5rem !important;
+}
+
+.dense .gap-3 {
+  gap: 0.5rem !important;
+}
+
+.dense .space-y-6 > :not(style) ~ :not(style) {
+  margin-top: 0.75rem !important;
+}
+
+.dense .text-2xl {
+  font-size: 1.125rem !important;
+}
+
+.dense .text-\[11px\] {
+  font-size: 9px !important;
+}
+
+.dense .text-xs {
+  font-size: 0.625rem !important;
+}
+
+.dense .text-sm {
+  font-size: 0.75rem !important;
+}
+
+.dense .h-10 {
+  height: 2rem !important;
+}
+
+.dense .w-\[200px\] {
+  width: 140px !important;
+}
+
+.dense .p-3 {
+  padding: 0.5rem !important;
+}
+
+.dense .py-8 {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+.dense .py-3.px-4 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+.dense .p-3.bg-\[#16A34A\]\/5,
+.dense .p-3.bg-\[#DC2626\]\/5,
+.dense .p-3.bg-\[#7C3AED\]\/5,
+.dense .p-3.bg-\[#EA580C\]\/5 {
+  padding: 0.5rem !important;
+}
+
+.dense .p-3.bg-\[#F8FAFC\] {
+  padding: 0.5rem !important;
+}
+
+/* Dense scope - override original text utilities */
+.dense .text-body {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.dense .text-body-sm {
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+.dense .text-caption {
+  font-size: 10px !important;
+  line-height: 1.3 !important;
+}
+
+.dense .text-table-header {
+  font-size: 9px !important;
+  line-height: 1.3 !important;
+}
+
+.dense .text-table-cell {
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+}
+
+.dense .text-card-title {
+  font-size: 14px !important;
+  line-height: 1.3 !important;
+}
+
+/* ═══════════════════════════════════════════
+   BASE TAG STYLES
+   ═══════════════════════════════════════════ */
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: var(--font-sans);
-    background: var(--shell-bg);
-    color: var(--foreground);
   }
 
   html {
     font-size: var(--font-size);
   }
 
+  body {
+    background: var(--shell-bg);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    @apply antialiased;
+  }
+
   h1 {
-    font-size: var(--text-3xl);
     font-family: var(--font-display);
-    font-weight: 600;
-    line-height: 1.4;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: var(--text-2xl);
     font-family: var(--font-display);
-    font-weight: 600;
-    line-height: 1.4;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
   }
 
   h3 {
-    font-size: var(--text-xl);
     font-family: var(--font-display);
+    font-size: 18px;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 
   h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0;
   }
 
   label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
+    font-size: 13px;
+    font-weight: 500;
     line-height: 1.5;
   }
 
   button {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
+    font-size: 13px;
+    font-weight: 600;
     line-height: 1.5;
+    letter-spacing: 0.01em;
   }
 
-  input {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-normal);
+  input,
+  textarea,
+  select {
+    font-size: 14px;
+    font-weight: 500;
     line-height: 1.5;
   }
 
@@ -178,7 +523,10 @@
   }
 
   .fx-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
     letter-spacing: 0;
   }
 

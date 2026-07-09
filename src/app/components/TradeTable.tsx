@@ -79,21 +79,21 @@ export default function TradeTable({
     return (
       <div className="text-center py-12">
         <p className="text-slate-600 font-medium">Please add an account first</p>
-        <p className="text-sm text-slate-500">Go to "Accounts" tab to create one</p>
+        <p className="text-body text-slate-500">Go to "Accounts" tab to create one</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-slate-200/50">
-        <span className="text-sm text-slate-500 font-medium">Filters:</span>
+      <div className="flex items-center gap-4 p-5 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB]">
+        <span className="text-body-sm text-slate-500">Filters:</span>
         <div className="flex gap-4 items-center">
           <Select
             value={filterAccount || 'all'}
             onValueChange={(value: string) => onFilterAccountChange(value)}
           >
-            <SelectTrigger className="w-[200px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+            <SelectTrigger className="w-[200px] bg-white border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors rounded-xl">
               <SelectValue placeholder="All Accounts" />
             </SelectTrigger>
             <SelectContent>
@@ -108,7 +108,7 @@ export default function TradeTable({
             value={filterStatus || 'all'}
             onValueChange={(value: string) => onFilterStatusChange(value)}
           >
-            <SelectTrigger className="w-[150px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+            <SelectTrigger className="w-[150px] bg-white border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors rounded-xl">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -122,7 +122,7 @@ export default function TradeTable({
             value={accountState || 'ACTIVE'}
             onValueChange={(value: string) => onAccountStateChange(value)}
           >
-            <SelectTrigger className={`w-[180px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors ${accountState === 'BREACHED' ? 'border-red-300 bg-red-50' : ''}`}>
+            <SelectTrigger className={`w-[180px] bg-white border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors rounded-xl ${accountState === 'BREACHED' ? 'border-red-300 bg-red-50' : ''}`}>
               <SelectValue placeholder="Account State" />
             </SelectTrigger>
             <SelectContent>
@@ -146,7 +146,7 @@ export default function TradeTable({
             value={filterAnalysis}
             onValueChange={(value: string) => onFilterAnalysisChange(value)}
           >
-            <SelectTrigger className="w-[160px] bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+            <SelectTrigger className="w-[160px] bg-white border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors rounded-xl">
               <SelectValue placeholder="All Analysis" />
             </SelectTrigger>
             <SelectContent>
@@ -159,7 +159,7 @@ export default function TradeTable({
           </Select>
 
           {accountState === 'BREACHED' && (
-            <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-lg flex items-center gap-1">
+            <span className="text-caption text-red-600 bg-red-50 px-2 py-1 rounded-lg flex items-center gap-1">
               <AlertTriangle className="w-3 h-3" />
               Showing breached accounts only
             </span>
@@ -183,27 +183,27 @@ export default function TradeTable({
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50">
+      <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB]">
         <div className="p-6">
           {trades.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-slate-600">No trades recorded yet</p>
-              <p className="text-sm text-slate-500">Click "Add Trade" to start logging</p>
+              <p className="text-body text-slate-500">Click "Add Trade" to start logging</p>
             </div>
           ) : (
             <>
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                  <label className="flex items-center gap-2 text-body text-slate-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={selectedTrades.length === trades.length && trades.length > 0}
                       onChange={onToggleSelectAll}
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-300 text-[#7C3AED] focus:ring-[#7C3AED]/30 cursor-pointer"
                     />
                     <span className="font-medium">Select All</span>
                   </label>
-                  <span className="text-sm text-slate-500">
+                  <span className="text-body text-slate-500">
                     {selectedTrades.length > 0 ? `${selectedTrades.length} selected` : `${trades.length} trades`}
                   </span>
                 </div>
@@ -211,21 +211,21 @@ export default function TradeTable({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={onBulkLink}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] transition-all duration-200 shadow-lg shadow-[#7C3AED]/25"
                     >
                       <Link2 className="w-4 h-4" />
                       Link Checklist ({selectedTrades.length})
                     </button>
                     <button
                       onClick={onBulkUnlink}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 shadow-lg shadow-red-500/25"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-lg shadow-red-500/25"
                     >
                       <Unlink className="w-4 h-4" />
                       Unlink ({selectedTrades.length})
                     </button>
                     <button
                       onClick={onBulkDeleteClick}
-                      className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-all duration-200 shadow-lg shadow-rose-500/25"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-xl hover:from-rose-600 hover:to-red-700 transition-all duration-200 shadow-lg shadow-rose-500/25"
                     >
                       <Trash className="w-4 h-4" />
                       Delete ({selectedTrades.length})
@@ -243,7 +243,7 @@ export default function TradeTable({
                           type="checkbox"
                           checked={selectedTrades.length === trades.length && trades.length > 0}
                           onChange={onToggleSelectAll}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          className="w-4 h-4 rounded border-slate-300 text-[#7C3AED] focus:ring-[#7C3AED]/30 cursor-pointer"
                         />
                       </TableHead>
                       <TableHead className="w-[140px]">Date</TableHead>
@@ -259,20 +259,20 @@ export default function TradeTable({
                   </TableHeader>
                   <TableBody>
                     {trades.map(trade => (
-                      <TableRow key={trade.id} className={`group ${selectedTrades.includes(trade.id) ? 'bg-blue-50/50' : ''}`}>
+                      <TableRow key={trade.id} className={`group ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50' : ''}`}>
                         <TableCell>
                           <input
                             type="checkbox"
                             checked={selectedTrades.includes(trade.id)}
                             onChange={() => onToggleSelect(trade.id)}
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-slate-300 text-[#7C3AED] focus:ring-[#7C3AED]/30 cursor-pointer"
                           />
                         </TableCell>
                         <TableCell>
                           <div>
                             {getLocalDateString(trade.entryDate)}
                             {trade.entryTime && (
-                              <div className="text-xs text-slate-400">{trade.entryTime}</div>
+                              <div className="text-caption text-slate-400">{trade.entryTime}</div>
                             )}
                           </div>
                         </TableCell>
@@ -286,12 +286,12 @@ export default function TradeTable({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-caption font-semibold bg-slate-100 text-slate-800">
                             {trade.pair}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${trade.type === 'BUY' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption font-semibold shadow-sm ${trade.type === 'BUY' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                             }`}>
                             {trade.type === 'BUY' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                             {trade.type}
@@ -313,12 +313,12 @@ export default function TradeTable({
                         </TableCell>
                         <TableCell className="text-center">
                           {(trade as any).checklistId ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit mx-auto">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-micro bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit mx-auto">
                               <Check className="w-3 h-3" />
                               Linked
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 w-fit mx-auto">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-micro bg-slate-100 text-slate-500 border border-slate-200 w-fit mx-auto">
                               &mdash; Not Linked
                             </span>
                           )}

@@ -186,12 +186,12 @@ export default function Reports() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="dense max-w-7xl mx-auto space-y-3">
       <PageHeader title="Performance Reports" subtitle="Analyze your trading performance" icon={BarChart3} color="purple" />
 
       {/* Filters */}
       <CardContainer className="!p-0">
-        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-gradient-to-r from-purple-50/50 to-pink-50/50">
+        <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#F8FAFC]">
           <div className="flex gap-3">
             <Select value={selectedFirm} onValueChange={(value: string) => setSelectedFirm(value)}>
               <SelectTrigger className="w-[200px]">
@@ -224,12 +224,12 @@ export default function Reports() {
             </Select>
 
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-sm text-[#64748B] cursor-pointer">
+              <label className="flex items-center gap-2 text-body-sm text-[#64748B] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeBreached}
                   onChange={e => setIncludeBreached(e.target.checked)}
-                  className="rounded border-[#E5EAF2] text-[#2563EB] focus:ring-[#2563EB]/30"
+                  className="rounded border-[#E5E7EB] text-[#7C3AED] focus:ring-[#7C3AED]/30"
                 />
                 Include Breached Accounts
               </label>
@@ -273,37 +273,37 @@ export default function Reports() {
             <div className="flex justify-between items-center p-3 bg-[#16A34A]/5 rounded-xl border border-[#16A34A]/10">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-[#16A34A]" />
-                <span className="text-sm text-[#0F172A]">Total Win</span>
+                <span className="text-body text-[#0F172A]">Total Win</span>
               </div>
               <span className="font-bold text-[#16A34A]">${stats.totalProfit.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-[#DC2626]/5 rounded-xl border border-[#DC2626]/10">
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-[#DC2626]" />
-                <span className="text-sm text-[#0F172A]">Total Loss</span>
+                <span className="text-body text-[#0F172A]">Total Loss</span>
               </div>
               <span className="font-bold text-[#DC2626]">-${stats.totalLoss.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-[#2563EB]/5 rounded-xl border-2 border-[#2563EB]/20">
+            <div className="flex justify-between items-center p-3 bg-[#7C3AED]/5 rounded-xl border-2 border-[#7C3AED]/20">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-[#2563EB]" />
-                <span className="text-sm font-semibold text-[#0F172A]">Net P/L</span>
+                <DollarSign className="w-4 h-4 text-[#7C3AED]" />
+                <span className="text-body font-semibold text-[#0F172A]">Net P/L</span>
               </div>
-              <span className={`font-bold text-lg ${stats.netProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+              <span className={`font-bold text-card-title ${stats.netProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                 {stats.netProfit >= 0 ? '+' : ''}${stats.netProfit.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-[#7C3AED]/5 rounded-xl border border-[#7C3AED]/10">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-[#7C3AED]" />
-                <span className="text-sm text-[#0F172A]">Largest Win</span>
+                <span className="text-body text-[#0F172A]">Largest Win</span>
               </div>
               <span className="font-bold text-[#7C3AED]">${stats.largestWin.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-[#EA580C]/5 rounded-xl border border-[#EA580C]/10">
               <div className="flex items-center gap-2">
                 <TrendingDown className="w-4 h-4 text-[#EA580C]" />
-                <span className="text-sm text-[#0F172A]">Largest Loss</span>
+                <span className="text-body text-[#0F172A]">Largest Loss</span>
               </div>
               <span className="font-bold text-[#EA580C]">${Math.abs(stats.largestLoss).toFixed(2)}</span>
             </div>
@@ -314,16 +314,16 @@ export default function Reports() {
         <SectionCard title="Top Pairs by Profit" icon={Target} color="green">
           <div className="space-y-2">
             {pairStats.length === 0 && (
-              <p className="text-sm text-[#64748B] text-center py-8">No closed trades yet</p>
+              <p className="text-body text-[#64748B] text-center py-8">No closed trades yet</p>
             )}
             {pairStats.slice(0, 6).map(pair => (
               <div
                 key={pair.pair}
-                className="flex items-center justify-between p-3 bg-[#F8FAFC] rounded-xl hover:bg-[#F1F5F9] transition-colors border border-[#E5EAF2]/50"
+                className="flex items-center justify-between p-3 bg-[#F8FAFC] rounded-xl hover:bg-[#F1F5F9] transition-colors border border-[#E5E7EB]/50"
               >
                 <div className="flex-1">
                   <p className="font-semibold text-[#0F172A]">{pair.pair}</p>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-caption text-[#64748B]">
                     {pair.trades} trades • {pair.winRate.toFixed(1)}% win rate
                   </p>
                 </div>
@@ -340,24 +340,24 @@ export default function Reports() {
       <SectionCard title="Monthly Performance" icon={BarChart3} color="indigo">
         <div className="overflow-x-auto">
           {monthlyStats.length === 0 ? (
-            <p className="text-sm text-[#64748B] text-center py-8">No closed trades yet</p>
+            <p className="text-body text-[#64748B] text-center py-8">No closed trades yet</p>
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E5EAF2] bg-[#F8FAFC]">
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC]">
+                  <th className="text-left py-3 px-4 text-table-header text-[#64748B]">
                     Month
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
                     Trades
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
                     Wins
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
                     Win Rate
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
                     Profit/Loss
                   </th>
                 </tr>
@@ -375,18 +375,18 @@ export default function Reports() {
                     }
                   })();
                   return (
-                    <tr key={month.month} className="border-b border-[#E5EAF2]/60 hover:bg-[#F8FAFC] transition-colors">
-                      <td className="py-3 px-4 text-sm text-[#0F172A] font-medium">
+                    <tr key={month.month} className="border-b border-[#E5E7EB]/60 hover:bg-[#F8FAFC] transition-colors">
+                      <td className="py-3 px-4 text-table-cell text-[#0F172A]">
                         {monthDate || month.month}
                       </td>
-                      <td className="py-3 px-4 text-sm text-right text-[#0F172A]">{month.trades}</td>
-                      <td className="py-3 px-4 text-sm text-right text-[#0F172A]">{month.wins}</td>
-                      <td className="py-3 px-4 text-sm text-right">
+                      <td className="py-3 px-4 text-table-cell text-right text-[#0F172A]">{month.trades}</td>
+                      <td className="py-3 px-4 text-table-cell text-right text-[#0F172A]">{month.wins}</td>
+                      <td className="py-3 px-4 text-table-cell text-right">
                         <span className={`font-semibold ${getWinRateColor(month.winRate)}`}>
                           {month.winRate.toFixed(1)}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-sm text-right">
+                      <td className="py-3 px-4 text-table-cell text-right">
                         <span className={`font-bold ${month.profit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                           {month.profit >= 0 ? '+' : ''}${month.profit.toFixed(2)}
                         </span>

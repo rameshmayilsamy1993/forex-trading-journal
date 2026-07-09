@@ -152,7 +152,7 @@ export default function ChecklistExecutionPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Pre-Trade Checklist</h1>
+        <h1 className="text-page-title">Pre-Trade Checklist</h1>
         <p className="text-slate-500 mt-1">Complete checklist validation before entering trades</p>
       </div>
 
@@ -161,7 +161,7 @@ export default function ChecklistExecutionPage() {
           <CheckCircle2 className="w-8 h-8 text-green-600" />
           <div className="flex-1">
             <p className="font-semibold text-green-800">Checklist Completed Successfully!</p>
-            <p className="text-sm text-green-700 flex items-center gap-2">
+            <p className="text-body text-green-700 flex items-center gap-2">
               Session: <span className="font-mono bg-green-100 px-2 py-0.5 rounded text-green-800">{completedSessionId}</span>
             </p>
           </div>
@@ -202,13 +202,13 @@ export default function ChecklistExecutionPage() {
       {activeTab === 'execute' ? (
         !selectedStrategy ? (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200/50 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Select Strategy</h3>
+            <h3 className="text-card-title mb-4">Select Strategy</h3>
             
             {strategiesWithChecklist.length === 0 ? (
               <div className="text-center py-8">
                 <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
                 <p className="mt-4 text-slate-600">No strategies with checklists available</p>
-                <p className="text-sm text-slate-500">Create strategies with checklists first</p>
+                <p className="text-body">Create strategies with checklists first</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -221,7 +221,7 @@ export default function ChecklistExecutionPage() {
                     <p className="font-semibold text-slate-900 group-hover:text-blue-700">
                       {strategy.name}
                     </p>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-body mt-1">
                       {strategy.checklist?.length} items • {strategy.checklist?.filter(i => i.required).length} required
                     </p>
                   </button>
@@ -234,12 +234,12 @@ export default function ChecklistExecutionPage() {
             <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm">Selected Strategy</p>
-                  <h2 className="text-xl font-bold">{selectedStrategy.name}</h2>
+                  <p className="text-blue-100 text-body">Selected Strategy</p>
+                  <h2 className="text-section-title">{selectedStrategy.name}</h2>
                 </div>
                 <button
                   onClick={handleReset}
-                  className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors"
+                  className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-button transition-colors"
                 >
                   Change Strategy
                 </button>
@@ -249,15 +249,15 @@ export default function ChecklistExecutionPage() {
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                 <div>
-                  <p className="text-sm text-slate-500">Progress</p>
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-body">Progress</p>
+                  <p className="text-page-title">
                     {progress.completed}/{progress.total}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-500">Required</p>
+                  <p className="text-body">Required</p>
                   <p className={cn(
-                    "text-2xl font-bold",
+                    "text-page-title",
                     isValid ? "text-green-600" : "text-amber-600"
                   )}>
                     {progress.requiredCompleted}/{progress.required.length}
@@ -319,7 +319,7 @@ export default function ChecklistExecutionPage() {
                       </span>
                       {item.required && (
                         <span className={cn(
-                          "px-2 py-0.5 rounded text-xs font-bold",
+                          "px-2 py-0.5 rounded text-caption",
                           isChecked ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
                         )}>
                           REQUIRED
@@ -336,7 +336,7 @@ export default function ChecklistExecutionPage() {
                     <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                     <div>
                       <p className="font-semibold text-red-800">Missing Required Items</p>
-                      <ul className="mt-2 text-sm text-red-700 space-y-1">
+                      <ul className="mt-2 text-body space-y-1">
                         {missingRequired.map(item => (
                           <li key={item}>• {item}</li>
                         ))}
@@ -347,7 +347,7 @@ export default function ChecklistExecutionPage() {
               )}
 
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className="block text-body-sm">
                   Notes (Optional)
                 </label>
                 <textarea
@@ -401,7 +401,7 @@ export default function ChecklistExecutionPage() {
           {checklistHistory.length === 0 ? (
             <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
               <Clock className="w-16 h-16 text-slate-300 mx-auto" />
-              <h3 className="mt-4 text-lg font-medium text-slate-700">No Checklists Yet</h3>
+              <h3 className="mt-4 text-card-title">No Checklists Yet</h3>
               <p className="mt-2 text-slate-500">Complete a new checklist to see it here</p>
             </div>
           ) : (
@@ -419,12 +419,12 @@ export default function ChecklistExecutionPage() {
                     )}
                     <div>
                       <p className="font-semibold text-slate-900">{checklist.strategyName}</p>
-                      <p className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded mt-1 inline-block">
+                      <p className="text-caption font-mono bg-slate-100 px-2 py-0.5 rounded mt-1 inline-block">
                         {checklist.sessionId}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className={cn(
-                          "px-2 py-0.5 rounded text-xs font-medium",
+                          "px-2 py-0.5 rounded text-caption",
                           checklist.status === 'LINKED'
                             ? "bg-purple-100 text-purple-700"
                             : "bg-green-100 text-green-700"
@@ -432,16 +432,16 @@ export default function ChecklistExecutionPage() {
                           {checklist.status === 'LINKED' ? '🔒 LINKED' : '🟢 ACTIVE'}
                         </span>
                         {checklist.status === 'LINKED' && checklist.linkedTrades?.length > 0 && (
-                          <span className="text-xs text-slate-500">
+                          <span className="text-caption">
                             ({checklist.linkedTrades.length} trade(s))
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-slate-500 mt-1">
+                      <p className="text-body mt-1">
                         {new Date(checklist.createdAt).toLocaleString()}
                       </p>
                       {checklist.pair && (
-                        <p className="text-sm text-slate-600 mt-1">
+                        <p className="text-body mt-1">
                           {checklist.pair} {checklist.tradeType}
                         </p>
                       )}
@@ -449,7 +449,7 @@ export default function ChecklistExecutionPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={cn(
-                      "px-3 py-1 rounded-full text-sm font-medium",
+                      "px-3 py-1 rounded-full text-body",
                       checklist.isValid
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -461,7 +461,7 @@ export default function ChecklistExecutionPage() {
                         console.log('Delete clicked:', checklist.id);
                         handleDeleteChecklist(checklist.id);
                       }}
-                      className="px-3 py-1 text-sm text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-slate-200"
+                      className="px-3 py-1 text-button text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-slate-200"
                       title="Delete"
                     >
                       Delete
@@ -474,7 +474,7 @@ export default function ChecklistExecutionPage() {
                     <div
                       key={index}
                       className={cn(
-                        "flex items-center gap-2 text-sm p-2 rounded-lg",
+                        "flex items-center gap-2 text-body p-2 rounded-lg",
                         item.checked ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
                       )}
                     >
@@ -490,8 +490,8 @@ export default function ChecklistExecutionPage() {
 
                 {checklist.missingRequired?.length > 0 && (
                   <div className="mt-3 p-3 bg-red-50 rounded-lg">
-                    <p className="text-sm font-medium text-red-800">Missing Required:</p>
-                    <p className="text-sm text-red-600">
+                    <p className="text-body-sm">Missing Required:</p>
+                    <p className="text-body text-red-600">
                       {checklist.missingRequired.join(', ')}
                     </p>
                   </div>

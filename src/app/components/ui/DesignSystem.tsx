@@ -1,7 +1,6 @@
 import React from 'react';
 import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from './utils';
-import { Button } from './button';
 
 export type ColorTheme = 'blue' | 'green' | 'orange' | 'purple' | 'teal' | 'pink' | 'red' | 'indigo' | 'yellow' | 'slate';
 
@@ -75,20 +74,19 @@ export function PageHeader({ title, subtitle, icon: Icon, color = 'blue', action
       <div className="flex items-center gap-3">
         {Icon && <IconBadge icon={Icon} color={color} />}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#0F172A]">{title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">{title}</h1>
           {subtitle && <p className="text-sm text-[#64748B] mt-0.5">{subtitle}</p>}
         </div>
         {children}
       </div>
       {action && (
-        <Button
+        <button
           onClick={action.onClick}
-          className="shadow-lg shadow-[#2563EB]/25"
-          variant={color === 'red' ? 'destructive' : 'default'}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white text-sm font-semibold rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] shadow-lg shadow-[#7C3AED]/25 hover:shadow-xl hover:shadow-[#7C3AED]/30 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
         >
           {action.icon && <action.icon className="w-4 h-4" />}
           {action.label}
-        </Button>
+        </button>
       )}
     </div>
   );
@@ -112,13 +110,13 @@ export function StatCard({ label, value, icon: Icon, color = 'blue', trend, clas
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-[#E5EAF2] p-5 transition-all duration-200 hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] shadow-[0_4px_16px_rgba(15,23,42,0.06)]',
+        'bg-white rounded-[20px] border border-[#E5E7EB] p-5 transition-all duration-200 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5',
         className,
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-xs uppercase tracking-[0.12em] text-[#64748B] font-semibold">{label}</p>
+          <p className="text-[11px] uppercase tracking-[0.1em] text-[#64748B] font-semibold">{label}</p>
           <p className={cn('text-2xl font-bold mt-1.5 tracking-tight tabular-nums', theme.text)}>
             {value}
           </p>
@@ -155,8 +153,8 @@ export const CardContainer = React.forwardRef<HTMLDivElement, CardContainerProps
       <div
         ref={ref}
         className={cn(
-          'bg-white rounded-2xl border border-[#E5EAF2] p-5 shadow-[0_4px_16px_rgba(15,23,42,0.06)]',
-          hover && 'hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] hover:-translate-y-0.5 transition-all duration-200',
+          'bg-white rounded-[20px] border border-[#E5E7EB] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.06)]',
+          hover && 'hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-200',
           className,
         )}
       >
@@ -182,9 +180,9 @@ export function SectionCard({ title, subtitle, icon: Icon, color = 'blue', child
   const theme = color ? (colorThemes[color] || defaultTheme) : defaultTheme;
 
   return (
-    <div className={cn('bg-white rounded-2xl border border-[#E5EAF2] overflow-hidden shadow-[0_4px_16px_rgba(15,23,42,0.06)]', className)}>
+    <div className={cn('bg-white rounded-[20px] border border-[#E5E7EB] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.06)]', className)}>
       {(title || action) && (
-        <div className="px-5 py-4 border-b border-[#E5EAF2] bg-white">
+        <div className="px-5 py-4 border-b border-[#E5E7EB] bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {Icon && (
@@ -212,11 +210,11 @@ interface TableCardProps {
 }
 
 export function TableCard({ children, className }: TableCardProps) {
-  return <div className={cn('bg-white rounded-2xl border border-[#E5EAF2] overflow-hidden shadow-[0_4px_16px_rgba(15,23,42,0.06)]', className)}>{children}</div>;
+  return <div className={cn('bg-white rounded-[20px] border border-[#E5E7EB] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.06)]', className)}>{children}</div>;
 }
 
 export function TableHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('px-5 py-3 bg-[#F8FAFC] border-b border-[#E5EAF2]', className)}>{children}</div>;
+  return <div className={cn('px-5 py-3 bg-[#F8FAFC] border-b border-[#E5E7EB]', className)}>{children}</div>;
 }
 
 export function TableBody({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -235,7 +233,7 @@ export function TableRow({
   return (
     <div
       className={cn(
-        'px-5 py-3 border-b border-[#E5EAF2]/60 last:border-0',
+        'px-5 py-3 border-b border-[#E5E7EB]/60 last:border-0',
         'hover:bg-[#F8FAFC] transition-colors duration-150',
         onClick && 'cursor-pointer',
         className,

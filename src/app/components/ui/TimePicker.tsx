@@ -134,7 +134,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
         `}
       >
         <Clock className="w-4 h-4 text-slate-400" />
-        <span className="text-sm">{displayValue}</span>
+        <span className="text-body">{displayValue}</span>
       </button>
 
       {isOpen && (
@@ -145,7 +145,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                 key={qs.label}
                 type="button"
                 onClick={() => handleQuickSelect(qs.time)}
-                className="px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                className="px-2.5 py-1 text-caption text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
               >
                 {qs.label}
               </button>
@@ -154,7 +154,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
 
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center">
-              <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">Hour</span>
+              <span className="text-micro text-slate-400 uppercase font-semibold mb-1.5">Hour</span>
               <div className="relative">
                 <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50/80 rounded-lg pointer-events-none border border-blue-100" />
                 <div
@@ -175,7 +175,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                         key={hour}
                         onClick={() => handleHourChange(hour)}
                         className={`
-                          h-10 flex items-center justify-center text-sm font-medium cursor-pointer
+                          h-10 flex items-center justify-center text-button cursor-pointer
                           transition-all duration-150 rounded-lg mx-1
                           ${selectedHour === hour 
                             ? 'text-blue-600 bg-blue-50' 
@@ -190,10 +190,10 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
               </div>
             </div>
 
-            <span className="text-2xl font-bold text-slate-300 mt-4">:</span>
+            <span className="text-page-title text-slate-300 mt-4">:</span>
 
             <div className="flex flex-col items-center">
-              <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">Min</span>
+              <span className="text-micro text-slate-400 uppercase font-semibold mb-1.5">Min</span>
               <div className="relative">
                 <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50/80 rounded-lg pointer-events-none border border-blue-100" />
                 <div
@@ -214,7 +214,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                         key={minute}
                         onClick={() => handleMinuteChange(minute)}
                         className={`
-                          h-10 flex items-center justify-center text-sm font-medium cursor-pointer
+                          h-10 flex items-center justify-center text-button cursor-pointer
                           transition-all duration-150 rounded-lg mx-1
                           ${selectedMinute === minute 
                             ? 'text-blue-600 bg-blue-50' 
@@ -230,7 +230,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
             </div>
 
             <div className="flex flex-col items-center ml-1">
-              <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">AM/PM</span>
+              <span className="text-micro text-slate-400 uppercase font-semibold mb-1.5">AM/PM</span>
               <div className="flex flex-col gap-1">
                 {PERIODS.map((period) => (
                   <button
@@ -238,7 +238,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                     type="button"
                     onClick={() => handlePeriodChange(period as 'AM' | 'PM')}
                     className={`
-                      px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 cursor-pointer
+                      px-3 py-2 text-button rounded-lg transition-all duration-150 cursor-pointer
                       ${selectedPeriod === period 
                         ? 'bg-blue-600 text-white shadow-md' 
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
@@ -255,7 +255,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-body text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             >
               Cancel
             </button>
@@ -265,7 +265,7 @@ export default function TimePicker({ value, onChange, placeholder = "--:-- --", 
                 onChange(formatTime(selectedHour, selectedMinute, selectedPeriod));
                 setIsOpen(false);
               }}
-              className="px-4 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+              className="px-4 py-1.5 text-button text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
             >
               Set Time
             </button>

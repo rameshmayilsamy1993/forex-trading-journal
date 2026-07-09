@@ -222,24 +222,7 @@ export default function TradeImport() {
         console.log('Account:', selectedAccount);
         console.log('Data keys:', Object.keys(convertedData[0] || {}));
         
-        const response = await fetch(`/api/trades/import-converted`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            trades: convertedData,
-            accountId: selectedAccount
-          })
-        });
-        
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.message || 'Import failed');
-        }
-        
-        const data = await response.json();
+        const data = await apiService.importConverted(convertedData, selectedAccount);
         setResult(data);
         if (data.inserted > 0) {
           setConvertedData([]);
@@ -322,29 +305,30 @@ export default function TradeImport() {
               </div>
               <div>
                 <h3 className="font-bold text-emerald-900">Import Complete!</h3>
-                <p className="text-sm text-emerald-700">Your trades have been imported successfully</p>
+                <p className="text-body text-emerald-700">Your trades have been imported successfully</p>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-3 gap-4 text-body">
               <div className="text-center p-4 bg-white rounded-xl border border-emerald-200 shadow-sm">
-                <p className="text-slate-500 text-xs uppercase tracking-wide font-medium">Total Rows</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">{result.total}</p>
+                <p className="text-table-header text-slate-500">Total Rows</p>
+                <p className="text-display font-bold text-slate-900 mt-1">{result.total}</p>
               </div>
               <div className="text-center p-4 bg-white rounded-xl border border-emerald-200 shadow-sm">
-                <p className="text-emerald-600 text-xs uppercase tracking-wide font-medium">Imported</p>
-                <p className="text-3xl font-bold text-emerald-600 mt-1">{result.inserted}</p>
+                <p className="text-table-header text-emerald-600">Imported</p>
+                <p className="text-display font-bold text-emerald-600 mt-1">{result.inserted}
+</p>
               </div>
               <div className="text-center p-4 bg-white rounded-xl border border-amber-200 shadow-sm">
-                <p className="text-amber-600 text-xs uppercase tracking-wide font-medium">Skipped</p>
-                <p className="text-3xl font-bold text-amber-600 mt-1">{result.skipped}</p>
+                <p className="text-table-header text-amber-600">Skipped</p>
+                <p className="text-display font-bold text-amber-600 mt-1">{result.skipped}</p>
               </div>
             </div>
             {result.errors && result.errors.length > 0 && (
               <div className="mt-4 p-4 bg-white rounded-xl border border-amber-200">
-                <p className="text-sm font-semibold text-amber-800 mb-2">
+                <p className="text-body-sm font-semibold text-amber-800 mb-2">
                   {result.errors.length} row(s) had errors:
                 </p>
-                <ul className="text-xs text-amber-700 space-y-1 max-h-32 overflow-auto">
+                <ul className="text-caption text-amber-700 space-y-1 max-h-32 overflow-auto">
                   {result.errors.map((err, idx) => (
                     <li key={idx} className="p-1.5 bg-amber-50 rounded">Row {err.row}: {err.error}</li>
                   ))}
@@ -356,7 +340,7 @@ export default function TradeImport() {
 
         <div className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-3">
+            <label className="block text-body-sm font-semibold text-slate-700 mb-3">
               Select Account
             </label>
             {accounts.length > 0 ? (
@@ -368,14 +352,14 @@ export default function TradeImport() {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 transition-all hover:bg-slate-100"
               />
             ) : (
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-body text-slate-500">
                 No accounts found. Please create an account first.
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-3">
+            <label className="block text-body-sm font-semibold text-slate-700 mb-3">
               Upload File
             </label>
             <div
@@ -407,11 +391,11 @@ export default function TradeImport() {
                     </div>
                     <p className="text-emerald-700 font-semibold">{file.name}</p>
                     {fileFormat === 'mt5' && (
-                      <span className="px-3 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
+                      <span className="px-3 py-1 text-caption font-medium bg-indigo-100 text-indigo-700 rounded-full">
                         MT5 Format Detected
                       </span>
                     )}
-                    <p className="text-sm text-slate-500">
+                    <p className="text-body text-slate-500">
                       {(file.size / 1024).toFixed(1)} KB
                     </p>
                     <button
@@ -420,7 +404,7 @@ export default function TradeImport() {
                         e.preventDefault();
                         handleReset();
                       }}
-                      className="mt-2 text-sm text-rose-500 hover:text-rose-700 font-medium transition-colors"
+                      className="mt-2 text-body text-rose-500 hover:text-rose-700 transition-colors"
                     >
                       Remove file
                     </button>
@@ -434,7 +418,7 @@ export default function TradeImport() {
                       Drag and drop your file here, or{' '}
                       <span className="text-blue-600 font-semibold hover:underline">browse</span>
                     </p>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-body text-slate-400">
                       Supports .xlsx, .xls (Excel) and .csv (MT5) files
                     </p>
                   </div>
@@ -466,18 +450,18 @@ export default function TradeImport() {
                 <AlertTriangle className="w-5 h-5" />
                 Import Preview Summary
               </h3>
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-3 gap-4 text-body">
                 <div className="text-center p-4 bg-white rounded-xl border border-emerald-200 shadow-sm">
-                  <p className="text-emerald-600 text-xs uppercase tracking-wide font-semibold">New Trades</p>
-                  <p className="text-3xl font-bold text-emerald-600 mt-1">{previewStats.newTrades}</p>
+                  <p className="text-table-header text-emerald-600 uppercase">New Trades</p>
+                  <p className="text-display font-bold text-emerald-600 mt-1">{previewStats.newTrades}</p>
                 </div>
                 <div className="text-center p-4 bg-white rounded-xl border border-amber-200 shadow-sm">
-                  <p className="text-amber-600 text-xs uppercase tracking-wide font-semibold">Duplicates</p>
-                  <p className="text-3xl font-bold text-amber-600 mt-1">{previewStats.duplicates}</p>
+                  <p className="text-table-header text-amber-600 uppercase">Duplicates</p>
+                  <p className="text-display font-bold text-amber-600 mt-1">{previewStats.duplicates}</p>
                 </div>
                 <div className="text-center p-4 bg-white rounded-xl border border-orange-200 shadow-sm">
-                  <p className="text-orange-600 text-xs uppercase tracking-wide font-semibold">In File</p>
-                  <p className="text-3xl font-bold text-orange-600 mt-1">{previewStats.potentialDuplicates}</p>
+                  <p className="text-table-header text-orange-600 uppercase">In File</p>
+                  <p className="text-display font-bold text-orange-600 mt-1">{previewStats.potentialDuplicates}</p>
                 </div>
               </div>
             </div>
@@ -489,43 +473,43 @@ export default function TradeImport() {
                 Preview (first {preview.length} rows)
               </h3>
               <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-200/50">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <table className="min-w-full divide-y divide-slate-200 text-table-cell">
                   <thead className="bg-slate-50/50">
                     <tr>
-                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
                         Status
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
                         Position ID
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
                         Pair
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
                         Type
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         Lots
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         Entry
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         S/L
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         T/P
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         Exit
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         Comm
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         Swap
                       </th>
-                      <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
                         Profit
                       </th>
                     </tr>
@@ -538,16 +522,16 @@ export default function TradeImport() {
                       >
                         <td className="px-3 py-3">
                           {trade.isDuplicate ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-lg">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-caption text-amber-700 bg-amber-100 rounded-lg">
                               Duplicate
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-lg">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-caption text-emerald-700 bg-emerald-100 rounded-lg">
                               New
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-3 text-slate-700 font-mono text-xs">
+                        <td className="px-3 py-3 text-caption text-slate-700 font-mono">
                           {trade.positionId || '-'}
                         </td>
                         <td className="px-3 py-3 text-slate-900 font-semibold">
@@ -555,7 +539,7 @@ export default function TradeImport() {
                         </td>
                         <td className="px-3 py-3">
                           <span
-                            className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg ${
+                            className={`inline-flex px-2.5 py-1 text-caption rounded-lg ${
                               trade.type === 'BUY'
                                 ? 'text-emerald-700 bg-emerald-100'
                                 : trade.type === 'SELL'
@@ -606,46 +590,46 @@ export default function TradeImport() {
                 Converted MT5 Data (first {convertedData.length} rows)
               </h3>
               <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-200/50">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <table className="min-w-full divide-y divide-slate-200 text-table-cell">
                   <thead className="bg-slate-50/50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
                         Position ID
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
                         Pair
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
                         Type
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         Lots
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
                         Entry Date Time
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         Entry Price
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
                         Exit Date Time
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         Exit Price
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         S/L
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         T/P
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         Commission
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         Swap
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
                         Profit
                       </th>
                     </tr>
@@ -653,14 +637,14 @@ export default function TradeImport() {
                   <tbody className="divide-y divide-slate-100">
                     {convertedData.map((trade, idx) => (
                       <tr key={idx} className="hover:bg-slate-50/50 transition-colors duration-150">
-                        <td className="px-4 py-3 text-slate-700 font-mono text-xs">
+                        <td className="px-4 py-3 text-caption text-slate-700 font-mono">
                           {trade.positionId || '-'}
                         </td>
                         <td className="px-4 py-3 text-slate-900 font-semibold">
                           {trade.pair || '-'}
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg ${
+                          <span className={`inline-flex px-2.5 py-1 text-caption rounded-lg ${
                             trade.type === 'BUY'
                               ? 'text-emerald-700 bg-emerald-100'
                               : trade.type === 'SELL'
@@ -714,7 +698,7 @@ export default function TradeImport() {
             {fileFormat === 'mt5' ? (
               <>
                 <h4 className="font-semibold text-slate-700 mb-3">Expected MT5 CSV Columns:</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-body mb-4">
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time (Entry)</span>
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
@@ -728,14 +712,14 @@ export default function TradeImport() {
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Commission</span>
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Swap</span>
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="text-caption text-slate-500">
                   Commission is automatically converted to positive values. Empty S/L and T/P are set to null.
                 </p>
               </>
             ) : (
               <>
                 <h4 className="font-semibold text-slate-700 mb-3">Expected Excel Columns:</h4>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-body">
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Type</span>
@@ -747,7 +731,7 @@ export default function TradeImport() {
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Profit</span>
                   <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time</span>
                 </div>
-                <p className="mt-4 text-xs text-slate-500">
+                <p className="mt-4 text-caption text-slate-500">
                   Column names are case-insensitive. Position column is used for duplicate detection. Default strategy "LONDON" and key level "No Key Level" will be assigned.
                 </p>
               </>

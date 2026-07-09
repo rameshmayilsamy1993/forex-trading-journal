@@ -48,7 +48,7 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
   return (
     <div className={cn("space-y-3", className)}>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-semibold text-slate-700">
+        <label className="text-body-sm text-slate-700">
           Checklist Items
         </label>
         <Button
@@ -66,7 +66,7 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
       {items.length === 0 && (
         <div className="text-center py-8 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
           <p className="text-slate-500">No checklist items yet</p>
-          <p className="text-sm text-slate-400">Click "Add Item" to create your first checklist item</p>
+          <p className="text-body text-slate-400">Click "Add Item" to create your first checklist item</p>
         </div>
       )}
 
@@ -82,7 +82,7 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
                 value={item.label}
                 onChange={(e) => updateItem(index, { label: e.target.value })}
                 placeholder="Enter checklist item label..."
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/30 focus:border-transparent"
               />
             </div>
 
@@ -92,9 +92,9 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
                   type="checkbox"
                   checked={item.required}
                   onChange={(e) => updateItem(index, { required: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-300 text-[#7C3AED] focus:ring-[#7C3AED]/30"
                 />
-                <span className="text-sm text-slate-600">Required</span>
+                <span className="text-body-sm text-slate-600">Required</span>
               </label>
 
               <div className="flex items-center gap-1">
@@ -129,7 +129,7 @@ export default function ChecklistBuilder({ items, onChange, className }: Checkli
       </div>
 
       {items.length > 0 && (
-        <p className="text-xs text-slate-500">
+        <p className="text-caption text-slate-500">
           {items.filter(i => i.required).length} required, {items.filter(i => !i.required).length} optional
         </p>
       )}

@@ -1,2 +1,6 @@
 packages:
   - '.'
+  - 'backend'
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true

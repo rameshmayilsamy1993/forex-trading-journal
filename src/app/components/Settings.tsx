@@ -174,7 +174,7 @@ export default function Settings() {
         <div className="flex border-b border-slate-200">
           <button
             onClick={() => setActiveSection('masters')}
-            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
+            className={`flex-1 px-6 py-4 text-button transition-all duration-200 ${
               activeSection === 'masters'
                 ? 'text-pink-700 border-b-2 border-pink-600 bg-pink-50/50'
                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
@@ -184,7 +184,7 @@ export default function Settings() {
           </button>
           <button
             onClick={() => setActiveSection('pairs')}
-            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
+            className={`flex-1 px-6 py-4 text-button transition-all duration-200 ${
               activeSection === 'pairs'
                 ? 'text-pink-700 border-b-2 border-pink-600 bg-pink-50/50'
                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
@@ -194,7 +194,7 @@ export default function Settings() {
           </button>
           <button
             onClick={() => setActiveSection('menu')}
-            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
+            className={`flex-1 px-6 py-4 text-button transition-all duration-200 ${
               activeSection === 'menu'
                 ? 'text-pink-700 border-b-2 border-pink-600 bg-pink-50/50'
                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
@@ -208,7 +208,7 @@ export default function Settings() {
           {activeSection === 'masters' && (
             <div className="space-y-6">
               <div className="bg-gradient-to-r from-pink-50/50 to-purple-50/50 rounded-xl p-4 border border-pink-100/50">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Add New Master</h3>
+                <h3 className="text-body-sm mb-3">Add New Master</h3>
                 <div className="flex gap-3">
                   <Select value={newMasterType} onValueChange={(v) => setNewMasterType(v as any)}>
                     <SelectTrigger className="w-[150px]">
@@ -248,7 +248,7 @@ export default function Settings() {
                   >
                     <div className="max-h-[300px] overflow-y-auto">
                       {groupedMasters[type.value as keyof typeof groupedMasters].length === 0 ? (
-                        <p className="text-sm text-gray-400 text-center py-4">No {type.label.toLowerCase()}s yet</p>
+                        <p className="text-body text-center py-4 text-gray-400">No {type.label.toLowerCase()}s yet</p>
                       ) : (
                         <div className="space-y-1">
                           {groupedMasters[type.value as keyof typeof groupedMasters].map(master => (
@@ -258,7 +258,7 @@ export default function Settings() {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                                <span className="text-sm font-medium text-slate-700">{master.name}</span>
+                                <span className="text-body-sm">{master.name}</span>
                               </div>
                               <button
                                 onClick={() => handleDeleteMaster(master.id)}
@@ -282,9 +282,9 @@ export default function Settings() {
               <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-100">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="w-5 h-5 text-pink-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Manage Trading Pairs</h3>
+                  <h3 className="text-body-sm">Manage Trading Pairs</h3>
                 </div>
-                <p className="text-xs text-gray-600 mb-3">
+                <p className="text-caption text-gray-600 mb-3">
                   Add or remove trading pairs. These pairs will be available in the dropdown for trades and missed trades.
                 </p>
                 <div className="flex gap-3">
@@ -329,13 +329,13 @@ export default function Settings() {
                                 setEditingValue('');
                               }
                             }}
-                            className="text-sm"
+                            className="text-input"
                             autoFocus
                           />
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleUpdatePair(pair, editingValue)}
-                              className="flex-1 p-1 bg-green-100 text-green-600 rounded text-xs hover:bg-green-200"
+                              className="flex-1 p-1 bg-green-100 text-green-600 rounded text-caption hover:bg-green-200"
                             >
                               <Check className="w-3 h-3 mx-auto" />
                             </button>
@@ -344,7 +344,7 @@ export default function Settings() {
                                 setEditingId(null);
                                 setEditingValue('');
                               }}
-                              className="flex-1 p-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
+                              className="flex-1 p-1 bg-gray-100 text-gray-600 rounded text-caption hover:bg-gray-200"
                             >
                               <X className="w-3 h-3 mx-auto" />
                             </button>
@@ -359,7 +359,7 @@ export default function Settings() {
                                 setEditingId(pair);
                                 setEditingValue(pair);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-150"
+                              className="p-1.5 text-slate-400 hover:text-[#7C3AED] hover:bg-violet-50 rounded-xl transition-all duration-150"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
@@ -384,9 +384,9 @@ export default function Settings() {
               <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-100">
                 <div className="flex items-center gap-2 mb-3">
                   <EyeOff className="w-5 h-5 text-pink-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Menu Visibility</h3>
+                  <h3 className="text-body-sm">Menu Visibility</h3>
                 </div>
-                <p className="text-xs text-gray-600 mb-3">
+                <p className="text-caption text-gray-600 mb-3">
                   Toggle sidebar menu items on/off. Hidden items will be removed from the sidebar but can be re-enabled here at any time.
                 </p>
               </div>
@@ -399,7 +399,7 @@ export default function Settings() {
                       key={item.id}
                       className="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-4 py-3 hover:shadow-sm transition-all duration-200"
                     >
-                      <span className="text-sm font-medium text-slate-700">{item.label}</span>
+                      <span className="text-body-sm">{item.label}</span>
                       <button
                         onClick={() => {
                           const next = new Set(hiddenTabs);
@@ -408,7 +408,7 @@ export default function Settings() {
                           setHiddenTabs(next);
                           saveHiddenTabs(next);
                         }}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-caption transition-all duration-200 ${
                           isHidden
                             ? 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                             : 'bg-pink-100 text-pink-700 hover:bg-pink-200'

@@ -136,7 +136,7 @@ export default function PropFirms() {
         <div className="p-6">
           {/* Add Form */}
           {isAdding && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-xl border border-blue-100">
+            <div className="mb-6 p-4 bg-gradient-to-r from-violet-50/50 to-purple-50/50 rounded-[20px] border border-[#E5E7EB]">
               <div className="flex gap-3 flex-wrap">
                 <Input
                   type="text"
@@ -180,14 +180,14 @@ export default function PropFirms() {
               <div className="text-center py-12 text-gray-500">
                 <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No prop firms added yet</p>
-                <p className="text-sm">Click "Add Prop Firm" to get started</p>
+                <p className="text-body">Click "Add Prop Firm" to get started</p>
               </div>
             )}
 
             {firms.map(firm => (
               <div
                 key={firm.id}
-                className="flex items-center gap-3 p-4 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200"
+                className="flex items-center gap-3 p-4 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-200"
               >
                 {editingId === firm.id ? (
                   <>
@@ -230,7 +230,7 @@ export default function PropFirms() {
                       style={{ backgroundColor: firm.color }}
                     />
                     <span className="flex-1 font-medium text-gray-900">{firm.name}</span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-body text-gray-500">
                       {new Date(firm.createdAt).toLocaleDateString()}
                     </span>
                     <button
@@ -254,7 +254,7 @@ export default function PropFirms() {
           {hasMore && (
             <div className="flex justify-center py-4">
               <button onClick={loadMoreFirms} disabled={isLoadingMore}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                className="px-6 py-2 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] disabled:opacity-50 transition-all shadow-lg shadow-[#7C3AED]/25">
                 {isLoadingMore ? 'Loading...' : 'Load More'}
               </button>
             </div>

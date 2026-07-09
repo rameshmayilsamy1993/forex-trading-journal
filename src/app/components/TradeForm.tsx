@@ -110,7 +110,7 @@ export default function TradeForm({
   return (
     <div className="p-6 bg-white rounded-2xl shadow-lg border border-slate-200/50">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-slate-900">
+        <h3 className="text-card-title font-bold text-slate-900">
           {editingId ? 'Edit Trade' : 'New Trade'}
         </h3>
         <button
@@ -286,9 +286,9 @@ export default function TradeForm({
         </FormField>
 
         {calculatedRR && (
-          <div className="col-span-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-            <span className="text-sm text-blue-900">
-              Risk/Reward Ratio: <span className="font-bold text-blue-600">1:{calculatedRR.toFixed(2)}</span>
+          <div className="col-span-3 p-4 bg-violet-50/50 border border-[#7C3AED]/20 rounded-xl">
+            <span className="text-body text-[#4C1D95]">
+              Risk/Reward Ratio: <span className="font-bold text-[#7C3AED]">1:{calculatedRR.toFixed(2)}</span>
             </span>
           </div>
         )}
@@ -505,7 +505,7 @@ export default function TradeForm({
                 onChange={(val) => setFormData({ ...formData, exitTime: val })}
               />
             </FormField>
-            <p className="text-sm text-gray-500 col-span-3">
+            <p className="text-body text-gray-500 col-span-3">
               Exit details will be filled when trade is closed
             </p>
           </>
@@ -513,7 +513,7 @@ export default function TradeForm({
 
         <div className="col-span-3 grid grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-body-sm font-semibold text-gray-700">
               Before Screenshot
             </label>
             <div className="modern-file-upload group relative">
@@ -526,23 +526,23 @@ export default function TradeForm({
               />
               <div className="flex flex-col items-center justify-center space-y-2">
                 {uploadingImage === 'beforeScreenshot' ? (
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-500"></div>
                 ) : (
                   <>
-                    <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                      <ImageIcon className="w-6 h-6 text-blue-600" />
+                    <div className="p-3 bg-violet-50 rounded-full group-hover:bg-violet-100 transition-colors">
+                      <ImageIcon className="w-6 h-6 text-[#7C3AED]" />
                     </div>
-                    <div className="text-sm text-gray-600">
-                      <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                    <div className="text-body text-gray-600">
+                      <span className="font-semibold text-[#7C3AED]">Click to upload</span> or drag and drop
                     </div>
-                    <p className="text-xs text-gray-400">PNG, JPG or WEBP</p>
+                    <p className="text-caption text-gray-400">PNG, JPG or WEBP</p>
                   </>
                 )}
               </div>
             </div>
             {formData.beforeScreenshot && (
               <div className="relative mt-2 inline-block">
-                <img src={formData.beforeScreenshot} alt="Before" className="h-24 rounded-lg border-2 border-blue-100 object-cover" />
+                <img src={formData.beforeScreenshot} alt="Before" className="h-24 rounded-lg border-2 border-violet-200 object-cover" />
                 <button
                   onClick={() => setFormData({ ...formData, beforeScreenshot: '' })}
                   className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
@@ -553,7 +553,7 @@ export default function TradeForm({
             )}
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-body-sm font-semibold text-gray-700">
               After Screenshot
             </label>
             <div className="modern-file-upload group relative">
@@ -566,23 +566,23 @@ export default function TradeForm({
               />
               <div className="flex flex-col items-center justify-center space-y-2">
                 {uploadingImage === 'afterScreenshot' ? (
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-500"></div>
                 ) : (
                   <>
-                    <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                      <ImageIcon className="w-6 h-6 text-blue-600" />
+                    <div className="p-3 bg-violet-50 rounded-full group-hover:bg-violet-100 transition-colors">
+                      <ImageIcon className="w-6 h-6 text-[#7C3AED]" />
                     </div>
-                    <div className="text-sm text-gray-600">
-                      <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                    <div className="text-body text-gray-600">
+                      <span className="font-semibold text-[#7C3AED]">Click to upload</span> or drag and drop
                     </div>
-                    <p className="text-xs text-gray-400">PNG, JPG or WEBP</p>
+                    <p className="text-caption text-gray-400">PNG, JPG or WEBP</p>
                   </>
                 )}
               </div>
             </div>
             {formData.afterScreenshot && (
               <div className="relative mt-2 inline-block">
-                <img src={formData.afterScreenshot} alt="After" className="h-24 rounded-lg border-2 border-blue-100 object-cover" />
+                <img src={formData.afterScreenshot} alt="After" className="h-24 rounded-lg border-2 border-violet-200 object-cover" />
                 <button
                   onClick={() => setFormData({ ...formData, afterScreenshot: '' })}
                   className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
@@ -600,14 +600,14 @@ export default function TradeForm({
               placeholder="Add trade notes..."
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl resize-none min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl resize-none min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/30 focus:border-transparent transition-all"
             />
           </FormField>
         </div>
       </div>
       <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-slate-100">
         {isEditMode && editingChecklistSession && (
-          <span className="px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl flex items-center gap-2 text-sm font-medium border border-blue-200">
+          <span className="px-4 py-2.5 bg-violet-50 text-[#7C3AED] rounded-xl flex items-center gap-2 text-body border border-[#7C3AED]/20">
             <ClipboardCheck className="w-4 h-4" />
             Linked: {editingChecklistSession}
           </span>
@@ -615,7 +615,7 @@ export default function TradeForm({
         {isEditMode && (
           <button
             onClick={onEditChecklistClick}
-            className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-all duration-200"
+            className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-button transition-all duration-200"
           >
             <Link2 className="w-4 h-4" />
             Change Checklist
@@ -624,14 +624,14 @@ export default function TradeForm({
 
         <button
           onClick={onSave}
-          className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5"
+          className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center gap-2 text-button shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5"
         >
           <Check className="w-4 h-4" />
           {editingId ? 'Update Trade' : 'Save Trade'}
         </button>
         <button
           onClick={onCancel}
-          className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-all duration-200"
+          className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 flex items-center gap-2 text-button transition-all duration-200"
         >
           <X className="w-4 h-4" />
           Cancel

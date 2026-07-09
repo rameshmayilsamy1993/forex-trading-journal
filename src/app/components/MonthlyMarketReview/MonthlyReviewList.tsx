@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Calendar, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import apiService from '../../services/apiService';
 import ReviewCard from './ReviewCard';
-import CreateReviewDialog from './CreateReviewDialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import {
@@ -50,8 +49,6 @@ export default function MonthlyReviewList() {
   const [filters, setFilters] = useState({ pair: '', month: '', year: '', bias: '', search: '' });
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editReview, setEditReview] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
@@ -100,8 +97,8 @@ export default function MonthlyReviewList() {
   };
 
   const handleEdit = (review: any) => {
-    setEditReview(review);
-    setCreateOpen(true);
+    (window as any).__monthlyReviewEditId = review.id || review._id;
+    window.dispatchEvent(new CustomEvent('navigate-to-tab', { detail: 'monthly-review-form' }));
   };
 
   const handleDelete = async (review: any) => {
@@ -115,9 +112,9 @@ export default function MonthlyReviewList() {
     }
   };
 
-  const handleSaved = () => {
-    setEditReview(null);
-    loadReviews();
+  const handleCreateNew = () => {
+    (window as any).__monthlyReviewEditId = null;
+    window.dispatchEvent(new CustomEvent('navigate-to-tab', { detail: 'monthly-review-form' }));
   };
 
   return (
@@ -127,7 +124,7 @@ export default function MonthlyReviewList() {
           <h1 className="text-page-title text-[#0F172A] font-semibold">Monthly Market Review</h1>
           <p className="text-body text-[#64748B] mt-1">Your higher timeframe trading research.</p>
         </div>
-        <Button onClick={() => { setEditReview(null); setCreateOpen(true); }} className="bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white shadow-lg shadow-[#7C3AED]/25 hover:shadow-xl hover:shadow-[#7C3AED]/30 hover:-translate-y-0.5">
+        <Button onClick={handleCreateNew} className="bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white shadow-lg shadow-[#7C3AED]/25 hover:shadow-xl hover:shadow-[#7C3AED]/30 hover:-translate-y-0.5">
           <Plus className="size-4" /> New Review
         </Button>
       </div>
@@ -213,7 +210,7 @@ export default function MonthlyReviewList() {
           <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-card-title text-slate-500 mb-2">No reviews yet</h3>
           <p className="text-body text-slate-400 mb-6">Create your first monthly market review to start tracking higher timeframe analysis.</p>
-          <Button onClick={() => { setEditReview(null); setCreateOpen(true); }}>New Review</Button>
+          <Button onClick={handleCreateNew}>New Review</Button>
         </div>
       )}
 
@@ -259,12 +256,7 @@ export default function MonthlyReviewList() {
         </>
       )}
 
-      <CreateReviewDialog
-        open={createOpen}
-        onOpenChange={(open) => { setCreateOpen(open); if (!open) setEditReview(null); }}
-        onSaved={handleSaved}
-        editReview={editReview}
-      />
+
     </div>
   );
 }

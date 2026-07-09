@@ -205,7 +205,7 @@ export default function BiasMapping() {
                       /* Edit Mode */
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-bold text-slate-900">{pair}</h3>
+                          <h3 className="text-card-title font-bold text-slate-900">{pair}</h3>
                           <button
                             onClick={cancelEdit}
                             className="p-2 hover:bg-slate-100 rounded-lg"
@@ -217,10 +217,10 @@ export default function BiasMapping() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Monthly */}
                           <div className="space-y-2">
-                            <label className="block text-sm font-medium text-slate-700">
+                            <label className="block text-body-sm text-slate-700">
                               Monthly Bias
                             </label>
-                            <p className="text-xs text-slate-500 mb-2">
+                            <p className="text-caption text-slate-500 mb-2">
                               Where did the current month close?
                             </p>
                             <div className="space-y-2">
@@ -246,7 +246,7 @@ export default function BiasMapping() {
                                   ) : (
                                     <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
                                   )}
-                                  <span className="text-sm text-slate-700">{option.label}</span>
+                                  <span className="text-body text-slate-700">{option.label}</span>
                                 </label>
                               ))}
                             </div>
@@ -254,10 +254,10 @@ export default function BiasMapping() {
 
                           {/* Weekly */}
                           <div className="space-y-2">
-                            <label className="block text-sm font-medium text-slate-700">
+                            <label className="block text-body-sm text-slate-700">
                               Weekly Bias
                             </label>
-                            <p className="text-xs text-slate-500 mb-2">
+                            <p className="text-caption text-slate-500 mb-2">
                               Where did the current week close?
                             </p>
                             <div className="space-y-2">
@@ -283,7 +283,7 @@ export default function BiasMapping() {
                                   ) : (
                                     <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
                                   )}
-                                  <span className="text-sm text-slate-700">{option.label}</span>
+                                  <span className="text-body text-slate-700">{option.label}</span>
                                 </label>
                               ))}
                             </div>
@@ -291,10 +291,10 @@ export default function BiasMapping() {
 
                           {/* Daily */}
                           <div className="space-y-2">
-                            <label className="block text-sm font-medium text-slate-700">
+                            <label className="block text-body-sm text-slate-700">
                               Daily Bias
                             </label>
-                            <p className="text-xs text-slate-500 mb-2">
+                            <p className="text-caption text-slate-500 mb-2">
                               Where did today close?
                             </p>
                             <div className="space-y-2">
@@ -320,7 +320,7 @@ export default function BiasMapping() {
                                   ) : (
                                     <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
                                   )}
-                                  <span className="text-sm text-slate-700">{option.label}</span>
+                                  <span className="text-body text-slate-700">{option.label}</span>
                                 </label>
                               ))}
                             </div>
@@ -329,7 +329,7 @@ export default function BiasMapping() {
 
                         {/* Notes */}
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium text-slate-700">
+                          <label className="block text-body-sm text-slate-700">
                             Notes (optional)
                           </label>
                           <Textarea
@@ -366,17 +366,17 @@ export default function BiasMapping() {
                         
                         <div className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${getBiasColor(bias?.monthlyBias || 'NEUTRAL')}`}>
                           {getBiasIcon(bias?.monthlyBias || 'NEUTRAL')}
-                          <span className="text-sm font-medium">{bias?.monthlyBias || 'NEUTRAL'}</span>
+                          <span className="text-body-sm">{bias?.monthlyBias || 'NEUTRAL'}</span>
                         </div>
                         
                         <div className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${getBiasColor(bias?.weeklyBias || 'NEUTRAL')}`}>
                           {getBiasIcon(bias?.weeklyBias || 'NEUTRAL')}
-                          <span className="text-sm font-medium">{bias?.weeklyBias || 'NEUTRAL'}</span>
+                          <span className="text-body-sm">{bias?.weeklyBias || 'NEUTRAL'}</span>
                         </div>
                         
                         <div className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${getBiasColor(bias?.dailyBias || 'NEUTRAL')}`}>
                           {getBiasIcon(bias?.dailyBias || 'NEUTRAL')}
-                          <span className="text-sm font-medium">{bias?.dailyBias || 'NEUTRAL'}</span>
+                          <span className="text-body-sm">{bias?.dailyBias || 'NEUTRAL'}</span>
                         </div>
                         
                         <div className="flex justify-end">
@@ -385,7 +385,7 @@ export default function BiasMapping() {
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2"
                           >
                             <Edit2 className="w-4 h-4" />
-                            <span className="text-sm">Edit</span>
+                            <span className="text-body">Edit</span>
                           </button>
                         </div>
                       </div>

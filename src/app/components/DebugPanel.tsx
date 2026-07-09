@@ -55,7 +55,7 @@ export function DebugPanel() {
     return (
       <button
         onClick={() => setIsVisible(true)}
-        className="fixed bottom-4 right-4 z-50 px-3 py-1.5 bg-gray-800 text-white text-xs rounded-lg shadow-lg hover:bg-gray-700"
+        className="fixed bottom-4 right-4 z-50 px-3 py-1.5 bg-gray-800 text-white text-caption rounded-lg shadow-lg hover:bg-gray-700"
       >
         Debug
       </button>
@@ -65,7 +65,7 @@ export function DebugPanel() {
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2 bg-gray-100 border-b border-gray-200">
-        <span className="text-sm font-semibold text-gray-700">Debug Panel</span>
+        <span className="text-body-sm text-gray-700">Debug Panel</span>
         <button
           onClick={() => setIsVisible(false)}
           className="text-gray-500 hover:text-gray-700"
@@ -74,7 +74,7 @@ export function DebugPanel() {
         </button>
       </div>
       
-      <div className="max-h-64 overflow-y-auto p-4 space-y-4 text-xs">
+      <div className="max-h-64 overflow-y-auto p-4 space-y-4 text-caption">
         <div>
           <h4 className="font-semibold text-gray-600 mb-1">Render Count</h4>
           <p className="text-gray-800">{debugInfo.renderCount}</p>
@@ -88,7 +88,7 @@ export function DebugPanel() {
                 <div key={i} className="p-2 bg-red-50 rounded text-red-700">
                   <p className="font-medium">{err.message}</p>
                   {err.stack && (
-                    <pre className="text-xs mt-1 overflow-x-auto">{err.stack.slice(0, 100)}</pre>
+                    <pre className="text-caption mt-1 overflow-x-auto">{err.stack.slice(0, 100)}</pre>
                   )}
                 </div>
               ))}

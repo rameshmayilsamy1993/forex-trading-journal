@@ -11,6 +11,12 @@ const monthlyReviewEntrySchema = new mongoose.Schema({
     publicId: { type: String },
     caption: { type: String, default: '' },
   }],
+  entryTime: { type: String, default: '' },
+  bias: { type: String, default: '' },
+  tags: [{ type: String }],
+  mood: { type: String, default: '' },
+  importance: { type: String, default: '' },
+  session: { type: String, default: '' },
   displayOrder: { type: Number, default: 0 },
 }, schemaOptions);
 

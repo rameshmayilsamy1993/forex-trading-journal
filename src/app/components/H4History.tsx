@@ -103,7 +103,7 @@ export default function H4History() {
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-500" />
-            <span className="text-sm font-medium text-slate-700">Filters:</span>
+            <span className="text-body-sm text-slate-700">Filters:</span>
           </div>
           
           <Select value={filterPair} onValueChange={setFilterPair}>
@@ -119,7 +119,7 @@ export default function H4History() {
           </Select>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-500">From:</span>
+            <span className="text-body-sm text-slate-500">From:</span>
             <input
               type="date"
               value={startDate}
@@ -129,7 +129,7 @@ export default function H4History() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-500">To:</span>
+            <span className="text-body-sm text-slate-500">To:</span>
             <input
               type="date"
               value={endDate}
@@ -153,7 +153,7 @@ export default function H4History() {
         ) : entries.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-slate-600">No H4 history found</p>
-            <p className="text-sm text-slate-500">Start by entering H4 data in the H4 Input page</p>
+            <p className="text-body text-slate-500">Start by entering H4 data in the H4 Input page</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -161,17 +161,17 @@ export default function H4History() {
               <div key={date} className="border border-slate-200 rounded-xl overflow-hidden">
                 <div className="p-4 bg-slate-50 border-b border-slate-200">
                   <span className="font-semibold">{formatDate(date)}</span>
-                  <span className="text-sm text-slate-500 ml-2">({dateEntries.length} pair{dateEntries.length !== 1 ? 's' : ''})</span>
+                  <span className="text-body-sm text-slate-500 ml-2">({dateEntries.length} pair{dateEntries.length !== 1 ? 's' : ''})</span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50/50">
-                        <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Pair</th>
+                        <th className="text-left py-2 px-4 text-table-header text-slate-600 uppercase">Pair</th>
                         {H4_TIMES.map(time => (
-                          <th key={time} className="text-center py-2 px-2 text-xs font-semibold text-slate-600 uppercase">{time}</th>
+                          <th key={time} className="text-center py-2 px-2 text-table-header text-slate-600 uppercase">{time}</th>
                         ))}
-                        <th className="text-left py-2 px-4 text-xs font-semibold text-slate-600 uppercase">Notes</th>
+                        <th className="text-left py-2 px-4 text-table-header text-slate-600 uppercase">Notes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -189,17 +189,17 @@ export default function H4History() {
                             return (
                               <td key={time} className="py-3 px-2 text-center">
                                 <div className="flex flex-col items-center gap-1">
-                                  <span className={cn("px-2 py-0.5 rounded text-xs font-semibold", getDirectionColor(dir))}>
+                                  <span className={cn("px-2 py-0.5 rounded text-caption", getDirectionColor(dir))}>
                                     {dir === 'BULLISH' ? <TrendingUp className="w-4 h-4 text-emerald-600" /> : dir === 'BEARISH' ? <TrendingDown className="w-4 h-4 text-rose-600" /> : <span className="text-slate-300">-</span>}
                                   </span>
-                                  <span className={cn("px-1 py-0.5 rounded text-[10px]", liq.color)}>
+                                  <span className={cn("px-1 py-0.5 rounded text-micro", liq.color)}>
                                     {liq.label}
                                   </span>
                                 </div>
                               </td>
                             );
                           })}
-                          <td className="py-3 px-4 text-sm text-slate-500 max-w-[150px] truncate">
+                          <td className="py-3 px-4 text-table-cell text-slate-500 max-w-[150px] truncate">
                             {entry.notes || '-'}
                           </td>
                         </tr>
@@ -225,10 +225,10 @@ export default function H4History() {
           >
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-section-title font-bold text-slate-900">
                   {selectedEntry.pair} - H4 Candles
                 </h2>
-                <p className="text-sm text-slate-500">{formatDate(selectedEntry.date)}</p>
+                <p className="text-body text-slate-500">{formatDate(selectedEntry.date)}</p>
               </div>
               <button onClick={() => setSelectedEntry(null)} className="p-2 hover:bg-slate-100 rounded-lg">
                 <X className="w-5 h-5 text-slate-500" />
@@ -252,17 +252,17 @@ export default function H4History() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="font-mono font-bold text-lg">{time}</span>
+                          <span className="font-mono font-bold text-card-title">{time}</span>
                           <span className={cn("px-2 py-1 rounded font-semibold", getDirectionColor(dir))}>
                             {dir}
                           </span>
                         </div>
-                        <span className={cn("px-3 py-1 rounded-full text-sm font-semibold", liq.color)}>
+                        <span className={cn("px-3 py-1 rounded-full text-body-sm", liq.color)}>
                           {liq.label}
                         </span>
                       </div>
                       {candle?.notes && (
-                        <p className="text-sm text-slate-600 mt-2">{candle.notes}</p>
+                        <p className="text-body text-slate-600 mt-2">{candle.notes}</p>
                       )}
                     </div>
                   );
@@ -271,8 +271,8 @@ export default function H4History() {
 
               {selectedEntry.notes && (
                 <div className="mt-6 p-3 bg-slate-50 rounded-lg">
-                  <h4 className="font-semibold text-sm mb-1">Notes</h4>
-                  <p className="text-sm text-slate-600">{selectedEntry.notes}</p>
+                  <h4 className="text-body-sm mb-1">Notes</h4>
+                  <p className="text-body text-slate-600">{selectedEntry.notes}</p>
                 </div>
               )}
             </div>

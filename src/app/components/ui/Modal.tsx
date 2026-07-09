@@ -58,8 +58,8 @@ export default function Modal({
                     </div>
                   )}
                   <div className="min-w-0">
-                    {title && <h2 className="text-xl font-bold">{title}</h2>}
-                    {subtitle && <p className="text-sm text-blue-100 mt-0.5">{subtitle}</p>}
+                    {title && <h2 className="text-section-title">{title}</h2>}
+                    {subtitle && <p className="text-body-sm text-violet-100 mt-0.5">{subtitle}</p>}
                   </div>
                 </div>
                 {showX && onClose && (

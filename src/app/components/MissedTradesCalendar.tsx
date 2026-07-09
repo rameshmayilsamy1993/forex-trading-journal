@@ -11,7 +11,7 @@ import { cn } from './ui/utils';
 import DOMPurify from 'dompurify';
 
 const QUARTER_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
-  Q1: { bg: 'bg-blue-100', text: 'text-blue-700', ring: 'ring-blue-500/20' },
+  Q1: { bg: 'bg-purple-100', text: 'text-purple-700', ring: 'ring-purple-500/20' },
   Q2: { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-500/20' },
   Q3: { bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-500/20' },
   Q4: { bg: 'bg-purple-100', text: 'text-purple-700', ring: 'ring-purple-500/20' },
@@ -21,7 +21,7 @@ function QuarterBadge({ quarter }: { quarter?: string }) {
   if (!quarter) return null;
   const style = QUARTER_STYLES[quarter] || QUARTER_STYLES.Q1;
   return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ring-1', style.bg, style.text, style.ring)}>
+    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-caption font-bold ring-1', style.bg, style.text, style.ring)}>
       {quarter}
     </span>
   );
@@ -29,16 +29,16 @@ function QuarterBadge({ quarter }: { quarter?: string }) {
 
 function Model1Badge({ value }: { value?: string }) {
   if (!value || value === 'No') {
-    return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
+    return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
   }
-  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300/50">{value}</span>;
+  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-bold bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300/50">{value}</span>;
 }
 
 function SsmtBadge({ value }: { value?: string }) {
   if (!value || value === 'No') {
-    return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
+    return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
   }
-  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 ring-1 ring-blue-300/50">{value}</span>;
+  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-bold bg-purple-100 text-purple-700 ring-1 ring-purple-300/50">{value}</span>;
 }
 
 interface DayData {
@@ -275,48 +275,48 @@ export default function MissedTradesCalendar() {
 
         {/* Month Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className={`p-6 rounded-2xl border ${
+          <div className={`p-6 rounded-[20px] border shadow-[0_10px_30px_rgba(0,0,0,0.06)] ${
             monthStats.totalRealPL >= 0 
               ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' 
               : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-200'
           }`}>
             <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-xl ${
+              <div className={`p-3 rounded-xl shadow-sm text-white ${
                 monthStats.totalRealPL >= 0 
-                  ? 'bg-green-100 text-green-600' 
-                  : 'bg-red-100 text-red-600'
+                  ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
+                  : 'bg-gradient-to-br from-red-500 to-rose-600'
               }`}>
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-slate-600">Real P/L</p>
-                <p className={`text-2xl font-bold ${
-                  monthStats.totalRealPL >= 0 ? 'text-green-600' : 'text-red-600'
+                <p className="text-body text-slate-600">Real P/L</p>
+                <p className={`text-page-title font-bold ${
+                  monthStats.totalRealPL >= 0 ? 'text-emerald-600' : 'text-red-600'
                 }`}>
                   {monthStats.totalRealPL >= 0 ? '+' : ''}${monthStats.totalRealPL.toFixed(2)}
                 </p>
               </div>
             </div>
           </div>
-          <div className="p-6 rounded-2xl border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+          <div className="p-6 rounded-[20px] border shadow-[0_10px_30px_rgba(0,0,0,0.06)] bg-gradient-to-br from-violet-50 to-purple-50 border-purple-200">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-blue-100 text-blue-600">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm">
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-slate-600">Missed Days</p>
-                <p className="text-2xl font-bold text-blue-600">{monthStats.tradingDays}</p>
+                <p className="text-body text-slate-600">Missed Days</p>
+                <p className="text-page-title font-bold text-[#7C3AED]">{monthStats.tradingDays}</p>
               </div>
             </div>
           </div>
-          <div className="p-6 rounded-2xl border bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+          <div className="p-6 rounded-[20px] border shadow-[0_10px_30px_rgba(0,0,0,0.06)] bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-purple-100 text-purple-600">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-sm">
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-slate-600">Total Missed</p>
-                <p className="text-2xl font-bold text-purple-600">{monthStats.totalTrades}</p>
+                <p className="text-body text-slate-600">Total Missed</p>
+                <p className="text-page-title font-bold text-[#7C3AED]">{monthStats.totalTrades}</p>
               </div>
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function MissedTradesCalendar() {
                 >
                   <ChevronLeft className="w-5 h-5 text-slate-600" />
                 </button>
-                <span className="text-lg font-semibold text-slate-900 min-w-[140px] text-center">
+                <span className="text-card-title text-slate-900 min-w-[140px] text-center">
                   {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </span>
                 <button
@@ -358,7 +358,7 @@ export default function MissedTradesCalendar() {
                 </button>
                 <button
                   onClick={goToToday}
-                  className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="ml-2 px-3 py-1.5 text-button text-white bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] shadow-md shadow-[#7C3AED]/20 transition-all duration-200"
                 >
                   Today
                 </button>
@@ -374,7 +374,7 @@ export default function MissedTradesCalendar() {
             <div className="mb-4">
               <div className="grid grid-cols-7 gap-2">
                 {weekDays.map(day => (
-                  <div key={day} className="text-center text-sm font-medium text-slate-500 py-2">
+                  <div key={day} className="text-center text-body-sm text-slate-500 py-2">
                     {day}
                   </div>
                 ))}
@@ -393,26 +393,26 @@ export default function MissedTradesCalendar() {
                     onClick={() => hasTrades && setSelectedDay(day)}
                     disabled={!hasTrades}
                     className={`
-                      relative p-3 rounded-xl border transition-all duration-200 min-h-[100px] text-left
+                      relative p-3 rounded-xl border transition-all duration-200 min-h-[100px] text-left shadow-sm
                       ${day.isCurrentMonth ? 'bg-white' : 'bg-slate-50'}
-                      ${day.isToday ? 'ring-2 ring-rose-400' : 'border-slate-100'}
-                      ${hasTrades ? 'hover:shadow-md hover:border-red-200 cursor-pointer' : 'cursor-default'}
+                      ${day.isToday ? 'ring-2 ring-[#7C3AED]' : 'border-[#E5E7EB]'}
+                      ${hasTrades ? 'hover:shadow-md hover:border-purple-200 cursor-pointer' : 'cursor-default'}
                       ${hasTrades && isProfitable ? 'border-green-200 bg-green-50/50' : ''}
                       ${hasTrades && isLoss ? 'border-red-200 bg-red-50/50' : ''}
                     `}
                   >
-                    <div className={`text-sm font-medium mb-2 ${
+                    <div className={`text-body-sm mb-2 ${
                       day.isCurrentMonth ? 'text-slate-900' : 'text-slate-400'
-                    } ${day.isToday ? 'text-red-600 font-bold' : ''}`}>
+                    } ${day.isToday ? 'text-[#7C3AED] font-bold' : ''}`}>
                       {day.date.getDate()}
                     </div>
 
                     {hasTrades && (
                       <div className="space-y-1">
-                        <div className="text-xs text-slate-500">
+                        <div className="text-caption text-slate-500">
                           {day.trades.length} missed
                         </div>
-                        <div className={`text-sm font-bold ${
+                        <div className={`text-body font-bold ${
                           isProfitable ? 'text-green-600' : 'text-red-600'
                         }`}>
                           {day.realPL >= 0 ? '+' : ''}${day.realPL.toFixed(0)}
@@ -429,25 +429,25 @@ export default function MissedTradesCalendar() {
           <div className="w-80 space-y-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-slate-900">Weekly Summary</h3>
-              <span className="text-xs text-slate-400">{currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+              <span className="text-caption text-slate-400">{currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
             </div>
             {weeklyData.length === 0 ? (
-              <div className="p-4 text-center text-sm text-slate-500 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="p-4 text-center text-body text-slate-500 bg-slate-50/50 rounded-[20px] border border-[#E5E7EB]">
                 No CRT missed trades this month
               </div>
             ) : (
               weeklyData.map((w, i) => (
-                <div key={i} className="p-4 rounded-xl border bg-white shadow-sm">
+                <div key={i} className="p-4 rounded-[20px] border border-[#E5E7EB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-200 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
                   <div className="flex justify-between items-center mb-1">
                     <p className="font-medium">{w.week}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-caption text-slate-400">
                       {w.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {w.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </p>
                   </div>
-                  <div className={`text-lg font-semibold ${w.total >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  <div className={`text-card-title ${w.total >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                     {w.total >= 0 ? '+' : ''}${w.total.toFixed(2)}
                   </div>
-                  <div className="text-xs text-slate-400">
+                  <div className="text-caption text-slate-400">
                     {w.days} missed {w.days === 1 ? 'day' : 'days'}
                   </div>
                 </div>
@@ -468,18 +468,18 @@ export default function MissedTradesCalendar() {
             >
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">
+                  <h3 className="text-section-title font-bold text-slate-900">
                     {selectedDay.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </h3>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-body text-slate-500 mt-1">
                     {selectedDay.trades.length} CRT missed {selectedDay.trades.length === 1 ? 'trade' : 'trades'}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold ${selectedDay.realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`text-page-title font-bold ${selectedDay.realPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {selectedDay.realPL >= 0 ? '+' : ''}${selectedDay.realPL.toFixed(2)}
                   </p>
-                  <p className="text-sm text-slate-500">Net Real P/L</p>
+                  <p className="text-body text-slate-500">Net Real P/L</p>
                 </div>
                 <button
                   onClick={() => setSelectedDay(null)}
@@ -498,7 +498,7 @@ export default function MissedTradesCalendar() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 text-xs font-medium rounded ${
+                          <span className={`px-2 py-1 text-caption rounded ${
                             trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                           }`}>
                             {trade.type}
@@ -515,7 +515,7 @@ export default function MissedTradesCalendar() {
                           {getRealPL(trade) >= 0 ? '+' : ''}${getRealPL(trade).toFixed(2)}
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm text-slate-500 mb-2">
+                      <div className="grid grid-cols-2 gap-2 text-body text-slate-500 mb-2">
                         <div>
                           <span className="text-slate-400">Entry:</span>{' '}
                           {formatPrice(trade.entryPrice, trade.pair)}
@@ -525,8 +525,8 @@ export default function MissedTradesCalendar() {
                           {trade.rr?.toFixed(2) || '-'}
                         </div>
                       </div>
-                      <div className="text-sm text-slate-500">
-                        <span className="text-orange-500">Reason:</span>{' '}
+                      <div className="text-body text-slate-500">
+                        <span className="text-orange-500">Reason:</span> {' '}
                         {trade.reason || trade.missedReason ? (
                           <span
                             className="prose prose-sm max-w-none text-gray-700"

@@ -172,7 +172,7 @@ export default function DateTimePicker({
         `}
       >
         {showTimeOnly ? <Clock className="w-4 h-4 text-slate-400" /> : <Calendar className="w-4 h-4 text-slate-400" />}
-        <span className="text-sm flex-1">{formatDisplayValue()}</span>
+        <span className="text-body flex-1">{formatDisplayValue()}</span>
         {value && (
           <X 
             className="w-4 h-4 text-slate-400 hover:text-slate-600" 
@@ -190,7 +190,7 @@ export default function DateTimePicker({
             <div className="flex border-b border-slate-100">
               <button
                 onClick={() => setActiveSection('date')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-button transition-colors ${
                   activeSection === 'date' 
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' 
                     : 'text-slate-500 hover:text-slate-700'
@@ -201,7 +201,7 @@ export default function DateTimePicker({
               </button>
               <button
                 onClick={() => setActiveSection('time')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-button transition-colors ${
                   activeSection === 'time' 
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' 
                     : 'text-slate-500 hover:text-slate-700'
@@ -223,7 +223,7 @@ export default function DateTimePicker({
                   >
                     <ChevronUp className="w-5 h-5 text-slate-500 rotate-90" />
                   </button>
-                  <span className="text-sm font-semibold text-slate-800">
+                  <span className="text-body-sm font-semibold text-slate-800">
                     {MONTHS[viewMonth.getMonth()]} {viewMonth.getFullYear()}
                   </span>
                   <button
@@ -236,7 +236,7 @@ export default function DateTimePicker({
 
                 <div className="grid grid-cols-7 gap-1 mb-2">
                   {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-                    <div key={day} className="text-center text-xs font-medium text-slate-400 py-1">
+                    <div key={day} className="text-center text-caption text-slate-400 py-1">
                       {day}
                     </div>
                   ))}
@@ -248,7 +248,7 @@ export default function DateTimePicker({
                       key={index}
                       onClick={() => handleDateSelect(date)}
                       className={`
-                        w-9 h-9 text-xs rounded-lg transition-all duration-150
+                        w-9 h-9 text-caption rounded-lg transition-all duration-150
                         ${!isCurrentMonth(date) ? 'text-slate-300' : 'text-slate-700 hover:bg-slate-100'}
                         ${isToday(date) ? 'font-bold text-blue-600' : ''}
                         ${isSelected(date) ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : ''}
@@ -264,7 +264,7 @@ export default function DateTimePicker({
             {(showTimeOnly || activeSection === 'time') && (
               <div className="flex items-center gap-3">
                 <div className="flex flex-col items-center">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">Hour</span>
+                  <span className="text-micro text-slate-400 uppercase font-semibold mb-1.5">Hour</span>
                   <div className="relative">
                     <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50/80 rounded-lg pointer-events-none border border-blue-100" />
                     <div
@@ -285,7 +285,7 @@ export default function DateTimePicker({
                             key={hour}
                             onClick={() => handleTimeChange(hour, selectedMinute, selectedPeriod)}
                             className={`
-                              h-10 flex items-center justify-center text-sm font-medium cursor-pointer
+                              h-10 flex items-center justify-center text-button cursor-pointer
                               transition-all duration-150 rounded-lg mx-1
                               ${selectedHour === hour 
                                 ? 'text-blue-600 bg-blue-50' 
@@ -300,10 +300,10 @@ export default function DateTimePicker({
                   </div>
                 </div>
 
-                <span className="text-2xl font-bold text-slate-300 mt-4">:</span>
+                <span className="text-page-title text-slate-300 mt-4">:</span>
 
                 <div className="flex flex-col items-center">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">Min</span>
+                  <span className="text-micro text-slate-400 uppercase font-semibold mb-1.5">Min</span>
                   <div className="relative">
                     <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[calc(100%-8px)] h-10 bg-blue-50/80 rounded-lg pointer-events-none border border-blue-100" />
                     <div
@@ -324,7 +324,7 @@ export default function DateTimePicker({
                             key={minute}
                             onClick={() => handleTimeChange(selectedHour, minute, selectedPeriod)}
                             className={`
-                              h-10 flex items-center justify-center text-sm font-medium cursor-pointer
+                              h-10 flex items-center justify-center text-button cursor-pointer
                               transition-all duration-150 rounded-lg mx-1
                               ${selectedMinute === minute 
                                 ? 'text-blue-600 bg-blue-50' 
@@ -340,7 +340,7 @@ export default function DateTimePicker({
                 </div>
 
                 <div className="flex flex-col items-center ml-1">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold mb-1.5">AM/PM</span>
+                  <span className="text-micro text-slate-400 uppercase font-semibold mb-1.5">AM/PM</span>
                   <div className="flex flex-col gap-1">
                     {PERIODS.map((period) => (
                       <button
@@ -348,7 +348,7 @@ export default function DateTimePicker({
                         type="button"
                         onClick={() => handleTimeChange(selectedHour, selectedMinute, period as 'AM' | 'PM')}
                         className={`
-                          px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 cursor-pointer
+                          px-3 py-2 text-button rounded-lg transition-all duration-150 cursor-pointer
                           ${selectedPeriod === period 
                             ? 'bg-blue-600 text-white shadow-md' 
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
@@ -367,7 +367,7 @@ export default function DateTimePicker({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+              className="px-4 py-2 text-button text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
             >
               Done
             </button>

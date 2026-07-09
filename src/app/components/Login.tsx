@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import apiService from '../services/apiService';
+import { useAuthContext } from '../context/AuthContext';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +13,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login, register } = useAuthContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +22,7 @@ export default function Login() {
 
     try {
       if (isLogin) {
-        await apiService.auth.login(email, password);
+        await login(email, password);
         navigate('/');
       } else {
         if (password !== confirmPassword) {
@@ -34,7 +35,7 @@ export default function Login() {
           setLoading(false);
           return;
         }
-        await apiService.auth.register(name, email, password);
+        await register(name, email, password);
         navigate('/');
       }
     } catch (err: any) {
@@ -59,9 +60,9 @@ export default function Login() {
         <div className="bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-white/10">
           <div className="space-y-2 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 mb-4">
-              <span className="text-2xl font-bold text-white">FX</span>
+              <span className="text-page-title font-bold text-white">FX</span>
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-display-lg font-bold text-slate-900">
               FX Journal
             </h1>
             <p className="text-slate-500">
@@ -72,7 +73,7 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-body-sm text-slate-700 mb-1.5">
                   Name
                 </label>
                 <Input
@@ -87,7 +88,7 @@ export default function Login() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-body-sm text-slate-700 mb-1.5">
                 Email
               </label>
               <Input
@@ -101,7 +102,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-body-sm text-slate-700 mb-1.5">
                 Password
               </label>
               <Input
@@ -116,7 +117,7 @@ export default function Login() {
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-body-sm text-slate-700 mb-1.5">
                   Confirm Password
                 </label>
                 <Input
@@ -131,7 +132,7 @@ export default function Login() {
             )}
 
             {error && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+              <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-body flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
                 {error}
               </div>
@@ -155,7 +156,7 @@ export default function Login() {
             <button
               type="button"
               onClick={toggleMode}
-              className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+              className="text-body-sm text-blue-600 hover:text-blue-700"
             >
               {isLogin
                 ? "Don't have an account? Sign up"

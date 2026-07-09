@@ -21,7 +21,7 @@ function Calendar({
         months: "flex flex-col sm:flex-row gap-2",
         month: "flex flex-col gap-4",
         caption: "flex justify-center pt-1 relative items-center w-full",
-        caption_label: "text-sm font-semibold text-slate-800",
+        caption_label: "text-body-sm text-slate-800",
         nav: "flex items-center gap-1",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -32,10 +32,10 @@ function Calendar({
         table: "w-full border-collapse",
         head_row: "flex",
         head_cell:
-          "text-slate-400 rounded-lg w-8 font-medium text-[0.75rem]",
+          "text-slate-400 rounded-lg w-8 font-medium text-caption",
         row: "flex w-full mt-1",
         cell: cn(
-          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-blue-50 [&:has([aria-selected].day-range-end)]:rounded-r-lg",
+          "relative p-0 text-center text-body focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-blue-50 [&:has([aria-selected].day-range-end)]:rounded-r-lg",
           props.mode === "range"
             ? "[&:has(>.day-range-end)]:rounded-r-lg [&:has(>.day-range-start)]:rounded-l-lg first:[&:has([aria-selected])]:rounded-l-lg last:[&:has([aria-selected])]:rounded-r-lg"
             : "[&:has([aria-selected])]:rounded-lg",

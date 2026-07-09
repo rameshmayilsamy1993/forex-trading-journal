@@ -77,19 +77,19 @@ export default function ForexLotCalculator() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3 space-y-6">
           <div className="bg-white dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/60 p-6">
-            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-5">
+            <h2 className="text-table-header text-slate-500 dark:text-slate-400 mb-5">
               Calculator
             </h2>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-body-sm text-slate-700 dark:text-slate-300 mb-2">
                   Currency Pair
                 </label>
                 <select
                   value={selectedPair}
                   onChange={(e) => setSelectedPair(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-input focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                 >
                   {PAIRS.map((pair) => (
                     <option key={pair.label} value={pair.label}>{pair.label}</option>
@@ -98,7 +98,7 @@ export default function ForexLotCalculator() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-body-sm text-slate-700 dark:text-slate-300 mb-2">
                   Risk Amount ($)
                 </label>
                 <div className="flex gap-2 mb-3 flex-wrap">
@@ -106,7 +106,7 @@ export default function ForexLotCalculator() {
                     <button
                       key={amount}
                       onClick={() => setRiskInput(String(amount))}
-                      className={`flex-1 min-w-[80px] px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border-2 ${
+                      className={`flex-1 min-w-[80px] px-4 py-3 rounded-xl text-button transition-all duration-200 border-2 ${
                         riskInput === String(amount)
                           ? 'bg-indigo-50 dark:bg-indigo-900/40 border-indigo-500 text-indigo-700 dark:text-indigo-300 shadow-sm'
                           : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20'
@@ -127,15 +127,15 @@ export default function ForexLotCalculator() {
                     }
                   }}
                   placeholder="Enter any risk amount"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-input placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                 />
                 {riskError && (
-                  <p className="text-xs text-red-500 mt-1">{riskError}</p>
+                  <p className="text-caption text-red-500 mt-1">{riskError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-body-sm text-slate-700 dark:text-slate-300 mb-2">
                   Stop Loss (Pips)
                 </label>
                 <input
@@ -144,7 +144,7 @@ export default function ForexLotCalculator() {
                   value={stopLoss}
                   onChange={(e) => handleStopLossChange(e.target.value)}
                   placeholder="e.g. 10, 12.5, 7.5"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-input placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                   required
                 />
                 <div className="flex gap-1.5 mt-2 flex-wrap">
@@ -152,14 +152,14 @@ export default function ForexLotCalculator() {
                     <button
                       key={ex}
                       onClick={() => setStopLoss(String(ex))}
-                      className="px-2.5 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      className="px-2.5 py-1 text-caption text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                     >
                       {ex}
                     </button>
                   ))}
                 </div>
                 {slPips <= 0 && stopLoss !== '' && (
-                  <p className="text-xs text-red-500 mt-1.5">Stop loss must be greater than 0</p>
+                  <p className="text-caption text-red-500 mt-1.5">Stop loss must be greater than 0</p>
                 )}
               </div>
             </div>
@@ -168,11 +168,11 @@ export default function ForexLotCalculator() {
           {lotSize > 0 && (
             <>
               <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/25 p-8 text-center">
-                <p className="text-sm font-medium text-indigo-100 mb-1">Recommended Lot Size</p>
+                <p className="text-body-sm text-indigo-100 mb-1">Recommended Lot Size</p>
                 <p className="text-5xl font-bold text-white mb-3">
-                  {displayLot} <span className="text-2xl font-medium text-indigo-200">Lots</span>
+                  {displayLot} <span className="text-section-title text-indigo-200">Lots</span>
                 </p>
-                <div className="flex items-center justify-center gap-4 text-sm text-indigo-100 flex-wrap">
+                <div className="flex items-center justify-center gap-4 text-body text-indigo-100 flex-wrap">
                   <span>Pair: {selectedPair}</span>
                   <span className="w-1 h-1 rounded-full bg-indigo-300" />
                   <span>Risk: ${riskAmount}</span>
@@ -193,7 +193,7 @@ export default function ForexLotCalculator() {
               </button>
 
               <div className="bg-white dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/60 p-6">
-                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <h3 className="text-table-header text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" />
                   Profit Preview
                 </h3>
@@ -205,8 +205,8 @@ export default function ForexLotCalculator() {
                     return (
                       <div key={rr.label} className={`${color.bg} ${color.border} border rounded-xl p-4 text-center dark:opacity-90`}>
                         <Icon className={`w-5 h-5 ${color.text} mx-auto mb-2`} />
-                        <p className={`text-lg font-bold ${color.text}`}>${profit.toLocaleString()}</p>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">{rr.label} R:R</p>
+                        <p className={`text-card-title font-bold ${color.text}`}>${profit.toLocaleString()}</p>
+                        <p className="text-caption text-slate-500 mt-0.5">{rr.label} R:R</p>
                       </div>
                     );
                   })}
@@ -218,20 +218,20 @@ export default function ForexLotCalculator() {
 
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/60 p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h3 className="text-table-header text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
               <Table2 className="w-4 h-4" />
               Quick Reference
             </h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+            <p className="text-caption text-slate-400 dark:text-slate-500 mb-4">
               When Risk = ${riskAmount} &amp; Pair = {selectedPair}
             </p>
 
             <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
-              <table className="w-full text-sm">
+              <table className="w-full text-table-cell">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">SL Pips</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lot Size</th>
+                    <th className="px-4 py-2.5 text-left text-table-header text-slate-500 dark:text-slate-400">SL Pips</th>
+                    <th className="px-4 py-2.5 text-right text-table-header text-slate-500 dark:text-slate-400">Lot Size</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -258,7 +258,7 @@ export default function ForexLotCalculator() {
             <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl">
               <div className="flex items-start gap-2">
                 <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-amber-700 dark:text-amber-300">
+                <p className="text-caption text-amber-700 dark:text-amber-300">
                   Pip values vary by currency pair and broker. Always verify with your broker's specifications.
                 </p>
               </div>

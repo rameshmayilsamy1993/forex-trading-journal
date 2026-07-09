@@ -12,7 +12,7 @@
 
 - Base font: 15px (non-standard)
 - Font scale: 12/14/15/16/18/24/32 — missing tiers, flat hierarchy
-- h1=24px, h2=20px, h3=18px — insufficient differentiation
+- h1=30px (text-3xl), h2=24px (text-2xl), h3=20px (text-xl) — already match proposed
 - Heavy use of hardcoded text color values (`text-slate-600`, `text-slate-900`) instead of theme tokens
 
 ### Proposed
@@ -20,17 +20,16 @@
 | Token | Current | Proposed | Rationale |
 |-------|---------|----------|-----------|
 | Base | 15px | **16px** | Standard, avoids iOS auto-zoom |
-| h1 | 24px (text-2xl) | **30px (text-3xl)** font-display | Stronger hierarchy |
-| h2 | 20px (text-xl) | **24px (text-2xl)** | Clear step down |
-| h3 | 18px (text-lg) | **20px (text-xl)** | Better differentiation |
-| h4 | 16px (text-base) | **16px (text-base)** | Keep |
+| h1 | 30px (text-3xl) | 30px (keep) | Already correct |
+| h2 | 24px (text-2xl) | 24px (keep) | Already correct |
+| h3 | 20px (text-xl) | 20px (keep) | Already correct |
+| h4 | 16px (text-base) | 16px (keep) | Keep |
 | Table header | 11px (text-xs) | 11px (text-xs) tracking-[0.08em] | Tighter tracking |
 | Table cell | 13-14px | **13px (text-sm)** | Keep |
 
 ### Changes Required
 
-- `src/styles/theme.css`: Update `@layer base` font sizes for h1-h3, change `--font-size` to 16px
-- Replace hardcoded `text-slate-*` colors with theme token equivalents where possible
+- `src/styles/theme.css`: Change `--font-size: 15px` → `16px`
 
 ---
 
@@ -58,36 +57,33 @@
 
 - Increase table cell padding: `py-3 px-4` → `py-3.5 px-5`
 - Standardize filter bar gap: `gap-3` → `gap-4`
-- Standardize modal body padding to `p-6`
+- Standardize modal body padding to `p-6` (already done)
 
 ---
 
 ## 3. Table Design
 
-### Current State (TradeJournal.tsx ~lines 1636-1771)
+### Current State (post-Phase 2 Task 4)
 
-- Uses raw `<table>` with inline Tailwind — **not** using reusable `table.tsx`
-- Header: `bg-gradient-to-r from-slate-50 to-white` — unnecessary visual noise
-- Row hover: `hover:bg-slate-50 hover:shadow-sm` — shadow causes layout jitter
-- Action buttons: 5 inline `p-2 rounded-xl` buttons — overcrowded
-- Fixed column widths: `w-[140px]`, `w-[300px]`, etc.
-- Pair badge: `bg-slate-100 text-slate-800 border`
+The TradeJournal was split in Phase 2. TradeTable.tsx already uses the reusable `Table`/`TableHeader`/`TableBody`/`TableRow`/`TableHead`/`TableCell` component system. However, CRTHistory.tsx, LiquidityHistory.tsx, and BiasHistory.tsx still use raw `<table>` with gradient headers.
 
 ### Proposed
 
 | Element | Current | Proposed |
 |---------|---------|----------|
-| Container | Raw div | Migrate to reusable `TableCard` |
-| Header | Gradient | Solid `bg-[#F8FAFC]` (from `table.tsx`) |
+| Container | Raw div | `TableCard` wrapper |
+| Header | `bg-gradient-to-r from-slate-50 to-white` | Solid `bg-[#F8FAFC]` |
 | Row hover | +shadow (jitters) | `hover:bg-[#F1F5F9]/60` only |
 | Cells | `py-3 px-4` | `py-3.5 px-5` |
 | Action buttons | 5 visible | Keep visible but `p-1.5` with tooltips |
 | P/L font | bold | `tabular-nums` for alignment |
-| Pair badge | bordered | Subtle `bg-[#F1F5F9]` |
 
-### Migration Path
+### Changes Required
 
-Replace inline `<table>/<thead>/<tbody>/<tr>/<th>/<td>` with `Table`/`TableHeader`/`TableBody`/`TableRow`/`TableHead`/`TableCell` from `./ui/table`.
+- CRTHistory.tsx: Replace gradient table header with solid `bg-[#F8FAFC]`
+- LiquidityHistory.tsx: Replace gradient header with solid `bg-[#F8FAFC]`
+- BiasHistory.tsx: Replace gradient header with solid `bg-[#F8FAFC]`
+- TradeTable.tsx: Apply `tabular-nums` to P/L cells
 
 ---
 
@@ -95,27 +91,13 @@ Replace inline `<table>/<thead>/<tbody>/<tr>/<th>/<td>` with `Table`/`TableHeade
 
 ### Current State
 
-- `Modal.tsx` has gradient blue/purple header
-- Trade detail modal (inline in TradeJournal) uses `bg-slate-950` header
-- Two different header patterns = **inconsistent**
-- Close button: `bg-white/10 hover:bg-red-500` — jarring color switch
-- Scrim: `bg-slate-950/75 backdrop-blur-md` — heavy
+Modal.tsx already matches the proposed state:
+- Header: Already `from-slate-800 to-slate-700` ✓
+- Close button: Already `hover:bg-white/25` ✓
+- Scrim: Already `bg-slate-950/50 backdrop-blur-sm` ✓
+- Footer: `bg-white border-t border-slate-200` ✓
 
-### Proposed
-
-| Element | Current | Proposed |
-|---------|---------|----------|
-| Header | Blue/purple gradient OR slate-950 | **Unified**: subtle dark gradient `from-slate-800 to-slate-700` for all modals |
-| Close button | `hover:bg-red-500` | `hover:bg-white/25` — neutral |
-| Scrim | `bg-slate-950/75 backdrop-blur-md` | `bg-slate-950/50 backdrop-blur-sm` — lighter |
-| Footer | `bg-slate-50/50` | `bg-white border-t border-[#E5EAF2]` |
-| Animation | `animate-in zoom-in-95` | Keep, add scrim `fade-in` |
-
-### Changes Required
-
-- Update `Modal.tsx` header to use `from-slate-800 to-slate-700`
-- Update trade detail modal in TradeJournal.tsx to use same pattern (or reuse Modal component)
-- Fix close button hover behavior
+No changes needed.
 
 ---
 
@@ -123,21 +105,37 @@ Replace inline `<table>/<thead>/<tbody>/<tr>/<th>/<td>` with `Table`/`TableHeade
 
 ### Current State
 
-- `StatCard` has hover lift (`-translate-y-0.5`) — unnecessary motion for metrics
-- `SectionCard` header: `from-white to-[#F8FAFC]` gradient
-- Trend badges use arrow unicode (`↑` `↓`)
-- PL numbers not using tabular-nums
-- Performance rows have colored backgrounds with `/5` opacity
+- DesignSystem.tsx: StatCard hover lift already removed, SectionCard already uses solid `bg-white`, trend arrows already use Lucide icons, tabular-nums already used
+- Dashboard.tsx: Filter header still uses gradient `from-indigo-50/50 to-purple-50/50`; P/L values missing `tabular-nums`
 
 ### Proposed
 
 | Element | Current | Proposed |
 |---------|---------|----------|
-| StatCard hover | `-translate-y-0.5` | Remove; subtle shadow increase only |
-| SectionCard header | Gradient | Solid `bg-white` — cleaner |
-| Trend arrows | Unicode | Use Lucide `TrendUp`/`TrendDown` icons |
-| Numbers | font-bold | `tabular-nums` for alignment |
-| Hover lift | On StatCard + CardContainer | Only on CardContainer |
+| Filter header | Gradient | Solid `bg-white` |
+| P/L values | font-bold | `tabular-nums` for alignment |
+
+### Changes Required
+
+- Dashboard.tsx: Filter header gradient → solid `bg-white`, add `tabular-nums` to P/L values
+
+---
+
+## 6. Unicode Arrows
+
+### Current State
+
+- H4History.tsx: Uses `↑`/`↓` unicode for direction display
+- ChecklistBuilder.tsx: Uses `↑`/`↓` unicode for reorder buttons
+
+### Proposed
+
+Replace unicode directional arrows with Lucide `TrendingUp`/`TrendingDown` icons.
+
+### Changes Required
+
+- H4History.tsx: Replace `↑`/`↓` with Lucide icons
+- ChecklistBuilder.tsx: Replace `↑`/`↓` with Lucide icons
 
 ---
 
@@ -145,10 +143,11 @@ Replace inline `<table>/<thead>/<tbody>/<tr>/<th>/<td>` with `Table`/`TableHeade
 
 | File | Changes |
 |------|---------|
-| `src/styles/theme.css` | Font scale, base size 16px, typography tokens |
-| `src/app/components/ui/Modal.tsx` | Unified header, lighter scrim, close button |
-| `src/app/components/ui/DesignSystem.tsx` | StatCard hover removal, tabular-nums |
-| `src/app/components/TradeJournal.tsx` | Table migration to reusable components, spacing, table cells |
-| `src/app/components/Dashboard.tsx` | StatCard hover removal, SectionCard headers, tabular-nums |
-| `src/app/components/LossReasonModal.tsx` | Minor: padding consistency |
-| `src/app/components/ChecklistDetailsModal.tsx` | Minor: padding consistency |
+| `src/styles/theme.css` | `--font-size: 15px` → `16px` |
+| `src/app/components/TradeTable.tsx` | Cell padding `py-3 px-4` → `py-3.5 px-5`, filter gap `gap-3` → `gap-4`, `tabular-nums` on P/L |
+| `src/app/components/Dashboard.tsx` | Filter header gradient → solid, `tabular-nums` on P/L |
+| `src/app/components/CRTHistory.tsx` | Gradient table header → solid `bg-[#F8FAFC]` |
+| `src/app/components/LiquidityHistory.tsx` | Gradient table header → solid `bg-[#F8FAFC]` |
+| `src/app/components/BiasHistory.tsx` | Gradient table header → solid `bg-[#F8FAFC]` |
+| `src/app/components/H4History.tsx` | Unicode arrows → Lucide icons |
+| `src/app/components/ChecklistBuilder.tsx` | Unicode arrows → Lucide icons |

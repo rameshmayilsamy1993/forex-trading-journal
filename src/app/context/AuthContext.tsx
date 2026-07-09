@@ -5,6 +5,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<User | null>;
 }
@@ -17,8 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      let currentUser: User | null = null;
       try {
-        const currentUser = await apiService.auth.getCurrentUser();
+        currentUser = await apiService.auth.getCurrentUser();
         setUser(currentUser);
       } catch {
         setUser(null);
@@ -28,6 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
     checkAuth();
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const data = await apiService.auth.login(email, password);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
+  const register = useCallback(async (name: string, email: string, password: string) => {
+    const data = await apiService.auth.register(name, email, password);
+    setUser(data);
+    return data;
   }, []);
 
   const logout = useCallback(async () => {
@@ -43,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

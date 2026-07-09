@@ -66,7 +66,7 @@ export default function ChecklistPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Strategy Checklist</h1>
+        <h1 className="text-page-title text-slate-900">Strategy Checklist</h1>
         <p className="text-slate-500 mt-1">Complete pre-trade validation before entering positions</p>
       </div>
 
@@ -75,7 +75,7 @@ export default function ChecklistPage() {
           <CheckCircle2 className="w-8 h-8 text-green-600" />
           <div className="flex-1">
             <p className="font-semibold text-green-800">Checklist Completed Successfully!</p>
-            <p className="text-sm text-green-700">You can now proceed to enter your trade.</p>
+            <p className="text-body text-green-700">You can now proceed to enter your trade.</p>
           </div>
           <button
             onClick={() => setCompletedChecklist(null)}
@@ -124,7 +124,7 @@ export default function ChecklistPage() {
             <div className="text-center py-12 bg-slate-50 rounded-xl">
               <FileText className="w-12 h-12 text-slate-300 mx-auto" />
               <p className="mt-4 text-slate-600">No checklists yet</p>
-              <p className="text-sm text-slate-500">Complete a new checklist to see it here</p>
+              <p className="text-body text-slate-500">Complete a new checklist to see it here</p>
             </div>
           ) : (
             checklists.map(checklist => (
@@ -141,9 +141,9 @@ export default function ChecklistPage() {
                     )}
                     <div>
                       <p className="font-semibold text-slate-900">{checklist.strategyName}</p>
-                      <p className="text-sm text-slate-500">{formatDate(checklist.createdAt)}</p>
+                      <p className="text-body text-slate-500">{formatDate(checklist.createdAt)}</p>
                       {checklist.pair && (
-                        <p className="text-sm text-slate-600 mt-1">
+                        <p className="text-body text-slate-600 mt-1">
                           {checklist.pair} {checklist.tradeType}
                         </p>
                       )}
@@ -151,7 +151,7 @@ export default function ChecklistPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className={cn(
-                      "px-3 py-1 rounded-full text-sm font-medium",
+                      "px-3 py-1 rounded-full text-body-sm",
                       checklist.isValid
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -177,7 +177,7 @@ export default function ChecklistPage() {
                     <div
                       key={index}
                       className={cn(
-                        "flex items-center gap-2 text-sm p-2 rounded",
+                        "flex items-center gap-2 text-body-sm p-2 rounded",
                         item.checked ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
                       )}
                     >
@@ -193,8 +193,8 @@ export default function ChecklistPage() {
 
                 {checklist.missingRequired.length > 0 && (
                   <div className="mt-3 p-3 bg-red-50 rounded-lg">
-                    <p className="text-sm font-medium text-red-800">Missing Required:</p>
-                    <p className="text-sm text-red-600">
+                    <p className="text-body-sm text-red-800">Missing Required:</p>
+                    <p className="text-body text-red-600">
                       {checklist.missingRequired.join(', ')}
                     </p>
                   </div>

@@ -81,9 +81,9 @@ export default function BreachedTrades() {
         <div className="bg-white rounded-xl p-6 border border-slate-200">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
-            <span className="text-sm text-slate-600">Total Breached Trades</span>
+            <span className="text-body-sm text-slate-600">Total Breached Trades</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{breachedTrades.length}</p>
+          <p className="text-display-lg font-bold text-slate-900">{breachedTrades.length}</p>
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-slate-200">
@@ -93,9 +93,9 @@ export default function BreachedTrades() {
             ) : (
               <TrendingDown className="w-5 h-5 text-red-600" />
             )}
-            <span className="text-sm text-slate-600">Total P/L</span>
+            <span className="text-body-sm text-slate-600">Total P/L</span>
           </div>
-          <p className={`text-2xl font-bold ${totalBreachedPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-display-lg font-bold ${totalBreachedPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCurrency(totalBreachedPL)}
           </p>
         </div>
@@ -103,9 +103,9 @@ export default function BreachedTrades() {
         <div className="bg-white rounded-xl p-6 border border-slate-200">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
-            <span className="text-sm text-slate-600">Breached Accounts</span>
+            <span className="text-body-sm text-slate-600">Breached Accounts</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="text-display-lg font-bold text-slate-900">
             {accounts.filter(a => a.status === 'BREACHED').length}
           </p>
         </div>
@@ -116,14 +116,14 @@ export default function BreachedTrades() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Date</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Account</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Firm</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Pair</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Type</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Entry</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Exit</th>
-                <th className="text-right p-4 text-sm font-medium text-slate-600">Profit</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Date</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Account</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Firm</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Pair</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Type</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Entry</th>
+                <th className="text-left p-4 text-table-header text-slate-600">Exit</th>
+                <th className="text-right p-4 text-table-header text-slate-600">Profit</th>
               </tr>
             </thead>
             <tbody>
@@ -136,14 +136,14 @@ export default function BreachedTrades() {
               ) : (
                 breachedTrades.map((trade, i) => (
                   <tr key={trade.id ?? i} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="p-4 text-sm text-slate-900">
+                    <td className="p-4 text-table-cell text-slate-900">
                       {trade.entryDate ? format(new Date(trade.entryDate), 'MMM dd, yyyy') : '-'}
                     </td>
-                    <td className="p-4 text-sm text-slate-900">{getAccountName(trade)}</td>
-                    <td className="p-4 text-sm text-slate-600">{getFirmName(trade)}</td>
-                    <td className="p-4 text-sm font-medium text-slate-900">{trade.pair}</td>
+                    <td className="p-4 text-table-cell text-slate-900">{getAccountName(trade)}</td>
+                    <td className="p-4 text-table-cell text-slate-600">{getFirmName(trade)}</td>
+                    <td className="p-4 text-table-cell text-slate-900">{trade.pair}</td>
                     <td className="p-4">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      <span className={`text-caption px-2 py-1 rounded-full ${
                         trade.type === 'BUY'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
@@ -151,9 +151,9 @@ export default function BreachedTrades() {
                         {trade.type}
                       </span>
                     </td>
-                    <td className="p-4 text-sm text-slate-900">{trade.entryPrice}</td>
-                    <td className="p-4 text-sm text-slate-900">{trade.exitPrice || '-'}</td>
-                    <td className={`p-4 text-right text-sm font-bold ${
+                    <td className="p-4 text-table-cell text-slate-900">{trade.entryPrice}</td>
+                    <td className="p-4 text-table-cell text-slate-900">{trade.exitPrice || '-'}</td>
+                    <td className={`p-4 text-right text-table-cell font-bold ${
                       (trade.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
                       {formatCurrency(trade.profit || 0)}

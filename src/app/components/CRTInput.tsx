@@ -313,14 +313,14 @@ export default function CRTInput() {
       <CardContainer>
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 mr-2">Pair:</label>
+            <label className="text-body-sm text-slate-700 mr-2">Pair:</label>
             <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)}
               className="px-3 py-2 border border-slate-200 rounded-lg">
               {pairs.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700 mr-2">Month:</label>
+            <label className="text-body-sm text-slate-700 mr-2">Month:</label>
             <input type="month" value={format(currentMonth, 'yyyy-MM')}
               onChange={e => setCurrentMonth(new Date(e.target.value + '-01'))}
               className="px-3 py-2 border border-slate-200 rounded-lg" />
@@ -391,7 +391,7 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
   return (
     <CardContainer>
       <div className="flex items-center justify-between mb-4">
-        <span className={cn('px-3 py-1 rounded-full text-sm font-medium', colorClass)}>
+        <span className={cn('px-3 py-1 rounded-full text-body-sm', colorClass)}>
           {TIMEFRAME_LABELS[tf] || tf}
         </span>
       </div>
@@ -399,13 +399,13 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Date */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+          <label className="block text-body-sm text-slate-700 mb-1">Date</label>
           <input type="date" value={entry.date}
             onChange={e => onChange(prev => ({ ...prev, date: e.target.value }))}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Time (optional)</label>
+          <label className="block text-body-sm text-slate-700 mb-1">Time (optional)</label>
           <input type="time" value={entry.time}
             onChange={e => onChange(prev => ({ ...prev, time: e.target.value }))}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg" />
@@ -415,15 +415,15 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
       <div className="mt-4 space-y-5">
         {/* 1. Key Level Exists */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Does Key Level Exist?</label>
+          <label className="block text-body-sm text-slate-700 mb-2">Does Key Level Exist?</label>
           <div className="flex gap-2">
             <button onClick={() => onChange(prev => ({ ...prev, keyLevelExists: true }))}
-              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
-                entry.keyLevelExists ? 'bg-blue-100 border-blue-300 text-blue-700' : 'border-slate-200 hover:border-slate-300')}>
+              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
+                entry.keyLevelExists ? 'bg-violet-100 border-violet-300 text-[#7C3AED]' : 'border-slate-200 hover:border-slate-300')}>
               Yes
             </button>
             <button onClick={() => onChange(prev => ({ ...prev, keyLevelExists: false, keyLevelType: '', customKeyLevel: '' }))}
-              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
                 !entry.keyLevelExists ? 'bg-slate-100 border-slate-300 text-slate-700' : 'border-slate-200 hover:border-slate-300')}>
               No
             </button>
@@ -433,7 +433,7 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
         {/* Key Level Type */}
         {entry.keyLevelExists && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Key Level Type</label>
+            <label className="block text-body-sm text-slate-700 mb-2">Key Level Type</label>
             <select value={entry.keyLevelType} onChange={e => onChange(prev => ({ ...prev, keyLevelType: e.target.value }))}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg">
               <option value="">Select type...</option>
@@ -449,15 +449,15 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
 
         {/* 2. Is CRT Playing? */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Is CRT Playing?</label>
+          <label className="block text-body-sm text-slate-700 mb-2">Is CRT Playing?</label>
           <div className="flex gap-2">
             <button onClick={() => onChange(prev => ({ ...prev, crtPlaying: true }))}
-              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
                 entry.crtPlaying ? 'bg-green-100 border-green-300 text-green-700' : 'border-slate-200 hover:border-slate-300')}>
               Yes
             </button>
             <button onClick={() => onChange(prev => ({ ...prev, crtPlaying: false }))}
-              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+              className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
                 !entry.crtPlaying ? 'bg-slate-100 border-slate-300 text-slate-700' : 'border-slate-200 hover:border-slate-300')}>
               No
             </button>
@@ -466,11 +466,11 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
 
         {/* 3. CRT Direction */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">CRT Direction</label>
+          <label className="block text-body-sm text-slate-700 mb-2">CRT Direction</label>
           <div className="flex flex-wrap gap-2">
             {CRT_DIRECTIONS.map(dir => (
               <button key={dir} onClick={() => onChange(prev => ({ ...prev, crtDirection: dir }))}
-                className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+                className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
                   entry.crtDirection === dir
                     ? (DIRECTION_COLORS[dir] || 'bg-slate-800 text-white')
                     : 'border-slate-200 hover:border-slate-300'
@@ -483,13 +483,13 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
 
         {/* 4. CRT Status */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">CRT Status</label>
+          <label className="block text-body-sm text-slate-700 mb-2">CRT Status</label>
           <div className="flex flex-wrap gap-2">
             {CRT_STATUSES.map(st => (
               <button key={st} onClick={() => onChange(prev => ({ ...prev, crtStatus: st }))}
-                className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+                className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
                   entry.crtStatus === st
-                    ? (STATUS_COLORS[st] || 'bg-blue-100 text-blue-700 border-blue-200')
+                    ? (STATUS_COLORS[st] || 'bg-violet-100 text-[#7C3AED] border-violet-200')
                     : 'border-slate-200 hover:border-slate-300'
                 )}>
                 {st}
@@ -500,11 +500,11 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
 
         {/* 5. CRT Range Respected */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">CRT Range Respected</label>
+          <label className="block text-body-sm text-slate-700 mb-2">CRT Range Respected</label>
           <div className="flex gap-2">
             {CRT_RANGE_RESPECTED.map(r => (
               <button key={r} onClick={() => onChange(prev => ({ ...prev, crtRangeRespected: r }))}
-                className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+                className={cn('px-4 py-2 rounded-lg border-2 transition-colors text-button',
                   entry.crtRangeRespected === r
                     ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
                     : 'border-slate-200 hover:border-slate-300'
@@ -517,13 +517,13 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
 
         {/* 6. Screenshot Upload */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Screenshot</label>
+          <label className="block text-body-sm text-slate-700 mb-2">Screenshot</label>
           <div className="flex items-start gap-4">
             <div
               onClick={() => fileRef.current?.click()}
               className={cn(
                 'relative border-2 border-dashed rounded-xl p-6 cursor-pointer transition-colors text-center',
-                'hover:border-blue-400 hover:bg-blue-50/50',
+                'hover:border-[#7C3AED] hover:bg-violet-50/50',
                 entry.imagePath ? 'border-green-300 bg-green-50/30' : 'border-slate-300'
               )}
               onDragOver={e => { e.preventDefault(); }}
@@ -537,16 +537,16 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
                 onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f, tf); }} />
               {uploading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-                  <span className="text-sm text-slate-500">Uploading...</span>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]" />
+                  <span className="text-body text-slate-500">Uploading...</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="p-3 bg-blue-50 rounded-full">
-                    <Upload className="w-6 h-6 text-blue-600" />
+                  <div className="p-3 bg-violet-50 rounded-full">
+                    <Upload className="w-6 h-6 text-[#7C3AED]" />
                   </div>
-                  <span className="text-sm text-slate-600 font-medium">Click to upload or drag & drop</span>
-                  <span className="text-xs text-slate-400">PNG, JPG or WEBP</span>
+                  <span className="text-body-sm text-slate-600">Click to upload or drag & drop</span>
+                  <span className="text-caption text-slate-400">PNG, JPG or WEBP</span>
                 </div>
               )}
             </div>
@@ -570,14 +570,14 @@ function SingleTimeframeSection({ entry, onChange, onSave, onUpload, uploading, 
 
         {/* 7. Notes */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+          <label className="block text-body-sm text-slate-700 mb-1">Notes</label>
           <textarea value={entry.notes} placeholder="Strategy comments, observations..."
             onChange={e => onChange(prev => ({ ...prev, notes: e.target.value }))}
             rows={3} className="w-full px-3 py-2 border border-slate-200 rounded-lg min-h-[72px]" />
         </div>
 
         <button onClick={onSave} disabled={isSaving}
-          className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium">
+          className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-button">
           <Save className="w-4 h-4" />
           {isSaving ? 'Saving...' : `Save ${TIMEFRAME_LABELS[tf] || tf} CRT`}
         </button>
@@ -608,11 +608,11 @@ function DynamicTimeframeSection({ title, timeframe, entries, onAdd, onRemove, o
     <CardContainer>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className={cn('px-3 py-1 rounded-full text-sm font-medium', colorClass)}>{title}</span>
-          <span className="text-sm text-slate-500">({entries.length})</span>
+          <span className={cn('px-3 py-1 rounded-full text-body-sm', colorClass)}>{title}</span>
+          <span className="text-body text-slate-500">({entries.length})</span>
         </div>
         <button onClick={onAdd}
-          className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">
+          className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-lg text-button hover:from-[#6D28D9] hover:to-[#4338CA]">
           <Plus className="w-4 h-4" /> Add Entry
         </button>
       </div>
@@ -630,7 +630,7 @@ function DynamicTimeframeSection({ title, timeframe, entries, onAdd, onRemove, o
           />
         ))}
         {entries.length === 0 && (
-          <p className="text-slate-400 text-sm">No entries yet. Click "Add Entry" to create one.</p>
+          <p className="text-slate-400 text-body">No entries yet. Click "Add Entry" to create one.</p>
         )}
       </div>
     </CardContainer>
@@ -664,29 +664,29 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
         <div className="flex items-center gap-2 flex-wrap">
           <input type="date" value={entry.date}
             onChange={e => onUpdate({ date: e.target.value })}
-            className="px-2 py-1 border border-slate-200 rounded text-sm w-36" />
+            className="px-2 py-1 border border-slate-200 rounded text-body w-36" />
           <input type="time" value={entry.time}
             onChange={e => onUpdate({ time: e.target.value })}
-            className="px-2 py-1 border border-slate-200 rounded text-sm w-28" />
-          <span className={cn('px-2 py-0.5 rounded text-xs font-medium',
+            className="px-2 py-1 border border-slate-200 rounded text-body w-28" />
+          <span className={cn('px-2 py-0.5 rounded text-caption',
             entry.crtPlaying ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500')}>
             CRT {entry.crtPlaying ? 'ON' : 'OFF'}
           </span>
-          <span className={cn('px-2 py-0.5 rounded text-xs font-medium',
+          <span className={cn('px-2 py-0.5 rounded text-caption',
             DIRECTION_COLORS[entry.crtDirection] || 'bg-slate-100 text-slate-500')}>
             {entry.crtDirection}
           </span>
-          <span className={cn('px-2 py-0.5 rounded text-xs font-medium',
+          <span className={cn('px-2 py-0.5 rounded text-caption',
             STATUS_COLORS[entry.crtStatus] || 'bg-slate-100 text-slate-500')}>
             {entry.crtStatus}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setExpanded(!expanded)} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+          <button onClick={() => setExpanded(!expanded)} className="text-caption text-[#7C3AED] hover:text-[#6D28D9]">
             {expanded ? 'Less' : 'More'}
           </button>
           <button onClick={onSave} disabled={isSaving}
-            className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50">
+            className="px-2 py-1 bg-green-500 text-white rounded text-caption hover:bg-green-600 disabled:opacity-50">
             Save
           </button>
           <button onClick={() => onRemove(entry.id)} className="p-1 text-red-500 hover:text-red-700">
@@ -699,15 +699,15 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
         <div className="p-4 space-y-4">
           {/* 1. Key Level Exists */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Does Key Level Exist?</label>
+            <label className="block text-caption text-slate-600 mb-1">Does Key Level Exist?</label>
             <div className="flex gap-2">
               <button onClick={() => onUpdate({ keyLevelExists: true })}
-                className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
-                  entry.keyLevelExists ? 'bg-blue-100 border-blue-300 text-blue-700' : 'border-slate-200 hover:border-slate-300')}>
+                className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
+                  entry.keyLevelExists ? 'bg-violet-100 border-violet-300 text-[#7C3AED]' : 'border-slate-200 hover:border-slate-300')}>
                 Yes
               </button>
               <button onClick={() => onUpdate({ keyLevelExists: false, keyLevelType: '', customKeyLevel: '' })}
-                className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
+                className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
                   !entry.keyLevelExists ? 'bg-slate-100 border-slate-300 text-slate-700' : 'border-slate-200 hover:border-slate-300')}>
                 No
               </button>
@@ -716,31 +716,31 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
 
           {entry.keyLevelExists && (
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Key Level Type</label>
+              <label className="block text-caption text-slate-600 mb-1">Key Level Type</label>
               <select value={entry.keyLevelType} onChange={e => onUpdate({ keyLevelType: e.target.value })}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm">
+                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-body">
                 <option value="">Select type...</option>
                 {KEY_LEVEL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
               {entry.keyLevelType === 'Custom' && (
                 <input type="text" value={entry.customKeyLevel} placeholder="Enter custom key level..."
                   onChange={e => onUpdate({ customKeyLevel: e.target.value })}
-                  className="w-full mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-sm" />
+                  className="w-full mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-body" />
               )}
             </div>
           )}
 
           {/* 2. Is CRT Playing? */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Is CRT Playing?</label>
+            <label className="block text-caption text-slate-600 mb-1">Is CRT Playing?</label>
             <div className="flex gap-2">
               <button onClick={() => onUpdate({ crtPlaying: true })}
-                className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
+                className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
                   entry.crtPlaying ? 'bg-green-100 border-green-300 text-green-700' : 'border-slate-200 hover:border-slate-300')}>
                 Yes
               </button>
               <button onClick={() => onUpdate({ crtPlaying: false })}
-                className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
+                className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
                   !entry.crtPlaying ? 'bg-slate-100 border-slate-300 text-slate-700' : 'border-slate-200 hover:border-slate-300')}>
                 No
               </button>
@@ -749,11 +749,11 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
 
           {/* 3. CRT Direction */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">CRT Direction</label>
+            <label className="block text-caption text-slate-600 mb-1">CRT Direction</label>
             <div className="flex flex-wrap gap-1.5">
               {CRT_DIRECTIONS.map(dir => (
                 <button key={dir} onClick={() => onUpdate({ crtDirection: dir })}
-                  className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
+                  className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
                     entry.crtDirection === dir
                       ? (DIRECTION_COLORS[dir] || 'bg-slate-800 text-white')
                       : 'border-slate-200 hover:border-slate-300'
@@ -766,11 +766,11 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
 
           {/* 4. CRT Status */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">CRT Status</label>
+            <label className="block text-caption text-slate-600 mb-1">CRT Status</label>
             <div className="flex flex-wrap gap-1.5">
               {CRT_STATUSES.map(st => (
                 <button key={st} onClick={() => onUpdate({ crtStatus: st })}
-                  className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
+                  className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
                     entry.crtStatus === st
                       ? (STATUS_COLORS[st] || 'bg-blue-100 text-blue-700 border-blue-200')
                       : 'border-slate-200 hover:border-slate-300'
@@ -783,11 +783,11 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
 
           {/* 5. CRT Range Respected */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">CRT Range Respected</label>
+            <label className="block text-caption text-slate-600 mb-1">CRT Range Respected</label>
             <div className="flex gap-2">
               {CRT_RANGE_RESPECTED.map(r => (
                 <button key={r} onClick={() => onUpdate({ crtRangeRespected: r })}
-                  className={cn('px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-colors',
+                  className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
                     entry.crtRangeRespected === r
                       ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
                       : 'border-slate-200 hover:border-slate-300'
@@ -800,11 +800,11 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
 
           {/* 6. Screenshot */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Screenshot</label>
+            <label className="block text-caption text-slate-600 mb-1">Screenshot</label>
             <div className="flex items-start gap-3">
               <div onClick={() => fileRef.current?.click()}
                 className={cn('border-2 border-dashed rounded-xl p-4 cursor-pointer transition-colors text-center',
-                  'hover:border-blue-400 hover:bg-blue-50/50',
+                  'hover:border-[#7C3AED] hover:bg-violet-50/50',
                   entry.imagePath ? 'border-green-300 bg-green-50/30' : 'border-slate-300'
                 )}
                 onDragOver={e => e.preventDefault()}
@@ -814,13 +814,13 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
                   onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); }} />
                 {uploading ? (
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
-                    <span className="text-xs text-slate-500">Uploading...</span>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#7C3AED]" />
+                    <span className="text-caption text-slate-500">Uploading...</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <Upload className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs text-slate-600">Upload</span>
+                    <Upload className="w-4 h-4 text-[#7C3AED]" />
+                    <span className="text-caption text-slate-600">Upload</span>
                   </div>
                 )}
               </div>
@@ -840,10 +840,10 @@ function CRTEntryCard({ entry, index, timeframe, onRemove, onSave, onUpdate, onU
 
           {/* 7. Notes */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Notes</label>
+            <label className="block text-caption text-slate-600 mb-1">Notes</label>
             <textarea value={entry.notes} placeholder="Strategy comments, observations..."
               onChange={e => onUpdate({ notes: e.target.value })}
-              rows={2} className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm min-h-[56px]" />
+              rows={2} className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-body min-h-[56px]" />
           </div>
         </div>
       )}

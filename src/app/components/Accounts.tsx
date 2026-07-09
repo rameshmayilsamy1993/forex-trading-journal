@@ -12,7 +12,7 @@ const STATUS_COLORS: Record<AccountStatus, { bg: string; text: string; dot: stri
   ACTIVE: { bg: 'bg-[#16A34A]/10', text: 'text-[#16A34A]', dot: 'bg-[#16A34A]' },
   BREACHED: { bg: 'bg-[#DC2626]/10', text: 'text-[#DC2626]', dot: 'bg-[#DC2626]' },
   PASSED_1: { bg: 'bg-[#EA580C]/10', text: 'text-[#EA580C]', dot: 'bg-[#EA580C]' },
-  PASSED_2: { bg: 'bg-[#2563EB]/10', text: 'text-[#2563EB]', dot: 'bg-[#2563EB]' },
+  PASSED_2: { bg: 'bg-[#7C3AED]/10', text: 'text-[#7C3AED]', dot: 'bg-[#7C3AED]' },
   FUNDED: { bg: 'bg-[#7C3AED]/10', text: 'text-[#7C3AED]', dot: 'bg-[#7C3AED]' },
   DISABLED: { bg: 'bg-[#64748B]/10', text: 'text-[#64748B]', dot: 'bg-[#64748B]' },
 };
@@ -297,7 +297,7 @@ export default function Accounts() {
             <div className="text-center py-12 text-[#64748B]">
               <Building2 className="w-12 h-12 mx-auto mb-3 opacity-40" />
               <p>Please add a prop firm first</p>
-              <p className="text-sm">Go to "Prop Firms" tab to create one</p>
+              <p className="text-body">Go to "Prop Firms" tab to create one</p>
             </div>
           )}
 
@@ -313,7 +313,7 @@ export default function Accounts() {
                 {accounts.length === 0 && !isAdding && (
                   <div className="col-span-full text-center py-12 text-[#64748B]">
                     <p>No accounts added yet</p>
-                    <p className="text-sm">Click "Add Account" to get started</p>
+                    <p className="text-body">Click "Add Account" to get started</p>
                   </div>
                 )}
 
@@ -338,7 +338,7 @@ export default function Accounts() {
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <span
                             className={`text-5xl font-black opacity-[0.04] select-none tracking-[0.15em] ${
-                              watermark === 'BREACHED' ? 'text-[#DC2626]' : watermark === 'FUNDED' ? 'text-[#7C3AED]' : 'text-[#2563EB]'
+                              watermark === 'BREACHED' ? 'text-[#DC2626]' : watermark === 'FUNDED' ? 'text-[#7C3AED]' : 'text-[#7C3AED]'
                             }`}
                           >
                             {watermark}
@@ -361,16 +361,16 @@ export default function Accounts() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
                                 <h3 className={`font-bold text-[#0F172A]`}>{account.name}</h3>
-                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
                                   <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
                                   {STATUS_LABELS[account.status || 'ACTIVE']}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 mt-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getFirmColor(account.propFirmId) }} />
-                                <span className={`text-sm ${isBreached ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
-                                  {getFirmName(account.propFirmId)}
-                                </span>
+<span className={`text-body ${isBreached ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
+                  {getFirmName(account.propFirmId)}
+                </span>
                               </div>
                             </div>
                             <div className="flex gap-1 relative z-10">
@@ -392,13 +392,13 @@ export default function Accounts() {
                           </div>
 
                           <div className="space-y-2 relative z-10">
-                            <div className="flex justify-between text-sm">
+                            <div className="flex justify-between text-body">
                               <span className="text-[#64748B]">Initial:</span>
-                              <span className="font-medium text-[#0F172A]">
+                              <span className="text-[#0F172A]">
                                 {formatCurrency(account.initialBalance, account.currency)}
                               </span>
                             </div>
-                            <div className="flex justify-between text-sm">
+                            <div className="flex justify-between text-body">
                               <span className="text-[#64748B]">Current:</span>
                               <span
                                 className={`font-bold ${
@@ -408,7 +408,7 @@ export default function Accounts() {
                                 {formatCurrency(currentBalance, account.currency)}
                               </span>
                             </div>
-                            <div className="flex justify-between text-sm pt-2 border-t border-[#E5EAF2]">
+                            <div className="flex justify-between text-body pt-2 border-t border-[#E5EAF2]">
                               <span className="text-[#64748B]">P/L:</span>
                               <span className={`font-bold ${pl >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                                 {pl >= 0 ? '+' : ''}
@@ -426,7 +426,7 @@ export default function Accounts() {
               {hasMore && (
                 <div className="flex justify-center py-4">
                   <button onClick={loadMoreAccounts} disabled={isLoadingMore}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                    className="px-6 py-2 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] disabled:opacity-50 transition-all shadow-lg shadow-[#7C3AED]/25">
                     {isLoadingMore ? 'Loading...' : 'Load More'}
                   </button>
                 </div>

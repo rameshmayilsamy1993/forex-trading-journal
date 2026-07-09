@@ -25,7 +25,7 @@ export default function TradeJournal() {
       title="Trade Journal"
       subtitle={user?.name ? `Welcome back, ${user.name}` : undefined}
       icon={Plus}
-      color="blue"
+      color="purple"
       action={{
         label: state.isAdding || state.editingId ? 'Cancel' : 'Add Trade',
         onClick: state.isAdding || state.editingId ? state.handleCancel : state.handleAdd,
@@ -33,7 +33,7 @@ export default function TradeJournal() {
     >
       {/* Account Balance Summary */}
       {state.accounts.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] p-4 transition-all duration-200 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
           <div className="flex flex-wrap gap-4 items-center">
             {state.accounts.map(account => {
               const accountTrades = state.trades.filter(
@@ -41,9 +41,9 @@ export default function TradeJournal() {
               );
               const profit = accountTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
               return (
-                <div key={account.id} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg">
-                  <span className="text-sm text-slate-600">{account.name}</span>
-                  <span className={`text-sm font-semibold ${profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                <div key={account.id} className="flex items-center gap-2 px-3 py-1.5 bg-[#F8FAFC] rounded-xl">
+                  <span className="text-body-sm text-[#64748B]">{account.name}</span>
+                  <span className={`text-body-sm font-semibold ${profit >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                     {profit >= 0 ? '+' : ''}{profit?.toFixed(2) ?? '0.00'}
                   </span>
                 </div>

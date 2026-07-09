@@ -14,33 +14,33 @@ export default function ViewChecklistModal({ isOpen, checklist, isLoading, onClo
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200">
         {isLoading ? (
           <div className="p-12 flex flex-col items-center justify-center">
-            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-violet-200 border-t-[#7C3AED] rounded-full animate-spin" />
             <p className="mt-4 text-slate-500">Loading checklist...</p>
           </div>
         ) : checklist ? (
           <>
-            <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+            <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${checklist.isValid
+                    <span className={`px-2 py-0.5 rounded text-caption font-bold ${checklist.isValid
                         ? 'bg-emerald-400/20 text-emerald-200'
                         : 'bg-red-400/20 text-red-200'
                       }`}>
                       {checklist.isValid ? 'VALID' : 'INVALID'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${checklist.status === 'LINKED'
+                    <span className={`px-2 py-0.5 rounded text-caption ${checklist.status === 'LINKED'
                         ? 'bg-violet-400/20 text-violet-200'
-                        : 'bg-blue-400/20 text-blue-200'
+                        : 'bg-violet-400/20 text-violet-200'
                       }`}>
                       {checklist.status === 'LINKED' ? 'LINKED' : 'ACTIVE'}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold">{checklist.strategyName}</h3>
-                  <p className="text-sm font-mono text-blue-100 mt-1">
+                  <h3 className="text-card-title font-bold">{checklist.strategyName}</h3>
+                  <p className="text-body font-mono text-violet-100 mt-1">
                     {checklist.sessionId}
                   </p>
-                  <p className="text-xs text-blue-200 mt-1">
+                  <p className="text-caption text-violet-200 mt-1">
                     {new Date(checklist.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -78,7 +78,7 @@ export default function ViewChecklistModal({ isOpen, checklist, isLoading, onClo
                       {item.label}
                     </span>
                     {item.required && (
-                      <span className={`text-xs px-2 py-0.5 rounded font-medium ${item.checked
+                      <span className={`text-caption px-2 py-0.5 rounded ${item.checked
                           ? 'bg-green-200 text-green-800'
                           : 'bg-red-200 text-red-800'
                         }`}>
@@ -91,15 +91,15 @@ export default function ViewChecklistModal({ isOpen, checklist, isLoading, onClo
 
               {checklist.notes && (
                 <div className="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                  <p className="text-sm font-medium text-amber-800 mb-1">Notes</p>
-                  <p className="text-sm text-amber-700">{checklist.notes}</p>
+                  <p className="text-body-sm text-amber-800 mb-1">Notes</p>
+                  <p className="text-body text-amber-700">{checklist.notes}</p>
                 </div>
               )}
 
               {checklist.missingRequired?.length > 0 && (
                 <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-                  <p className="text-sm font-medium text-red-800 mb-1">Missing Required Items</p>
-                  <ul className="text-sm text-red-700 space-y-1">
+                  <p className="text-body-sm text-red-800 mb-1">Missing Required Items</p>
+                  <ul className="text-body text-red-700 space-y-1">
                     {checklist.missingRequired.map((item: string, index: number) => (
                       <li key={index}>&bull; {item}</li>
                     ))}

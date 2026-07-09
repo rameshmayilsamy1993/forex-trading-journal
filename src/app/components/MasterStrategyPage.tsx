@@ -134,7 +134,7 @@ export default function MasterStrategyPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-page-title font-bold text-slate-900 flex items-center gap-2">
             <Settings className="w-7 h-7" />
             Strategy Checklists
           </h1>
@@ -161,7 +161,7 @@ export default function MasterStrategyPage() {
       {isEditing ? (
         <div className="bg-white rounded-xl shadow-lg border border-slate-200/50 overflow-hidden">
           <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-section-title font-bold flex items-center gap-2">
               {editingId ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               {editingId ? 'Edit Strategy' : 'Create New Strategy'}
             </h2>
@@ -169,14 +169,14 @@ export default function MasterStrategyPage() {
 
           <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-body-sm text-slate-700 mb-2">
                 Strategy Name <span className="text-red-500">*</span>
               </label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., ICT 4HR + 15MIN Entry"
-                className="text-lg"
+                className="text-card-title"
               />
             </div>
 
@@ -208,7 +208,7 @@ export default function MasterStrategyPage() {
           {strategies.length === 0 ? (
             <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
               <FileText className="w-16 h-16 text-slate-300 mx-auto" />
-              <h3 className="mt-4 text-lg font-medium text-slate-700">No Strategies Yet</h3>
+              <h3 className="mt-4 text-card-title text-slate-700">No Strategies Yet</h3>
               <p className="mt-2 text-slate-500">Create your first strategy checklist to get started</p>
               <Button onClick={handleCreate} className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
@@ -223,13 +223,13 @@ export default function MasterStrategyPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-slate-900">{strategy.name}</h3>
+                    <h3 className="text-card-title font-bold text-slate-900">{strategy.name}</h3>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(strategy.checklist || []).map((item, index) => (
                         <span
                           key={index}
                           className={cn(
-                            "inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm",
+                            "inline-flex items-center gap-1 px-3 py-1 rounded-full text-body-sm",
                             item.required
                               ? "bg-blue-100 text-blue-700"
                               : "bg-slate-100 text-slate-600"
@@ -237,12 +237,12 @@ export default function MasterStrategyPage() {
                         >
                           {item.label}
                           {item.required && (
-                            <span className="text-xs font-semibold">*</span>
+                            <span className="text-caption">*</span>
                           )}
                         </span>
                       ))}
                     </div>
-                    <p className="mt-3 text-sm text-slate-500">
+                    <p className="mt-3 text-body text-slate-500">
                       {(strategy.checklist || []).length} items •{' '}
                       {(strategy.checklist || []).filter(i => i.required).length} required
                     </p>

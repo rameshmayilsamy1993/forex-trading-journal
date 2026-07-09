@@ -95,7 +95,7 @@ export default function Masters() {
               <button
                 key={tab.id}
                 onClick={() => setActiveType(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-button transition-all duration-200 ${
                   activeType === tab.id
                     ? 'text-purple-700 border-b-2 border-purple-600 bg-purple-50/50'
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'

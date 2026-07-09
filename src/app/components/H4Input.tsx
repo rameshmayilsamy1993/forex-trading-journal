@@ -145,7 +145,7 @@ export default function H4Input() {
       <CardContainer>
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">Date:</label>
+            <label className="text-body-sm text-slate-700">Date:</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-[180px] justify-start">
@@ -167,7 +167,7 @@ export default function H4Input() {
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">Pair:</label>
+            <label className="text-body-sm text-slate-700">Pair:</label>
             <select
               value={selectedPair}
               onChange={(e) => setSelectedPair(e.target.value)}
@@ -181,7 +181,7 @@ export default function H4Input() {
 
           <button
             onClick={loadCurrentData}
-            className="px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg"
+            className="px-3 py-2 text-button bg-slate-100 hover:bg-slate-200 rounded-lg"
           >
             Load
           </button>
@@ -190,7 +190,7 @@ export default function H4Input() {
 
       {/* Candle Inputs */}
       <CardContainer>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">
+        <h3 className="text-card-title text-slate-900 mb-4">
           4-Hour Candles - {selectedPair}
         </h3>
         
@@ -231,7 +231,7 @@ export default function H4Input() {
                         )}
                       >
                         <Icon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{opt.label}</span>
+                        <span className="text-button">{opt.label}</span>
                       </button>
                     );
                   })}
@@ -250,7 +250,7 @@ export default function H4Input() {
                       }}
                       className="w-4 h-4 rounded border-slate-300 text-blue-600"
                     />
-                    <span className="flex items-center gap-1 text-sm text-blue-700">
+                    <span className="flex items-center gap-1 text-body-sm text-blue-700">
                       <ArrowUp className="w-3 h-3" /> High Taken
                     </span>
                   </label>
@@ -266,7 +266,7 @@ export default function H4Input() {
                       }}
                       className="w-4 h-4 rounded border-slate-300 text-purple-600"
                     />
-                    <span className="flex items-center gap-1 text-sm text-purple-700">
+                    <span className="flex items-center gap-1 text-body-sm text-purple-700">
                       <ArrowDown className="w-3 h-3" /> Low Taken
                     </span>
                   </label>
@@ -278,7 +278,7 @@ export default function H4Input() {
 
         {/* Notes */}
         <div className="mt-6 space-y-2">
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-body-sm text-slate-700">
             Notes (optional)
           </label>
           <Textarea
