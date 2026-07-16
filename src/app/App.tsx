@@ -5,9 +5,11 @@ import LiveISTClock from './components/common/LiveISTClock';
 import { useAuthContext } from './context/AuthContext';
 import { useNotifications } from './context/NotificationContext';
 import NotificationDropdown from './components/common/NotificationDropdown';
+import { AnimatePresence } from 'framer-motion';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from './components/ui/Loading';
 import { Toaster } from './components/ui/sonner';
+import AnimatedPage from './components/AnimatedPage';
 
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const TradeJournal = lazy(() => import('./components/TradeJournal'));
@@ -48,42 +50,46 @@ const Reminders = lazy(() => import('./components/Reminders'));
 function TabContent({ activeTab }: { activeTab: Tab }) {
   return (
     <Suspense fallback={<LoadingSpinner message="Loading..." />}>
-      <ErrorBoundary>
-        {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'journal' && <TradeJournal />}
-        {activeTab === 'import' && <TradeImport />}
-        {activeTab === 'convert' && <ConvertCsv />}
-        {activeTab === 'checklist' && <ChecklistExecutionPage />}
-        {activeTab === 'calendar' && <TradingCalendar />}
-        {activeTab === 'missed' && <MissedTradeJournal />}
-        {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
-        {activeTab === 'firms' && <PropFirms />}
-        {activeTab === 'accounts' && <Accounts />}
-        {activeTab === 'reports' && <Reports />}
-        {activeTab === 'strategy-master' && <MasterStrategyPage />}
-        {activeTab === 'bias' && <BiasMapping />}
-        {activeTab === 'bias-input' && <BiasInput />}
-        {activeTab === 'bias-history' && <BiasHistory />}
-        {activeTab === 'liquidity-input' && <LiquidityInput />}
-        {activeTab === 'liquidity-history' && <LiquidityHistory />}
-        {activeTab === 'crt-input' && <CRTInput />}
-        {activeTab === 'crt-history' && <CRTHistory />}
-        {activeTab === 'breached-trades' && <BreachedTrades />}
-        {activeTab === 'settings' && <Settings />}
-        {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
-        {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
-        {activeTab === 'market-stats' && <MarketStatistics />}
-        {activeTab === 'monthly-review' && <MonthlyReviewList />}
-        {activeTab === 'monthly-review-detail' && <MonthlyReviewDetail />}
-        {activeTab === 'monthly-review-form' && <MonthlyReviewForm />}
-        {activeTab === 'weekly-review' && <WeeklyReviewList />}
-        {activeTab === 'weekly-review-detail' && <WeeklyReviewDetail />}
-        {activeTab === 'weekly-review-form' && <WeeklyReviewForm />}
-        {activeTab === 'daily-review' && <DailyReviewList />}
-        {activeTab === 'daily-review-detail' && <DailyReviewDetail />}
-        {activeTab === 'daily-review-form' && <DailyReviewForm />}
-        {activeTab === 'reminders' && <Reminders />}
-      </ErrorBoundary>
+      <AnimatePresence mode="wait">
+        <AnimatedPage key={activeTab}>
+          <ErrorBoundary>
+            {activeTab === 'dashboard' && <Dashboard />}
+            {activeTab === 'journal' && <TradeJournal />}
+            {activeTab === 'import' && <TradeImport />}
+            {activeTab === 'convert' && <ConvertCsv />}
+            {activeTab === 'checklist' && <ChecklistExecutionPage />}
+            {activeTab === 'calendar' && <TradingCalendar />}
+            {activeTab === 'missed' && <MissedTradeJournal />}
+            {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
+            {activeTab === 'firms' && <PropFirms />}
+            {activeTab === 'accounts' && <Accounts />}
+            {activeTab === 'reports' && <Reports />}
+            {activeTab === 'strategy-master' && <MasterStrategyPage />}
+            {activeTab === 'bias' && <BiasMapping />}
+            {activeTab === 'bias-input' && <BiasInput />}
+            {activeTab === 'bias-history' && <BiasHistory />}
+            {activeTab === 'liquidity-input' && <LiquidityInput />}
+            {activeTab === 'liquidity-history' && <LiquidityHistory />}
+            {activeTab === 'crt-input' && <CRTInput />}
+            {activeTab === 'crt-history' && <CRTHistory />}
+            {activeTab === 'breached-trades' && <BreachedTrades />}
+            {activeTab === 'settings' && <Settings />}
+            {activeTab === 'xauusd-calculator' && <XauusdCalculator />}
+            {activeTab === 'forex-lot-calculator' && <ForexLotCalculator />}
+            {activeTab === 'market-stats' && <MarketStatistics />}
+            {activeTab === 'monthly-review' && <MonthlyReviewList />}
+            {activeTab === 'monthly-review-detail' && <MonthlyReviewDetail />}
+            {activeTab === 'monthly-review-form' && <MonthlyReviewForm />}
+            {activeTab === 'weekly-review' && <WeeklyReviewList />}
+            {activeTab === 'weekly-review-detail' && <WeeklyReviewDetail />}
+            {activeTab === 'weekly-review-form' && <WeeklyReviewForm />}
+            {activeTab === 'daily-review' && <DailyReviewList />}
+            {activeTab === 'daily-review-detail' && <DailyReviewDetail />}
+            {activeTab === 'daily-review-form' && <DailyReviewForm />}
+            {activeTab === 'reminders' && <Reminders />}
+          </ErrorBoundary>
+        </AnimatedPage>
+      </AnimatePresence>
     </Suspense>
   );
 }

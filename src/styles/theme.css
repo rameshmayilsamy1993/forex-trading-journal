@@ -355,12 +355,19 @@
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
+}
+
+@utility glass-panel-hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 @utility glass-card {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
 }
 
 @utility glass-chip {
@@ -369,7 +376,27 @@
   border: 1px solid #E2E8F0;
 }
 
+@utility animate-shimmer {
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(
+    90deg,
+    #F1F5F9 25%,
+    #F8FAFC 50%,
+    #F1F5F9 75%
+  );
+  background-size: 200% 100%;
+}
+
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
