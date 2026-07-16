@@ -16,18 +16,18 @@ const buttonVariants = cva(
         success:
           "bg-gradient-to-r from-[#16A34A] to-[#22C55E] text-white shadow-md shadow-[#16A34A]/20 hover:shadow-lg hover:shadow-[#16A34A]/25 hover:-translate-y-0.5",
         outline:
-          "border border-[#E5EAF2] bg-white text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] hover:shadow-sm active:bg-[#F1F5F9]",
+          "border border-white/10 bg-white/5 text-[#F1F5F9] hover:bg-white/10 hover:border-white/20 hover:shadow-sm active:bg-white/[0.08]",
         secondary:
-          "bg-[#F1F5F9] text-[#0F172A] hover:bg-[#E2E8F0] hover:shadow-sm",
+          "bg-white/5 text-[#F1F5F9] hover:bg-white/10 hover:shadow-sm",
         ghost:
-          "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]",
+          "text-[#94A3B8] hover:bg-white/5 hover:text-[#F1F5F9]",
         link: "text-[#7C3AED] underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-[38px] px-4 py-2 has-[>svg]:px-3",
-        sm: "h-[32px] rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 text-micro",
-        lg: "h-[42px] rounded-lg px-5 has-[>svg]:px-4",
-        icon: "size-[38px] rounded-lg",
+        default: "h-[34px] px-3.5 py-2 has-[>svg]:px-3",
+        sm: "h-[28px] rounded-md gap-1.5 px-2.5 has-[>svg]:px-2 text-micro",
+        lg: "h-[38px] rounded-lg px-4 has-[>svg]:px-3.5",
+        icon: "size-[34px] rounded-lg",
       },
     },
     defaultVariants: {
