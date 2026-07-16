@@ -121,11 +121,11 @@ interface SidebarProps {
 
 // Shared sidebar nav item classes for consistent spacing
 const NAV_BASE = "w-full flex items-center gap-2.5 rounded-xl text-sidebar-menu transition-all duration-200 relative group";
-const NAV_ACTIVE = "bg-gradient-to-r from-[#7C3AED]/20 to-transparent text-white shadow-[0_0_20px_rgba(124,58,237,0.15)]";
-const NAV_INACTIVE = "text-slate-400 hover:text-white hover:bg-white/[0.04]";
+const NAV_ACTIVE = "bg-gradient-to-r from-[#7C3AED]/10 to-transparent text-[#0F172A] font-medium";
+const NAV_INACTIVE = "text-[#475569] hover:text-[#0F172A] hover:bg-[#F1F5F9]";
 const NAV_ICON = "w-[18px] h-[18px] flex-shrink-0 transition-all duration-200";
 const NAV_ICON_ACTIVE = "text-[#7C3AED]";
-const NAV_ICON_INACTIVE = "text-slate-500 group-hover:text-white";
+const NAV_ICON_INACTIVE = "text-[#94A3B8] group-hover:text-[#475569]";
 const ACTIVE_INDICATOR = "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#7C3AED] rounded-r-full shadow-[0_0_8px_rgba(124,58,237,0.5)]";
 
 export default function Sidebar({
@@ -211,7 +211,7 @@ export default function Sidebar({
               <span className="flex-1 text-left">{item.label}</span>
               {hasChildren && (
                 <ChevronDown className={cn(
-                  "w-4 h-4 text-slate-500 transition-transform duration-200",
+                  "w-4 h-4 text-[#94A3B8] transition-transform duration-200",
                   isExpanded && "rotate-180",
                 )} />
               )}
@@ -232,7 +232,7 @@ export default function Sidebar({
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={onMobileClose}
         />
       )}
@@ -241,7 +241,7 @@ export default function Sidebar({
       <aside
         className={cn(
           "fixed top-0 left-0 h-screen z-50 transition-all duration-300 flex flex-col",
-          "bg-[#0F172A] border-r border-white/[0.06] shadow-2xl shadow-slate-950/40",
+          "bg-white border-r border-[#E2E8F0] shadow-lg",
           isCollapsed ? "w-[72px]" : "w-[260px]",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
@@ -249,34 +249,34 @@ export default function Sidebar({
         {/* Logo */}
         <div
           className={cn(
-            "h-16 flex items-center border-b border-white/[0.06] px-4",
+            "h-16 flex items-center border-b border-[#E2E8F0] px-4",
             isCollapsed ? "justify-center" : "justify-between",
           )}
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#7C3AED] via-[#6D28D9] to-[#4F46E5] rounded-xl flex items-center justify-center shadow-lg shadow-[#7C3AED]/40 ring-1 ring-white/[0.1]">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#7C3AED] via-[#6D28D9] to-[#4F46E5] rounded-xl flex items-center justify-center shadow-lg shadow-[#7C3AED]/25">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
               <div>
-                <h1 className="text-section-title text-white">FX Journal</h1>
-                <p className="text-caption text-slate-400">Trading Platform</p>
+                <h1 className="text-section-title text-[#0F172A]">FX Journal</h1>
+                <p className="text-caption text-[#475569]">Trading Platform</p>
               </div>
             )}
           </div>
           {!isCollapsed && (
-            <button onClick={onMobileClose} className="lg:hidden p-2 hover:bg-white/[0.06] rounded-lg transition-colors" aria-label="Close navigation menu">
-              <X className="w-4 h-4 text-slate-400" />
+            <button onClick={onMobileClose} className="lg:hidden p-2 hover:bg-[#F1F5F9] rounded-lg transition-colors" aria-label="Close navigation menu">
+              <X className="w-4 h-4 text-[#94A3B8]" />
             </button>
           )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-2.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <nav className="flex-1 overflow-y-auto py-4 px-2.5 scrollbar-thin scrollbar-thumb-[#E2E8F0] scrollbar-track-transparent">
           {visibleGroups.map((group, groupIndex) => (
             <div key={group.title} className={cn(groupIndex > 0 && "mt-5")}>
               {!isCollapsed && (
-                <p className="px-3 mb-1.5 text-sidebar-group text-slate-600">
+                <p className="px-3 mb-1.5 text-sidebar-group text-[#94A3B8]">
                   {group.title}
                 </p>
               )}
@@ -290,13 +290,13 @@ export default function Sidebar({
         {/* Collapse Toggle (Desktop) */}
         <button
           onClick={() => onCollapsedChange(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-[#1E293B] border border-white/[0.08] rounded-full items-center justify-center shadow-lg shadow-slate-950/30 hover:bg-[#334155] transition-colors"
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white border border-[#E2E8F0] rounded-full items-center justify-center shadow-lg hover:bg-[#F1F5F9] transition-colors"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight className="w-3 h-3 text-slate-400" />
+            <ChevronRight className="w-3 h-3 text-[#94A3B8]" />
           ) : (
-            <ChevronLeft className="w-3 h-3 text-slate-400" />
+            <ChevronLeft className="w-3 h-3 text-[#94A3B8]" />
           )}
         </button>
       </aside>
