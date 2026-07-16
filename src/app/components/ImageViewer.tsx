@@ -182,7 +182,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }: Image
               key={i}
               onClick={() => setCurrentIndex(i)}
               className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition ${
-                i === currentIndex ? 'border-blue-500' : 'border-white/30 hover:border-white/60'
+                i === currentIndex ? 'border-[#7C3AED]' : 'border-white/30 hover:border-white/60'
               }`}
             >
               <img src={getThumbnail(img.url)} alt={img.label} className="w-full h-full object-cover" loading="lazy" />

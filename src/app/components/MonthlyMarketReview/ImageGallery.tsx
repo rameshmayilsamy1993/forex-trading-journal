@@ -85,13 +85,13 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-[#E5EAF2] bg-white/40"
+        className="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02]"
       >
-        <div className="size-20 rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center mb-5">
+        <div className="size-20 rounded-2xl bg-gradient-to-br from-[#7C3AED]/20 to-[#4F46E5]/10 flex items-center justify-center mb-5">
           <ImageIcon className="size-9 text-[#7C3AED]/40" />
         </div>
-        <p className="text-body font-medium text-[#64748B]">No images attached</p>
-        <p className="text-caption text-[#94A3B8] mt-1">Screenshots will appear here</p>
+        <p className="text-body font-medium text-muted-foreground">No images attached</p>
+        <p className="text-caption text-muted-foreground mt-1">Screenshots will appear here</p>
       </motion.div>
     );
   }
@@ -111,7 +111,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
             className="break-inside-avoid mb-4 group relative cursor-pointer"
             onClick={() => openLightbox(index)}
           >
-            <div className="relative overflow-hidden rounded-2xl bg-[#F8FAFC] border border-[#E5EAF2] shadow-sm transition-shadow duration-300 group-hover:shadow-xl">
+            <div className="relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/10 shadow-sm transition-shadow duration-300 group-hover:shadow-xl shadow-black/20">
               <img
                 src={image.url}
                 alt={image.caption || 'Gallery image'}
@@ -143,7 +143,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center"
             onClick={closeLightbox}
           >
             <motion.button
