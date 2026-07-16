@@ -27,24 +27,6 @@ interface WeekData {
   daysTraded: number;
 }
 
-const SAMPLE_TRADES: Trade[] = [
-  { id: '1', accountId: 'acc1', propFirmId: 'firm1', pair: 'EUR/USD', type: 'BUY', status: 'CLOSED', entryPrice: 1.0850, exitPrice: 1.0880, lotSize: 0.1, entryDate: '2026-03-02', profit: 30 },
-  { id: '2', accountId: 'acc1', propFirmId: 'firm1', pair: 'GBP/USD', type: 'SELL', status: 'CLOSED', entryPrice: 1.2650, exitPrice: 1.2620, lotSize: 0.1, entryDate: '2026-03-02', profit: 30 },
-  { id: '3', accountId: 'acc2', propFirmId: 'firm2', pair: 'USD/JPY', type: 'BUY', status: 'CLOSED', entryPrice: 149.50, exitPrice: 150.00, lotSize: 0.1, entryDate: '2026-03-03', profit: 50 },
-  { id: '4', accountId: 'acc1', propFirmId: 'firm1', pair: 'EUR/GBP', type: 'SELL', status: 'CLOSED', entryPrice: 0.8550, exitPrice: 0.8580, lotSize: 0.1, entryDate: '2026-03-05', profit: -30 },
-  { id: '5', accountId: 'acc1', propFirmId: 'firm1', pair: 'AUD/USD', type: 'BUY', status: 'CLOSED', entryPrice: 0.6550, exitPrice: 0.6600, lotSize: 0.1, entryDate: '2026-03-05', profit: 50 },
-];
-
-const SAMPLE_FIRMS: PropFirm[] = [
-  { id: 'firm1', name: 'Funding Pips', color: '#3B82F6', createdAt: '' },
-  { id: 'firm2', name: 'FTMO', color: '#10B981', createdAt: '' },
-];
-
-const SAMPLE_ACCOUNTS: TradingAccount[] = [
-  { id: 'acc1', name: '25K Account', propFirmId: 'firm1', initialBalance: 25000, currentBalance: 25230, currency: 'USD', status: 'ACTIVE', isActive: true, canTrade: true, createdAt: '' },
-  { id: 'acc2', name: '50K Account', propFirmId: 'firm2', initialBalance: 50000, currentBalance: 50180, currency: 'USD', status: 'ACTIVE', isActive: true, canTrade: true, createdAt: '' },
-];
-
 export default function TradingCalendar() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [firms, setFirms] = useState<PropFirm[]>([]);

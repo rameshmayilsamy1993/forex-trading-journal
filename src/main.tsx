@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "./app/context/AuthContext";
+import { NotificationProvider } from "./app/context/NotificationContext";
 import App from "./app/App.tsx";
 import Login from "./app/components/Login";
 import "./styles/index.css";
@@ -28,7 +29,9 @@ createRoot(document.getElementById("root")!).render(
           path="/"
           element={
             <ProtectedRoute>
-              <App />
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
             </ProtectedRoute>
           }
         />

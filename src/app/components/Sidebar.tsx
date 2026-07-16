@@ -5,7 +5,7 @@ import {
   Activity, FileSpreadsheet, ClipboardCheck, Settings2,
   ChevronDown, ChevronLeft, ChevronRight, X, TrendingUp,
   TrendingDown, History, Layers, AlertTriangle, Calculator,
-  DollarSign, BarChart4, Sparkles, NotebookText
+  DollarSign, BarChart4, Sparkles, NotebookText, Bell
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import apiService, { User as UserType } from '../services/apiService';
@@ -30,7 +30,7 @@ function saveHiddenTabs(hidden: Set<Tab>) {
   localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
 }
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats' | 'monthly-review' | 'monthly-review-detail' | 'monthly-review-form' | 'weekly-review' | 'weekly-review-detail' | 'weekly-review-form' | 'daily-review' | 'daily-review-detail' | 'daily-review-form';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats' | 'monthly-review' | 'monthly-review-detail' | 'monthly-review-form' | 'weekly-review' | 'weekly-review-detail' | 'weekly-review-form' | 'daily-review' | 'daily-review-detail' | 'daily-review-form' | 'reminders';
 
 interface NavItem {
   id: Tab;
@@ -103,6 +103,7 @@ const navigationGroups: NavGroup[] = [
       { id: 'firms', label: 'Prop Firms', icon: Building2 },
       { id: 'strategy-master', label: 'Strategies', icon: Settings2 },
       { id: 'settings', label: 'Settings', icon: SettingsIcon },
+      { id: 'reminders', label: 'Reminders', icon: Bell },
     ],
   },
 ];

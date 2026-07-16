@@ -218,9 +218,6 @@ export default function TradeImport() {
       setIsLoading(true);
       setError(null);
       try {
-        console.log('=== IMPORT CONVERTED DEBUG ===');
-        console.log('Account:', selectedAccount);
-        console.log('Data keys:', Object.keys(convertedData[0] || {}));
         
         const data = await apiService.importConverted(convertedData, selectedAccount);
         setResult(data);

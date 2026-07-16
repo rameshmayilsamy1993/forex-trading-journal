@@ -129,4 +129,20 @@ const getList = async (req, res, next) => {
   }
 };
 
-module.exports = { create, getByTrade, update, getList };
+const remove = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const analysis = await LossAnalysis.findOneAndDelete({
+      _id: id,
+      userId: req.session.userId
+    });
+    if (!analysis) {
+      return res.status(404).json({ message: 'Analysis not found' });
+    }
+    res.json({ message: 'Analysis deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { create, getByTrade, update, getList, remove };

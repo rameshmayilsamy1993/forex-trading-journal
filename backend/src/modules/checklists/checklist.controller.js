@@ -362,8 +362,6 @@ const unlinkChecklistFromTrades = async (req, res, next) => {
 
     if (checklist.linkedTrades.length === 0) {
       checklist.status = 'ACTIVE';
-    } else {
-      checklist.status = 'PARTIAL';
     }
 
     await checklist.save();

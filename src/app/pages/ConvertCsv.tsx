@@ -183,8 +183,6 @@ const convertFundingPipsSimple = (data: string[][]): Record<string, string | num
     const row = data[i];
     if (!row || row.length < 13) continue;
     
-    console.log('ROW:', row);
-    console.log('Profit Value:', row[FUNDING_PIPS_MAP.profit]);
     
     if (!row[FUNDING_PIPS_MAP.symbol]) {
       console.warn('Missing Symbol');
@@ -265,7 +263,6 @@ const convertMT5 = (data: Record<string, string>[]): ConvertedTrade[] => {
   const results: ConvertedTrade[] = [];
   
   for (const row of data) {
-    console.log('Row keys:', Object.keys(row));
     
     const entryDateTimeRaw = getColumn(row, ['time', 'time_1', 'open']);
     const exitDateTimeRaw = getColumn(row, ['time.1', 'time_2', 'close']);

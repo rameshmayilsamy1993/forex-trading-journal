@@ -3,6 +3,8 @@ import { Menu, User, LogOut, Bell, Settings as SettingsIcon, Sparkles } from 'lu
 import Sidebar, { Tab } from './components/Sidebar';
 import LiveISTClock from './components/common/LiveISTClock';
 import { useAuthContext } from './context/AuthContext';
+import { useNotifications } from './context/NotificationContext';
+import NotificationDropdown from './components/common/NotificationDropdown';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from './components/ui/Loading';
 import { Toaster } from './components/ui/sonner';
@@ -41,6 +43,7 @@ const WeeklyReviewForm = lazy(() => import('./components/WeeklyMarketReview/Week
 const DailyReviewList = lazy(() => import('./components/DailyMarketReview/DailyReviewList'));
 const DailyReviewDetail = lazy(() => import('./components/DailyMarketReview/DailyReviewDetail'));
 const DailyReviewForm = lazy(() => import('./components/DailyMarketReview/DailyReviewForm'));
+const Reminders = lazy(() => import('./components/Reminders'));
 
 function TabContent({ activeTab }: { activeTab: Tab }) {
   return (
@@ -79,6 +82,7 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
         {activeTab === 'daily-review' && <DailyReviewList />}
         {activeTab === 'daily-review-detail' && <DailyReviewDetail />}
         {activeTab === 'daily-review-form' && <DailyReviewForm />}
+        {activeTab === 'reminders' && <Reminders />}
       </ErrorBoundary>
     </Suspense>
   );
@@ -86,6 +90,7 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
 
 export default function App() {
   const { user: currentUser, logout: handleLogout } = useAuthContext();
+  const { unreadCount } = useNotifications();
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -137,10 +142,9 @@ export default function App() {
         <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB]/60 items-center justify-end px-6 gap-3">
           <LiveISTClock />
           <div className="w-px h-6 bg-slate-200/60" />
-          <button className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all duration-200 relative" title="Notifications">
-            <Bell className="w-3.5 h-3.5" />
-            <span className="absolute top-1 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
-          </button>
+          <NotificationDropdown onNavigateToReminders={() => {
+            window.dispatchEvent(new CustomEvent('navigate-to-tab', { detail: 'reminders' }));
+          }} />
           <button className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all duration-200" title="Settings">
             <SettingsIcon className="w-3.5 h-3.5" />
           </button>
