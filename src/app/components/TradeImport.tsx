@@ -401,7 +401,7 @@ export default function TradeImport() {
                         e.preventDefault();
                         handleReset();
                       }}
-                      className="mt-2 text-body text-rose-500 hover:text-rose-700 transition-colors"
+                      className="mt-2 text-body text-rose-500 hover:text-rose-400 transition-colors"
                     >
                       Remove file
                     </button>
@@ -413,7 +413,7 @@ export default function TradeImport() {
                     </div>
                     <p className="text-slate-600 font-medium">
                       Drag and drop your file here, or{' '}
-                      <span className="text-blue-600 font-semibold hover:underline">browse</span>
+                      <span className="text-[#7C3AED] font-semibold hover:underline">browse</span>
                     </p>
                     <p className="text-body text-slate-400">
                       Supports .xlsx, .xls (Excel) and .csv (MT5) files
@@ -469,53 +469,53 @@ export default function TradeImport() {
               <h3 className="font-semibold text-slate-900 mb-3">
                 Preview (first {preview.length} rows)
               </h3>
-              <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-200/50">
-                <table className="min-w-full divide-y divide-slate-200 text-table-cell">
-                  <thead className="bg-slate-50/50">
+              <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-white/10">
+                <table className="min-w-full divide-y divide-white/10 text-table-cell">
+                  <thead className="bg-white/[0.02]">
                     <tr>
-                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-left text-table-header text-muted-foreground uppercase">
                         Status
                       </th>
-                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-left text-table-header text-muted-foreground uppercase">
                         Position ID
                       </th>
-                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-left text-table-header text-muted-foreground uppercase">
                         Pair
                       </th>
-                      <th className="px-3 py-3 text-left text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-left text-table-header text-muted-foreground uppercase">
                         Type
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         Lots
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         Entry
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         S/L
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         T/P
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         Exit
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         Comm
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         Swap
                       </th>
-                      <th className="px-3 py-3 text-right text-table-header text-slate-600 uppercase">
+                      <th className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">
                         Profit
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-white/5">
                     {preview.map((trade, idx) => (
                       <tr
                         key={idx}
-                        className={`hover:bg-slate-50/50 transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-50/50' : ''}`}
+                        className={`hover:bg-white/[0.02] transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-950/20' : ''}`}
                       >
                         <td className="px-3 py-3">
                           {trade.isDuplicate ? (
@@ -528,154 +528,49 @@ export default function TradeImport() {
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-3 text-caption text-slate-700 font-mono">
+                        <td className="px-3 py-3 text-caption text-foreground font-mono">
                           {trade.positionId || '-'}
                         </td>
-                        <td className="px-3 py-3 text-slate-900 font-semibold">
+                        <td className="px-3 py-3 text-foreground font-semibold">
                           {trade.pair || '-'}
                         </td>
                         <td className="px-3 py-3">
                           <span
                             className={`inline-flex px-2.5 py-1 text-caption rounded-lg ${
                               trade.type === 'BUY'
-                                ? 'text-emerald-700 bg-emerald-100'
-                                : trade.type === 'SELL'
-                                ? 'text-rose-700 bg-rose-100'
-                                : 'text-slate-700 bg-slate-100'
-                            }`}
-                          >
-                            {trade.type || '-'}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700">
-                          {trade.lotSize != null && trade.lotSize !== 0 ? trade.lotSize.toFixed(2) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.entryPrice != null && trade.entryPrice !== 0 ? formatPrice(trade.entryPrice, trade.pair) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.stopLoss != null && trade.stopLoss !== 0 ? formatPrice(trade.stopLoss, trade.pair) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.takeProfit != null && trade.takeProfit !== 0 ? formatPrice(trade.takeProfit, trade.pair) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700 font-mono">
-                          {trade.exitPrice != null && trade.exitPrice !== 0 ? formatPrice(trade.exitPrice, trade.pair) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700">
-                          {trade.commission != null && trade.commission !== 0 ? trade.commission.toFixed(2) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-700">
-                          {trade.swap != null && trade.swap !== 0 ? trade.swap.toFixed(2) : '-'}
-                        </td>
-                        <td className={`px-3 py-3 text-right font-semibold ${
-                          (trade.profit ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
-                        }`}>
-                          {trade.profit != null ? trade.profit.toFixed(2) : '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {convertedData.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-semibold text-slate-900 mb-3">
-                Converted MT5 Data (first {convertedData.length} rows)
-              </h3>
-              <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-200/50">
-                <table className="min-w-full divide-y divide-slate-200 text-table-cell">
-                  <thead className="bg-slate-50/50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
-                        Position ID
-                      </th>
-                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
-                        Pair
-                      </th>
-                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
-                        Type
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        Lots
-                      </th>
-                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
-                        Entry Date Time
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        Entry Price
-                      </th>
-                      <th className="px-4 py-3 text-left text-table-header text-slate-600 uppercase">
-                        Exit Date Time
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        Exit Price
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        S/L
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        T/P
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        Commission
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        Swap
-                      </th>
-                      <th className="px-4 py-3 text-right text-table-header text-slate-600 uppercase">
-                        Profit
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {convertedData.map((trade, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50 transition-colors duration-150">
-                        <td className="px-4 py-3 text-caption text-slate-700 font-mono">
-                          {trade.positionId || '-'}
-                        </td>
-                        <td className="px-4 py-3 text-slate-900 font-semibold">
-                          {trade.pair || '-'}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex px-2.5 py-1 text-caption rounded-lg ${
-                            trade.type === 'BUY'
-                              ? 'text-emerald-700 bg-emerald-100'
+? 'text-emerald-400 bg-emerald-950/30'
                               : trade.type === 'SELL'
-                              ? 'text-rose-700 bg-rose-100'
-                              : 'text-slate-700 bg-slate-100'
+                              ? 'text-rose-400 bg-rose-950/30'
+                              : 'text-foreground bg-white/5'
                           }`}>
                             {trade.type || '-'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700">
+                        <td className="px-4 py-3 text-right text-foreground">
                           {trade.lot != null ? trade.lot.toFixed(2) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-slate-700">
+                        <td className="px-4 py-3 text-foreground">
                           {trade.entryDate ? `${trade.entryDate} ${trade.entryTime}` : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                        <td className="px-4 py-3 text-right text-foreground font-mono">
                           {trade.entryPrice != null ? formatPrice(trade.entryPrice, trade.pair) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-slate-700">
+                        <td className="px-4 py-3 text-foreground">
                           {trade.exitDate ? `${trade.exitDate} ${trade.exitTime}` : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                        <td className="px-4 py-3 text-right text-foreground font-mono">
                           {trade.exitPrice != null ? formatPrice(trade.exitPrice, trade.pair) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                        <td className="px-4 py-3 text-right text-foreground font-mono">
                           {trade.stopLoss != null ? formatPrice(trade.stopLoss, trade.pair) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700 font-mono">
+                        <td className="px-4 py-3 text-right text-foreground font-mono">
                           {trade.takeProfit != null ? formatPrice(trade.takeProfit, trade.pair) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700">
+                        <td className="px-4 py-3 text-right text-foreground">
                           {trade.commission != null ? trade.commission.toFixed(2) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-700">
+                        <td className="px-4 py-3 text-right text-foreground">
                           {trade.swap != null ? trade.swap.toFixed(2) : '-'}
                         </td>
                         <td className={`px-4 py-3 text-right font-semibold ${

@@ -118,7 +118,7 @@ const metricColorMap = {
   },
   red: {
     icon: 'from-rose-500 to-red-600',
-    text: 'text-rose-700',
+    text: 'text-rose-400',
     bg: 'bg-rose-50',
   },
   orange: {
@@ -127,8 +127,8 @@ const metricColorMap = {
     bg: 'bg-amber-50',
   },
   blue: {
-    icon: 'from-blue-500 to-indigo-600',
-    text: 'text-blue-700',
+    icon: 'from-[#7C3AED] to-[#4F46E5]',
+    text: 'text-[#6D28D9]',
     bg: 'bg-blue-50',
   },
 };
@@ -666,13 +666,13 @@ export default function MarketStatistics() {
               <div className="overflow-x-auto">
                 <table className="w-full text-table-cell">
                   <thead>
-                    <tr className="bg-slate-50/80">
-                      <th className="px-6 py-3 text-left text-table-header text-slate-500 uppercase">Session</th>
-                      <th className="px-6 py-3 text-left text-table-header text-slate-500 uppercase">Description</th>
-                      <th className="px-6 py-3 text-right text-table-header text-slate-500 uppercase">Avg Body</th>
-                      <th className="px-6 py-3 text-right text-table-header text-slate-500 uppercase">Avg Range</th>
-                      <th className="px-6 py-3 text-center text-table-header text-slate-500 uppercase">Volatility</th>
-                      <th className="px-6 py-3 text-right text-table-header text-slate-500 uppercase">Activity</th>
+                    <tr className="bg-white/[0.02]">
+                      <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Session</th>
+                      <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Description</th>
+                      <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Body</th>
+                      <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Range</th>
+                      <th className="px-6 py-3 text-center text-table-header text-muted-foreground uppercase">Volatility</th>
+                      <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Activity</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -682,13 +682,13 @@ export default function MarketStatistics() {
                       const activityPct = s ? Math.round((s.avg_range / maxRange) * 100) : 0;
                       const volLevel = s ? getVolatilityLevel(s.avg_range, sessionsData) : 'Medium';
                       return (
-                        <tr key={session} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">{session}</td>
-                          <td className="px-6 py-4 text-caption text-slate-500 whitespace-nowrap">{sessionDescriptions[session]}</td>
-                          <td className="px-6 py-4 text-right text-slate-800 font-medium tabular-nums whitespace-nowrap">
+                        <tr key={session} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-6 py-4 font-semibold text-foreground whitespace-nowrap">{session}</td>
+                          <td className="px-6 py-4 text-caption text-muted-foreground whitespace-nowrap">{sessionDescriptions[session]}</td>
+                          <td className="px-6 py-4 text-right text-foreground font-medium tabular-nums whitespace-nowrap">
                             {s ? `${formatNumber(s.avg_body)} ${unit}` : '—'}
                           </td>
-                          <td className="px-6 py-4 text-right text-slate-800 font-medium tabular-nums whitespace-nowrap">
+                          <td className="px-6 py-4 text-right text-foreground font-medium tabular-nums whitespace-nowrap">
                             {s ? `${formatNumber(s.avg_range)} ${unit}` : '—'}
                           </td>
                           <td className="px-6 py-4 text-center whitespace-nowrap">
@@ -702,7 +702,7 @@ export default function MarketStatistics() {
                                   style={{ width: `${activityPct}%` }}
                                 />
                               </div>
-                              <span className="text-caption text-slate-600 w-8 text-right">{activityPct}%</span>
+                              <span className="text-caption text-muted-foreground w-8 text-right">{activityPct}%</span>
                             </div>
                           </td>
                         </tr>
@@ -732,11 +732,11 @@ export default function MarketStatistics() {
               <div className="overflow-x-auto">
                 <table className="w-full text-table-cell">
                   <thead>
-                    <tr className="bg-slate-50/80">
-                      <th className="px-6 py-3 text-left text-table-header text-slate-500 uppercase">Day</th>
-                      <th className="px-6 py-3 text-right text-table-header text-slate-500 uppercase">Avg Body</th>
-                      <th className="px-6 py-3 text-right text-table-header text-slate-500 uppercase">Avg Range</th>
-                      <th className="px-6 py-3 text-center text-table-header text-slate-500 uppercase">Best For</th>
+                    <tr className="bg-white/[0.02]">
+                      <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Day</th>
+                      <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Body</th>
+                      <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Range</th>
+                      <th className="px-6 py-3 text-center text-table-header text-muted-foreground uppercase">Best For</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -744,12 +744,12 @@ export default function MarketStatistics() {
                       const d = results.weekdays[day];
                       const style = d ? getTradingStyle(day, d.avg_range) : 'Range Trading';
                       return (
-                        <tr key={day} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 font-semibold text-slate-800">{day}</td>
-                          <td className="px-6 py-4 text-right text-slate-800 font-medium tabular-nums">
+                        <tr key={day} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-6 py-4 font-semibold text-foreground">{day}</td>
+                          <td className="px-6 py-4 text-right text-foreground font-medium tabular-nums">
                             {d ? `${formatNumber(d.avg_body)} ${unit}` : '—'}
                           </td>
-                          <td className="px-6 py-4 text-right text-slate-800 font-medium tabular-nums">
+                          <td className="px-6 py-4 text-right text-foreground font-medium tabular-nums">
                             {d ? `${formatNumber(d.avg_range)} ${unit}` : '—'}
                           </td>
                           <td className="px-6 py-4 text-center">
@@ -779,11 +779,11 @@ export default function MarketStatistics() {
               <div className="overflow-x-auto">
                 <table className="w-full text-table-cell">
                   <thead>
-                    <tr className="bg-slate-50/80">
-                      <th className="px-6 py-3 text-left text-table-header text-slate-500 uppercase">Direction</th>
-                      <th className="px-6 py-3 text-left text-table-header text-slate-500 uppercase">Metric</th>
+                    <tr className="bg-white/[0.02]">
+                      <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Direction</th>
+                      <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Metric</th>
                       {[50, 60, 70, 80, 90, 95].map((lvl) => (
-                        <th key={lvl} className="px-3 py-3 text-right text-table-header text-slate-500 uppercase">{lvl}%</th>
+                        <th key={lvl} className="px-3 py-3 text-right text-table-header text-muted-foreground uppercase">{lvl}%</th>
                       ))}
                     </tr>
                   </thead>
@@ -791,19 +791,19 @@ export default function MarketStatistics() {
                     {probabilityMetrics.map((row) => {
                       const data = results.probabilities[row.dir]?.[row.metric];
                       const isBullish = row.dir === 'bullish';
-                      const dirColor = isBullish ? 'text-emerald-700' : 'text-rose-700';
+                      const dirColor = isBullish ? 'text-emerald-400' : 'text-rose-400';
                       const dirLabel = isBullish ? 'Bullish' : 'Bearish';
                       return (
-                        <tr key={`${row.dir}-${row.metric}`} className="hover:bg-slate-50/50 transition-colors">
+                        <tr key={`${row.dir}-${row.metric}`} className="hover:bg-white/[0.02] transition-colors">
                           <td className={`px-6 py-4 font-semibold ${dirColor} capitalize`}>{dirLabel}</td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-slate-700 font-medium">{row.label}</span>
+                              <span className="text-foreground font-medium">{row.label}</span>
                               <InfoTip content={row.explanation} />
                             </div>
                           </td>
                           {[50, 60, 70, 80, 90, 95].map((lvl) => (
-                            <td key={lvl} className="px-3 py-4 text-right text-slate-800 font-medium tabular-nums whitespace-nowrap">
+                            <td key={lvl} className="px-3 py-4 text-right text-foreground font-medium tabular-nums whitespace-nowrap">
                               {data ? `${formatNumber(data[lvl])}` : '—'}
                             </td>
                           ))}

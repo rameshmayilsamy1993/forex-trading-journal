@@ -339,20 +339,20 @@ export default function Reports() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC]">
-                  <th className="text-left py-3 px-4 text-table-header text-[#64748B]">
+                <tr className="border-b border-white/10 bg-white/5">
+                  <th className="text-left py-3 px-4 text-table-header text-muted-foreground">
                     Month
                   </th>
-                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
+                  <th className="text-right py-3 px-4 text-table-header text-muted-foreground">
                     Trades
                   </th>
-                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
+                  <th className="text-right py-3 px-4 text-table-header text-muted-foreground">
                     Wins
                   </th>
-                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
+                  <th className="text-right py-3 px-4 text-table-header text-muted-foreground">
                     Win Rate
                   </th>
-                  <th className="text-right py-3 px-4 text-table-header text-[#64748B]">
+                  <th className="text-right py-3 px-4 text-table-header text-muted-foreground">
                     Profit/Loss
                   </th>
                 </tr>
@@ -370,12 +370,12 @@ export default function Reports() {
                     }
                   })();
                   return (
-                    <tr key={month.month} className="border-b border-[#E5E7EB]/60 hover:bg-[#F8FAFC] transition-colors">
-                      <td className="py-3 px-4 text-table-cell text-[#0F172A]">
+                    <tr key={month.month} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3 px-4 text-table-cell text-foreground">
                         {monthDate || month.month}
                       </td>
-                      <td className="py-3 px-4 text-table-cell text-right text-[#0F172A]">{month.trades}</td>
-                      <td className="py-3 px-4 text-table-cell text-right text-[#0F172A]">{month.wins}</td>
+                      <td className="py-3 px-4 text-table-cell text-right text-foreground">{month.trades}</td>
+                      <td className="py-3 px-4 text-table-cell text-right text-foreground">{month.wins}</td>
                       <td className="py-3 px-4 text-table-cell text-right">
                         <span className={`font-semibold ${getWinRateColor(month.winRate)}`}>
                           {month.winRate.toFixed(1)}%

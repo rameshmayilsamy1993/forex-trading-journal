@@ -17,7 +17,7 @@ const RR_RATIOS = [
 
 const RR_COLORS = [
   { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: Target },
-  { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: TrendingUp },
+  { bg: 'bg-blue-950/30', border: 'border-blue-800/40', text: 'text-[#6D28D9]', icon: TrendingUp },
   { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', icon: BarChart4 },
   { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', icon: TrendingUp },
 ];
@@ -71,7 +71,7 @@ export default function XauusdCalculator() {
                       onClick={() => setRiskInput(String(amount))}
                       className={`flex-1 min-w-[80px] px-4 py-3 rounded-xl text-button transition-all duration-200 border-2 ${
                         riskInput === String(amount)
-                          ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
+                          ? 'bg-blue-950/30 border-blue-500 text-[#6D28D9] shadow-sm'
                           : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50/50'
                       }`}
                     >
@@ -187,23 +187,23 @@ export default function XauusdCalculator() {
             <div className="overflow-hidden rounded-xl border border-slate-200">
               <table className="w-full text-table-cell">
                 <thead>
-                  <tr className="bg-slate-50">
-                    <th className="px-4 py-2.5 text-left text-table-header text-slate-500">SL</th>
-                    <th className="px-4 py-2.5 text-right text-table-header text-slate-500">Lot</th>
+                  <tr className="bg-white/[0.02]">
+                    <th className="px-4 py-2.5 text-left text-table-header text-muted-foreground">SL</th>
+                    <th className="px-4 py-2.5 text-right text-table-header text-muted-foreground">Lot</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-white/5">
                   {QUICK_REFERENCE_SL.map((sl) => {
                     const lot = riskAmount / sl;
                     return (
                       <tr
                         key={sl}
-                        className={`hover:bg-slate-50 transition-colors ${
-                          sl === slPoints ? 'bg-blue-50 font-semibold' : ''
+                        className={`hover:bg-white/[0.02] transition-colors ${
+                          sl === slPoints ? 'bg-blue-950/20 font-semibold' : ''
                         }`}
                       >
-                        <td className="px-4 py-2 text-slate-700">{sl}</td>
-                        <td className="px-4 py-2 text-right text-slate-900 tabular-nums">{lot.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-foreground">{sl}</td>
+                        <td className="px-4 py-2 text-right text-foreground tabular-nums">{lot.toFixed(2)}</td>
                       </tr>
                     );
                   })}

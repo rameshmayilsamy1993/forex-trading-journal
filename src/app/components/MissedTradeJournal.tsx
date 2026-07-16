@@ -28,7 +28,7 @@ const REASON_OPTIONS = [
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
 const QUARTER_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
-  Q1: { bg: 'bg-blue-100', text: 'text-blue-700', ring: 'ring-blue-500/20' },
+  Q1: { bg: 'bg-blue-950/30', text: 'text-[#6D28D9]', ring: 'ring-blue-500/20' },
   Q2: { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-500/20' },
   Q3: { bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-500/20' },
   Q4: { bg: 'bg-purple-100', text: 'text-purple-700', ring: 'ring-purple-500/20' },
@@ -37,7 +37,7 @@ const QUARTER_STYLES: Record<string, { bg: string; text: string; ring: string }>
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   MISSED: { bg: 'bg-slate-100', text: 'text-slate-600' },
   REVIEWED: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  PLANNED: { bg: 'bg-blue-50', text: 'text-blue-700' },
+  PLANNED: { bg: 'bg-blue-950/30', text: 'text-[#6D28D9]' },
   EXECUTED_LATER: { bg: 'bg-violet-50', text: 'text-violet-700' },
 };
 
@@ -121,7 +121,7 @@ function SsmtBadge({ value }: { value?: string }) {
   if (!value || value === 'No') {
     return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-red-100 text-red-700 ring-1 ring-red-300/50">No</span>;
   }
-  return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-blue-100 text-blue-700 ring-1 ring-blue-300/50">{value}</span>;
+  return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-blue-950/30 text-[#6D28D9] ring-1 ring-blue-300/50">{value}</span>;
 }
 
 export default function MissedTradeJournal() {
@@ -556,8 +556,8 @@ export default function MissedTradeJournal() {
             <p className="text-page-title font-bold text-orange-700 mt-1">{stats.total}</p>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] p-5 transition-all duration-200 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
-            <p className="text-caption text-blue-600 uppercase">Q1 Trades</p>
-            <p className="text-page-title font-bold text-blue-700 mt-1">{stats.q1}</p>
+            <p className="text-caption text-[#7C3AED] uppercase">Q1 Trades</p>
+            <p className="text-page-title font-bold text-[#6D28D9] mt-1">{stats.q1}</p>
           </div>
           <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] p-5 transition-all duration-200 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
             <p className="text-caption text-emerald-600 uppercase">Q2 Trades</p>
@@ -663,7 +663,7 @@ export default function MissedTradeJournal() {
             {/* Section 1: Trade Basics */}
             <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
               <h4 className="font-semibold text-[#0F172A] mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white text-body-sm font-bold shadow-sm">1</span>
+                <span className="w-8 h-8 bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] rounded-lg flex items-center justify-center text-white text-body-sm font-bold shadow-sm">1</span>
                 Trade Basics
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1016,20 +1016,20 @@ export default function MissedTradeJournal() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC]">
-                  <th className="text-left py-3.5 px-4 text-table-header text-[#64748B]">Date</th>
-                  <th className="text-left py-3.5 px-4 text-table-header text-[#64748B]">Entry Time</th>
-                  <th className="text-left py-3.5 px-4 text-table-header text-[#64748B]">T.S.Time</th>
-                  <th className="text-left py-3.5 px-4 text-table-header text-[#64748B]">Pair</th>
-                  <th className="text-left py-3.5 px-4 text-table-header text-[#64748B]">Type</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-[#64748B]">Entry</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-[#64748B]">SL</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-[#64748B]">TP</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-[#64748B]">Real P/L</th>
-                  <th className="text-center py-3.5 px-4 text-table-header text-[#64748B]">Daily Q</th>
-                  <th className="text-center py-3.5 px-4 text-table-header text-[#64748B]">6HR Q</th>
-                  <th className="text-left py-3.5 px-4 text-table-header text-[#64748B]">Status</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-[#64748B]">Actions</th>
+                <tr className="border-b border-white/10 bg-white/5">
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Date</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Entry Time</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">T.S.Time</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Pair</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Type</th>
+                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Entry</th>
+                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">SL</th>
+                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">TP</th>
+                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Real P/L</th>
+                  <th className="text-center py-3.5 px-4 text-table-header text-muted-foreground">Daily Q</th>
+                  <th className="text-center py-3.5 px-4 text-table-header text-muted-foreground">6HR Q</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Status</th>
+                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1037,8 +1037,8 @@ export default function MissedTradeJournal() {
                   const realPL = trade.realPL ?? ((trade.profitLoss || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
                   const statusStyle = STATUS_STYLES[trade.status] || STATUS_STYLES.MISSED;
                   return (
-                    <tr key={trade.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors duration-150">
-                      <td className="py-3.5 px-4 text-table-cell text-slate-700 whitespace-nowrap">
+                    <tr key={trade.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors duration-150">
+                      <td className="py-3.5 px-4 text-table-cell text-foreground whitespace-nowrap">
                         {new Date(trade.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
@@ -1058,7 +1058,7 @@ export default function MissedTradeJournal() {
                           {trade.type}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-table-cell text-right font-mono text-slate-700 whitespace-nowrap">{formatPrice(trade.entryPrice, trade.pair)}</td>
+                      <td className="py-3.5 px-4 text-table-cell text-right font-mono text-foreground whitespace-nowrap">{formatPrice(trade.entryPrice, trade.pair)}</td>
                       <td className="py-3.5 px-4 text-table-cell text-right font-mono text-[#EF4444] whitespace-nowrap">{formatPrice(trade.stopLoss, trade.pair)}</td>
                       <td className="py-3.5 px-4 text-table-cell text-right font-mono text-[#10B981] whitespace-nowrap">{formatPrice(trade.takeProfit, trade.pair)}</td>
                       <td className={`py-3.5 px-4 text-table-cell text-right whitespace-nowrap ${realPL >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
@@ -1225,7 +1225,7 @@ export default function MissedTradeJournal() {
                     <p className="text-caption text-slate-500 mb-1">SSMT</p>
                     <p className="text-body-sm mt-1">
                       {viewingTrade.ssmtConfirmation && viewingTrade.ssmtConfirmation !== 'No' ? (
-                        <span className="text-blue-600">✔ {viewingTrade.ssmtConfirmation}</span>
+                        <span className="text-[#7C3AED]">✔ {viewingTrade.ssmtConfirmation}</span>
                       ) : (
                         <span className="text-red-500">❌ No</span>
                       )}

@@ -35,7 +35,7 @@ const getDirectionColor = (direction: string) => {
 
 const getLiquidityLabel = (high: boolean, low: boolean) => {
   if (high && low) return { label: 'High & Low', color: 'bg-orange-100 border-orange-300 text-orange-700' };
-  if (high) return { label: 'High Taken', color: 'bg-blue-100 border-blue-300 text-blue-700' };
+  if (high) return { label: 'High Taken', color: 'bg-blue-950/30 border-blue-800/40 text-[#6D28D9]' };
   if (low) return { label: 'Low Taken', color: 'bg-purple-100 border-purple-300 text-purple-700' };
   return { label: 'None', color: 'bg-slate-100 border-gray-300 text-slate-600' };
 };
@@ -166,19 +166,19 @@ export default function H4History() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50/50">
-                        <th className="text-left py-2 px-4 text-table-header text-slate-600 uppercase">Pair</th>
+                      <tr className="border-b border-white/10 bg-white/5">
+                        <th className="text-left py-2 px-4 text-table-header text-muted-foreground uppercase">Pair</th>
                         {H4_TIMES.map(time => (
-                          <th key={time} className="text-center py-2 px-2 text-table-header text-slate-600 uppercase">{time}</th>
+                          <th key={time} className="text-center py-2 px-2 text-table-header text-muted-foreground uppercase">{time}</th>
                         ))}
-                        <th className="text-left py-2 px-4 text-table-header text-slate-600 uppercase">Notes</th>
+                        <th className="text-left py-2 px-4 text-table-header text-muted-foreground uppercase">Notes</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-white/5">
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 
-                          className="hover:bg-slate-50 cursor-pointer"
+                          className="hover:bg-white/[0.02] cursor-pointer"
                           onClick={() => setSelectedEntry(entry)}
                         >
                           <td className="py-3 px-4 font-medium">{entry.pair}</td>
@@ -199,7 +199,7 @@ export default function H4History() {
                               </td>
                             );
                           })}
-                          <td className="py-3 px-4 text-table-cell text-slate-500 max-w-[150px] truncate">
+                          <td className="py-3 px-4 text-table-cell text-muted-foreground max-w-[150px] truncate">
                             {entry.notes || '-'}
                           </td>
                         </tr>

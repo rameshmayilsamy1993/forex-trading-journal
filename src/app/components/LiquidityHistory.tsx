@@ -40,7 +40,7 @@ const getLiquidityMeta = (liquidity: string): LiquidityMeta => {
       return {
         label: 'Buy-side',
         fullLabel: 'Buy-side Liquidity Taken',
-        badgeColor: 'bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-300',
+        badgeColor: 'bg-blue-950/30 border-blue-800/40 text-[#6D28D9]',
         cardColor: 'bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700',
         cardText: 'text-blue-800 dark:text-blue-300',
         icon: <TrendingUp className="w-6 h-6" />,
@@ -223,10 +223,10 @@ export default function LiquidityHistory() {
           <div className="flex items-center justify-between mb-3">
             <span className="text-body-sm text-slate-500">High Taken</span>
             <div className="p-2 bg-blue-50 rounded-xl">
-              <ArrowUp className="w-4 h-4 text-blue-600" />
+              <ArrowUp className="w-4 h-4 text-[#7C3AED]" />
             </div>
           </div>
-          <div className="text-page-title text-blue-600">{stats.highTaken}</div>
+          <div className="text-page-title text-[#7C3AED]">{stats.highTaken}</div>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
@@ -262,34 +262,34 @@ export default function LiquidityHistory() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEntries]) => (
-              <div key={date} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="p-4 bg-[#F8FAFC] border-b border-slate-200 flex items-center justify-between">
+              <div key={date} className="border border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="font-semibold text-slate-900">{formatDate(date)}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-caption">{dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''}</span>
+                    <span className="font-semibold text-foreground">{formatDate(date)}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-muted-foreground text-caption">{dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-[#F8FAFC]">
-                        <th className="text-left py-3 px-4 text-table-header text-slate-600">Time</th>
-                        <th className="text-left py-3 px-4 text-table-header text-slate-600">Pair</th>
-                        <th className="text-center py-3 px-4 text-table-header text-slate-600">Monthly</th>
-                        <th className="text-center py-3 px-4 text-table-header text-slate-600">Weekly</th>
-                        <th className="text-center py-3 px-4 text-table-header text-slate-600">Daily</th>
-                        <th className="text-left py-3 px-4 text-table-header text-slate-600">Notes</th>
+                      <tr className="border-b border-white/10 bg-white/5">
+                        <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Time</th>
+                        <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Pair</th>
+                        <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Monthly</th>
+                        <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Weekly</th>
+                        <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Daily</th>
+                        <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Notes</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-white/5">
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 
-                          className="group hover:bg-slate-50/70 transition-all duration-150 cursor-pointer"
+                          className="group hover:bg-white/[0.02] transition-all duration-150 cursor-pointer"
                           onClick={() => setSelectedEntry(entry)}
                         >
-                          <td className="py-3 px-4 text-table-cell text-slate-600 font-mono">{formatTime(entry.createdAt)}</td>
-                          <td className="py-3 px-4 text-table-cell font-semibold text-slate-900">{entry.pair}</td>
+                          <td className="py-3 px-4 text-table-cell text-muted-foreground font-mono">{formatTime(entry.createdAt)}</td>
+                          <td className="py-3 px-4 text-table-cell font-semibold text-foreground">{entry.pair}</td>
                           <td className="py-3 px-4 text-center">
                             {getLiquidityBadge(entry.monthlyLiquidity)}
                           </td>
@@ -299,8 +299,8 @@ export default function LiquidityHistory() {
                           <td className="py-3 px-4 text-center">
                             {getLiquidityBadge(entry.dailyLiquidity)}
                           </td>
-                          <td className="py-3 px-4 text-table-cell text-slate-500 max-w-[200px] truncate group-hover:text-slate-700 transition-colors">
-                            {entry.notes || <span className="text-slate-300">-</span>}
+                          <td className="py-3 px-4 text-table-cell text-muted-foreground max-w-[200px] truncate group-hover:text-foreground transition-colors">
+                            {entry.notes || <span className="text-muted-foreground">-</span>}
                           </td>
                         </tr>
                       ))}
@@ -314,22 +314,22 @@ export default function LiquidityHistory() {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200">
-            <div className="text-body text-slate-500">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+            <div className="text-body text-muted-foreground">
               Page {pagination.page} of {pagination.pages} ({pagination.total} entries)
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Next
               </button>

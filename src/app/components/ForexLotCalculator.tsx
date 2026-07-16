@@ -29,7 +29,7 @@ const RR_RATIOS = [
 
 const RR_COLORS = [
   { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: Target },
-  { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: TrendingUp },
+  { bg: 'bg-blue-950/30', border: 'border-blue-800/40', text: 'text-[#6D28D9]', icon: TrendingUp },
   { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', icon: BarChart4 },
   { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', icon: TrendingUp },
 ];
@@ -229,23 +229,23 @@ export default function ForexLotCalculator() {
             <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
               <table className="w-full text-table-cell">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700/50">
-                    <th className="px-4 py-2.5 text-left text-table-header text-slate-500 dark:text-slate-400">SL Pips</th>
-                    <th className="px-4 py-2.5 text-right text-table-header text-slate-500 dark:text-slate-400">Lot Size</th>
+                  <tr className="bg-white/[0.02]">
+                    <th className="px-4 py-2.5 text-left text-table-header text-muted-foreground">SL Pips</th>
+                    <th className="px-4 py-2.5 text-right text-table-header text-muted-foreground">Lot Size</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                <tbody className="divide-y divide-white/5">
                   {QUICK_REFERENCE_SL.map((sl) => {
                     const lot = riskAmount / (sl * dollarPerPip);
                     return (
                       <tr
                         key={sl}
-                        className={`hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors ${
-                          Math.abs(sl - slPips) < 0.01 ? 'bg-indigo-50 dark:bg-indigo-900/20 font-semibold' : ''
+                        className={`hover:bg-white/[0.02] transition-colors ${
+                          Math.abs(sl - slPips) < 0.01 ? 'bg-indigo-900/20 font-semibold' : ''
                         }`}
                       >
-                        <td className="px-4 py-2 text-slate-700 dark:text-slate-300">{sl.toFixed(1)}</td>
-                        <td className="px-4 py-2 text-right text-slate-900 dark:text-slate-100 tabular-nums">
+                        <td className="px-4 py-2 text-foreground">{sl.toFixed(1)}</td>
+                        <td className="px-4 py-2 text-right text-foreground tabular-nums">
                           {lot > 0 ? lot.toFixed(2) : '0.00'}
                         </td>
                       </tr>

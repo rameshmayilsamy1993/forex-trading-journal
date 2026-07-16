@@ -42,7 +42,7 @@ const DIRECTION_COLORS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   'Waiting': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  'Active': 'bg-blue-100 text-blue-700 border-blue-200',
+  'Active': 'bg-blue-950/30 text-[#6D28D9] border-blue-800/40',
   'Continuing': 'bg-teal-100 text-teal-700 border-teal-200',
   'Entry Ready': 'bg-purple-100 text-purple-700 border-purple-200',
   'Completed': 'bg-green-100 text-green-700 border-green-200',
@@ -313,26 +313,26 @@ export default function CRTHistory() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#F8FAFC] border-b border-slate-200">
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Timeframe</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Date</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">CRT Direction</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Key Level</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Status</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Range Respected</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Screenshot</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Notes</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Created</th>
-                      <th className="text-left py-3 px-3 text-table-header text-slate-600 uppercase">Actions</th>
+                    <tr className="bg-white/5 border-b border-white/10">
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Timeframe</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Date</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">CRT Direction</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Key Level</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Status</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Range Respected</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Screenshot</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Notes</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Created</th>
+                      <th className="text-left py-3 px-3 text-table-header text-muted-foreground uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-white/5">
                     {events.map((event, idx) => (
-                      <tr key={event.id || idx} className="group hover:bg-slate-50/70 transition-all duration-150">
+                      <tr key={event.id || idx} className="group hover:bg-white/[0.02] transition-all duration-150">
                         <td className="py-3 px-3">
                           <span className={cn('px-2.5 py-1 rounded-full text-caption border shadow-sm', TIMEFRAME_COLORS[event.timeframe])}>{TIMEFRAME_LABELS[event.timeframe] || event.timeframe}</span>
                         </td>
-                        <td className="py-3 px-3 text-table-cell text-slate-700">
+                        <td className="py-3 px-3 text-table-cell text-foreground">
                           {event.date?.split('T')[0]}{event.time && <span className="text-caption text-slate-400 ml-1 font-mono">{event.time}</span>}
                         </td>
                         <td className="py-3 px-3">
@@ -342,19 +342,19 @@ export default function CRTHistory() {
                         <td className="py-3 px-3">
                           <span className={cn('px-2.5 py-1 rounded-full text-caption inline-block border shadow-sm', STATUS_COLORS[event.crtStatus] || 'bg-slate-100 text-slate-500')}>{event.crtStatus}</span>
                         </td>
-                        <td className="py-3 px-3 text-table-cell text-slate-700">{event.crtRangeRespected}</td>
+                        <td className="py-3 px-3 text-table-cell text-foreground">{event.crtRangeRespected}</td>
                         <td className="py-3 px-3">
                           {event.imagePath ? (
                             <img src={event.imagePath} alt="CRT" className="w-10 h-10 object-cover rounded-xl border border-slate-200 cursor-pointer hover:opacity-80 hover:shadow-md transition-all duration-200"
                               onClick={() => setViewingImage([{ url: event.imagePath, label: `${TIMEFRAME_LABELS[event.timeframe]} CRT` }])} />
                           ) : <span className="text-caption text-slate-300">--</span>}
                         </td>
-                        <td className="py-3 px-3 text-table-cell text-slate-500 max-w-[150px] truncate group-hover:text-slate-700 transition-colors" title={event.notes}>{event.notes || <span className="text-slate-300">--</span>}</td>
-                        <td className="py-3 px-3 text-caption text-slate-400">{format(new Date(event.createdAt), 'MMM dd, yyyy')}</td>
+                        <td className="py-3 px-3 text-table-cell text-muted-foreground max-w-[150px] truncate group-hover:text-foreground transition-colors" title={event.notes}>{event.notes || <span className="text-muted-foreground">--</span>}</td>
+                        <td className="py-3 px-3 text-caption text-muted-foreground">{format(new Date(event.createdAt), 'MMM dd, yyyy')}</td>
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-1">
                             <button onClick={() => setEditingEvent(event)} className="p-1.5 text-[#7C3AED] hover:bg-violet-50 rounded-xl transition-all duration-150 hover:scale-105" title="Edit"><Edit className="w-4 h-4" /></button>
-                            <button onClick={() => setViewingEvent(event)} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-150 hover:scale-105" title="View"><Eye className="w-4 h-4" /></button>
+                            <button onClick={() => setViewingEvent(event)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-xl transition-all duration-150 hover:scale-105" title="View"><Eye className="w-4 h-4" /></button>
                           </div>
                         </td>
                       </tr>
@@ -364,11 +364,11 @@ export default function CRTHistory() {
               </div>
 
               {pagination.pages > 1 && (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                  <div className="text-body text-slate-500">Page {pagination.page} of {pagination.pages} ({pagination.total} total)</div>
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
+                  <div className="text-body text-muted-foreground">Page {pagination.page} of {pagination.pages} ({pagination.total} total)</div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 transition-all duration-200"><ChevronLeft className="w-4 h-4" /></button>
-                    <button onClick={() => setPage(p => Math.min(pagination.pages, p + 1))} disabled={page >= pagination.pages} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 transition-all duration-200"><ChevronRight className="w-4 h-4" /></button>
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="p-2 border border-white/10 rounded-xl hover:bg-white/[0.02] disabled:opacity-40 transition-all duration-200"><ChevronLeft className="w-4 h-4" /></button>
+                    <button onClick={() => setPage(p => Math.min(pagination.pages, p + 1))} disabled={page >= pagination.pages} className="p-2 border border-white/10 rounded-xl hover:bg-white/[0.02] disabled:opacity-40 transition-all duration-200"><ChevronRight className="w-4 h-4" /></button>
                   </div>
                 </div>
               )}
@@ -423,7 +423,7 @@ export default function CRTHistory() {
 }
 
 function SummaryWidget({ label, value, color }: { label: string; value: number; color: string }) {
-  const iconColor = color === 'text-blue-600' ? 'bg-blue-50 text-blue-600' : color === 'text-purple-600' ? 'bg-purple-50 text-purple-600' : color === 'text-green-600' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600';
+  const iconColor = color === 'text-[#7C3AED]' ? 'bg-[#7C3AED]/10 text-[#7C3AED]' : color === 'text-purple-600' ? 'bg-purple-950/30 text-purple-400' : color === 'text-green-600' ? 'bg-emerald-950/30 text-emerald-400' : 'bg-rose-950/30 text-rose-400';
   return (
     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between mb-3">

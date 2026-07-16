@@ -210,8 +210,8 @@ export default function BiasHistory() {
       <CardContainer>
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500" />
-            <span className="text-body-sm text-slate-700">Filters:</span>
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-body-sm text-foreground">Filters:</span>
           </div>
           
           <Select value={filterPair} onValueChange={setFilterPair}>
@@ -227,7 +227,7 @@ export default function BiasHistory() {
           </Select>
 
           <div className="flex items-center gap-2">
-            <span className="text-body-sm text-slate-500">From:</span>
+            <span className="text-body-sm text-muted-foreground">From:</span>
             <input
               type="date"
               value={startDate}
@@ -237,7 +237,7 @@ export default function BiasHistory() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-body-sm text-slate-500">To:</span>
+            <span className="text-body-sm text-muted-foreground">To:</span>
             <input
               type="date"
               value={endDate}
@@ -258,36 +258,36 @@ export default function BiasHistory() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-body-sm text-slate-500">Total Shifts</span>
+            <span className="text-body-sm text-muted-foreground">Total Shifts</span>
             <div className="p-2 bg-orange-50 rounded-xl">
               <Flame className="w-4 h-4 text-orange-600" />
             </div>
           </div>
           <div className="text-page-title text-orange-600">{stats.totalShifts}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-body-sm text-slate-500">Bullish Days</span>
+            <span className="text-body-sm text-muted-foreground">Bullish Days</span>
             <div className="p-2 bg-emerald-50 rounded-xl">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
             </div>
           </div>
           <div className="text-page-title text-emerald-600">{stats.bullishDays}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-body-sm text-slate-500">Bearish Days</span>
-            <div className="p-2 bg-rose-50 rounded-xl">
+            <span className="text-body-sm text-muted-foreground">Bearish Days</span>
+            <div className="p-2 bg-rose-950/30 rounded-xl">
               <TrendingDown className="w-4 h-4 text-rose-600" />
             </div>
           </div>
           <div className="text-page-title text-rose-600">{stats.bearishDays}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-body-sm text-slate-500">Neutral Days</span>
+            <span className="text-body-sm text-muted-foreground">Neutral Days</span>
             <div className="p-2 bg-slate-50 rounded-xl">
               <Minus className="w-4 h-4 text-slate-600" />
             </div>
@@ -304,28 +304,28 @@ export default function BiasHistory() {
           </div>
         ) : events.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-600">No bias events found</p>
-            <p className="text-body text-slate-500">Start by entering bias data in the Bias Input page</p>
+            <p className="text-muted-foreground">No bias events found</p>
+            <p className="text-body text-muted-foreground">Start by entering bias data in the Bias Input page</p>
           </div>
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEvents]) => (
-                  <div key={date} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+                  <div key={date} className="border border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                 {/* Date Header */}
                 <div 
-                  className="flex items-center justify-between p-4 bg-[#F8FAFC] cursor-pointer hover:bg-slate-100 transition-all duration-200"
+                  className="flex items-center justify-between p-4 bg-white/5 cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
                   onClick={() => toggleDateExpand(date)}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-1 rounded-lg bg-white shadow-sm">
-                      <ChevronRight className={cn("w-4 h-4 text-slate-400 transition-transform duration-200", expandedDates.has(date) && "rotate-90")} />
+                      <ChevronRight className={cn("w-4 h-4 text-muted-foreground transition-transform duration-200", expandedDates.has(date) && "rotate-90")} />
                     </div>
-                    <span className="font-semibold text-slate-900">{formatDate(date)}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-caption">{dateEvents.length} event{dateEvents.length !== 1 ? 's' : ''}</span>
+                    <span className="font-semibold text-foreground">{formatDate(date)}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-muted-foreground text-caption">{dateEvents.length} event{dateEvents.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {dateEvents.some(hasAnyShift) && (
-                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-body-sm border border-orange-200">
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-950/30 text-orange-400 text-body-sm border border-orange-800/40">
                         <Flame className="w-4 h-4" />
                         {dateEvents.filter(e => hasAnyShift(e)).length} shift(s)
                       </span>
@@ -338,30 +338,30 @@ export default function BiasHistory() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-slate-200 bg-[#F8FAFC]">
-                          <th className="text-left py-3 px-4 text-table-header text-slate-600">Time</th>
-                          <th className="text-left py-3 px-4 text-table-header text-slate-600">Pair</th>
-                          <th className="text-center py-3 px-4 text-table-header text-slate-600">Monthly</th>
-                          <th className="text-center py-3 px-4 text-table-header text-slate-600">Weekly</th>
-                          <th className="text-center py-3 px-4 text-table-header text-slate-600">Daily</th>
-                          <th className="text-center py-3 px-4 text-table-header text-slate-600">Shift</th>
-                          <th className="text-left py-3 px-4 text-table-header text-slate-600">Details</th>
+                        <tr className="border-b border-white/10 bg-white/5">
+                          <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Time</th>
+                          <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Pair</th>
+                          <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Monthly</th>
+                          <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Weekly</th>
+                          <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Daily</th>
+                          <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Shift</th>
+                          <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Details</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-white/5">
                         {dateEvents.map((entry) => (
                           <tr 
                             key={entry.id} 
                             className={cn(
-                              "hover:bg-slate-50/70 transition-all duration-150 cursor-pointer group",
+                              "hover:bg-white/[0.02] transition-all duration-150 cursor-pointer group",
                               hasAnyShift(entry) && "bg-orange-50/30"
                             )}
                             onClick={() => openModal(entry)}
                           >
-                            <td className="py-3 px-4 text-table-cell text-slate-600 font-mono">
+                            <td className="py-3 px-4 text-table-cell text-muted-foreground font-mono">
                               {formatTime(entry.createdAt)}
                             </td>
-                            <td className="py-3 px-4 text-table-cell font-semibold text-slate-900">{entry.pair}</td>
+                            <td className="py-3 px-4 text-table-cell font-semibold text-foreground">{entry.pair}</td>
                             <td className="py-3 px-4 text-center">
                               <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption font-semibold border shadow-sm transition-all hover:scale-105 group-hover:shadow-md", getBiasStyle(entry.monthlyBias).badge)}>
                                 {getBiasIcon(entry.monthlyBias)}
@@ -382,9 +382,9 @@ export default function BiasHistory() {
                             </td>
                             <td className="py-3 px-4 text-center">
                               <div className="flex items-center justify-center gap-1">
-                                {entry.monthlyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-caption"><Flame className="w-3 h-3" /> M</span>}
-                                {entry.weeklyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-caption"><Flame className="w-3 h-3" /> W</span>}
-                                {entry.dailyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-caption"><Flame className="w-3 h-3" /> D</span>}
+                                {entry.monthlyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/30 text-orange-400 text-caption"><Flame className="w-3 h-3" /> M</span>}
+                                {entry.weeklyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/30 text-orange-400 text-caption"><Flame className="w-3 h-3" /> W</span>}
+                                {entry.dailyShifted && <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/30 text-orange-400 text-caption"><Flame className="w-3 h-3" /> D</span>}
                                 {!hasAnyShift(entry) && <span className="text-slate-300 text-caption">None</span>}
                               </div>
                             </td>
@@ -406,22 +406,22 @@ export default function BiasHistory() {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200">
-            <div className="text-body text-slate-500">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+            <div className="text-body text-muted-foreground">
               Page {pagination.page} of {pagination.pages} ({pagination.total} events)
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Next
               </button>
@@ -441,15 +441,15 @@ export default function BiasHistory() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-white">
+            <div className="flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-r from-purple-950/20 to-transparent">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-section-title text-slate-900">
+                  <h2 className="text-section-title text-foreground">
                     {selectedEvent.pair}
                   </h2>
                   <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 text-caption font-semibold">Bias Details</span>
                 </div>
-                <p className="text-body text-slate-500">
+                <p className="text-body text-muted-foreground">
                   {formatDate(selectedEvent.createdAt)} at {formatTime(selectedEvent.createdAt)}
                 </p>
               </div>
@@ -457,7 +457,7 @@ export default function BiasHistory() {
                 onClick={closeModal}
                 className="p-2 hover:bg-white/80 rounded-xl transition-colors"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
 
@@ -465,7 +465,7 @@ export default function BiasHistory() {
             <div className="p-5 overflow-y-auto max-h-[70vh]">
               {/* Current Biases */}
               <div className="mb-6">
-                <h3 className="text-body-sm font-semibold text-slate-700 mb-3">Current Biases</h3>
+                <h3 className="text-body-sm font-semibold text-foreground mb-3">Current Biases</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {(['monthlyBias', 'weeklyBias', 'dailyBias'] as const).map((biasKey) => {
                     const bias = selectedEvent[biasKey];
@@ -544,7 +544,7 @@ export default function BiasHistory() {
                         key={event.id} 
                         className={cn(
                           "flex gap-4 p-4 rounded-xl border transition-all duration-200 hover:shadow-sm",
-                          event.id === selectedEvent.id ? "border-violet-300 bg-violet-50/50" : "border-slate-200 bg-white"
+                          event.id === selectedEvent.id ? "border-violet-300 bg-violet-500/10" : "border-white/10 bg-white"
                         )}
                       >
                         <div className="flex flex-col items-center gap-1">
