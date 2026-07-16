@@ -55,18 +55,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1620] flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(124,58,237,0.08)_0%,_transparent_70%)] pointer-events-none" />
-      <div className="w-full max-w-md relative">
-        <div className="glass-panel rounded-3xl p-6 shadow-2xl space-y-5">
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-6 space-y-5">
           <div className="space-y-2 text-center">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] shadow-lg shadow-[#7C3AED]/25 mb-3">
               <span className="text-page-title font-bold text-white">FX</span>
             </div>
-            <h1 className="text-display-lg font-bold text-foreground">
+            <h1 className="text-display-lg font-bold text-[#0F172A]">
               FX Journal
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-[#475569]">
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </p>
           </div>
@@ -74,7 +73,7 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {!isLogin && (
               <div>
-                <label className="block text-body-sm text-muted-foreground mb-1">
+                <label className="block text-body-sm text-[#475569] mb-1">
                   Name
                 </label>
                 <Input
@@ -89,7 +88,7 @@ export default function Login() {
             )}
 
             <div>
-              <label className="block text-body-sm text-muted-foreground mb-1">
+              <label className="block text-body-sm text-[#475569] mb-1">
                 Email
               </label>
               <Input
@@ -103,7 +102,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-body-sm text-muted-foreground mb-1">
+              <label className="block text-body-sm text-[#475569] mb-1">
                 Password
               </label>
               <Input
@@ -118,7 +117,7 @@ export default function Login() {
 
             {!isLogin && (
               <div>
-                <label className="block text-body-sm text-muted-foreground mb-1">
+                <label className="block text-body-sm text-[#475569] mb-1">
                   Confirm Password
                 </label>
                 <Input
@@ -133,7 +132,7 @@ export default function Login() {
             )}
 
             {error && (
-              <div className="bg-red-950/40 border border-red-800/40 text-red-400 px-3.5 py-2.5 rounded-xl text-body flex items-center gap-2">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-body flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                 {error}
               </div>
