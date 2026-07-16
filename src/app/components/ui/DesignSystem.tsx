@@ -95,7 +95,7 @@ export function StatCard({ label, value, icon: Icon, trend, className }: StatCar
   return (
     <div className={cn('glass-panel rounded-2xl p-3 flex items-center gap-3', className)}>
       {Icon && (
-        <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-[#F1F5F9] flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-foreground" />
         </div>
       )}
@@ -144,7 +144,7 @@ export function SectionCard({ title, subtitle, icon: Icon, color = 'blue', child
   return (
     <div className={cn('glass-card rounded-2xl overflow-hidden', className)}>
       {(title || action) && (
-        <div className="px-3 py-2.5 border-b border-white/10 bg-white/5">
+        <div className="px-3 py-2.5 border-b border-[#E2E8F0] bg-[#F8FAFC]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {Icon && (
@@ -176,7 +176,7 @@ export function TableCard({ children, className }: TableCardProps) {
 }
 
 export function TableHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('px-3 py-2 bg-white/5 border-b border-white/10 text-table-header', className)}>{children}</div>;
+  return <div className={cn('px-3 py-2 bg-[#F8FAFC] border-b border-[#E2E8F0] text-table-header', className)}>{children}</div>;
 }
 
 export function TableBody({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -195,8 +195,8 @@ export function TableRow({
   return (
     <div
       className={cn(
-        'px-3 py-2 border-b border-white/5 last:border-0',
-        'hover:bg-white/[0.02] transition-colors duration-150',
+        'px-3 py-2 border-b border-[#E2E8F0]/60 last:border-0',
+        'hover:bg-[#F1F5F9]/60 transition-colors duration-150',
         onClick && 'cursor-pointer',
         className,
       )}
