@@ -184,7 +184,7 @@ export default function CRTHistory() {
           <SummaryWidget label="Invalidated" value={summary.invalidatedCount} color="text-red-600" />
           <CardContainer>
             <div className="text-center">
-              <div className="text-caption text-slate-500">Most Recent CRT</div>
+              <div className="text-caption text-muted-foreground">Most Recent CRT</div>
               {summary.mostRecentCRT ? (
                 <div className="mt-1">
                   <div className="text-body-sm">{summary.mostRecentCRT.pair}</div>
@@ -200,24 +200,24 @@ export default function CRTHistory() {
 
       {/* CRT Command Center Grid */}
       <div>
-        <h2 className="text-card-title text-slate-800 mb-3">CRT COMMAND CENTER</h2>
+        <h2 className="text-card-title text-foreground mb-3">CRT COMMAND CENTER</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {TIMEFRAMES.map(tf => {
             const entry = latestPerTimeframe.get(tf);
             return (
-              <div key={tf} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+              <div key={tf} className="bg-white/[0.04] p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                 <div className={cn('px-3 py-1.5 rounded-full text-caption inline-block mb-3 shadow-sm', TIMEFRAME_COLORS[tf])}>
                   {TIMEFRAME_LABELS[tf]}
                 </div>
                 {entry ? (
                   <div className="space-y-2">
-                    <div className={cn('px-2.5 py-1.5 rounded-lg text-caption text-center shadow-sm', DIRECTION_COLORS[entry.crtDirection] || 'bg-slate-100 text-slate-600')}>
+                    <div className={cn('px-2.5 py-1.5 rounded-lg text-caption text-center shadow-sm', DIRECTION_COLORS[entry.crtDirection] || 'bg-slate-100 text-muted-foreground')}>
                       {entry.crtDirection}
                     </div>
-                    <div className="text-caption text-slate-600 bg-slate-50 rounded-lg px-2 py-1.5">
-                      <span className="text-slate-700">Key Level:</span> {getKeyLevelDisplay(entry)}
+                    <div className="text-caption text-muted-foreground bg-slate-50 rounded-lg px-2 py-1.5">
+                      <span className="text-foreground">Key Level:</span> {getKeyLevelDisplay(entry)}
                     </div>
-                    <div className={cn('px-2.5 py-1.5 rounded-lg text-caption text-center border shadow-sm', STATUS_COLORS[entry.crtStatus] || 'bg-slate-100 text-slate-500')}>
+                    <div className={cn('px-2.5 py-1.5 rounded-lg text-caption text-center border shadow-sm', STATUS_COLORS[entry.crtStatus] || 'bg-slate-100 text-muted-foreground')}>
                       {entry.crtStatus}
                     </div>
                     <div className="flex items-center gap-1.5 text-caption text-slate-400 bg-slate-50 rounded-lg px-2 py-1.5">
@@ -225,7 +225,7 @@ export default function CRTHistory() {
                       {getTimeAgo(entry.updatedAt || entry.createdAt)}
                     </div>
                     {entry.imagePath && (
-                      <img src={entry.imagePath} alt="CRT" className="w-full h-16 object-cover rounded-xl border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity"
+                      <img src={entry.imagePath} alt="CRT" className="w-full h-16 object-cover rounded-xl border border-white/10 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => setViewingImage([{ url: entry.imagePath, label: `${TIMEFRAME_LABELS[tf]} CRT` }])} />
                     )}
                   </div>
@@ -242,15 +242,15 @@ export default function CRTHistory() {
       <CardContainer>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500" />
-            <span className="text-body-sm text-slate-700">Filters</span>
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-body-sm text-foreground">Filters</span>
             {(filters.timeframe || filters.direction || filters.status || filters.dateFrom || filters.dateTo || filters.search) && (
               <button onClick={clearFilters} className="text-caption text-red-600 hover:text-red-800 ml-2">Clear all</button>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-body-sm text-slate-700">Pair:</label>
-            <select value={selectedPair} onChange={e => { setSelectedPair(e.target.value); }} className="px-3 py-2 border border-slate-200 rounded-lg text-body">
+            <label className="text-body-sm text-foreground">Pair:</label>
+            <select value={selectedPair} onChange={e => { setSelectedPair(e.target.value); }} className="px-3 py-2 border border-white/10 rounded-lg text-body">
               {pairs.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
             <button onClick={() => setShowFilters(!showFilters)} className="text-body text-[#7C3AED] hover:text-[#6D28D9]">{showFilters ? 'Hide' : 'More'} Filters</button>
@@ -260,36 +260,36 @@ export default function CRTHistory() {
         {showFilters && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
             <div>
-              <label className="block text-caption text-slate-500 mb-1">Timeframe</label>
-              <select value={filters.timeframe} onChange={e => setFilters(p => ({ ...p, timeframe: e.target.value }))} className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-body">
+              <label className="block text-caption text-muted-foreground mb-1">Timeframe</label>
+              <select value={filters.timeframe} onChange={e => setFilters(p => ({ ...p, timeframe: e.target.value }))} className="w-full px-2 py-1.5 border border-white/10 rounded-lg text-body">
                 <option value="">All</option>
                 {TIMEFRAMES.map(tf => <option key={tf} value={tf}>{TIMEFRAME_LABELS[tf]}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-caption text-slate-500 mb-1">CRT Direction</label>
-              <select value={filters.direction} onChange={e => setFilters(p => ({ ...p, direction: e.target.value }))} className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-body">
+              <label className="block text-caption text-muted-foreground mb-1">CRT Direction</label>
+              <select value={filters.direction} onChange={e => setFilters(p => ({ ...p, direction: e.target.value }))} className="w-full px-2 py-1.5 border border-white/10 rounded-lg text-body">
                 <option value="">All</option>
                 {CRT_DIRECTIONS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-caption text-slate-500 mb-1">Status</label>
-              <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))} className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-body">
+              <label className="block text-caption text-muted-foreground mb-1">Status</label>
+              <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))} className="w-full px-2 py-1.5 border border-white/10 rounded-lg text-body">
                 <option value="">All</option>
                 {CRT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-caption text-slate-500 mb-1">Date From</label>
-              <input type="date" value={filters.dateFrom} onChange={e => setFilters(p => ({ ...p, dateFrom: e.target.value }))} className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-body" />
+              <label className="block text-caption text-muted-foreground mb-1">Date From</label>
+              <input type="date" value={filters.dateFrom} onChange={e => setFilters(p => ({ ...p, dateFrom: e.target.value }))} className="w-full px-2 py-1.5 border border-white/10 rounded-lg text-body" />
             </div>
             <div>
-              <label className="block text-caption text-slate-500 mb-1">Date To</label>
-              <input type="date" value={filters.dateTo} onChange={e => setFilters(p => ({ ...p, dateTo: e.target.value }))} className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-body" />
+              <label className="block text-caption text-muted-foreground mb-1">Date To</label>
+              <input type="date" value={filters.dateTo} onChange={e => setFilters(p => ({ ...p, dateTo: e.target.value }))} className="w-full px-2 py-1.5 border border-white/10 rounded-lg text-body" />
             </div>
             <div>
-              <label className="block text-caption text-slate-500 mb-1">Search</label>
+              <label className="block text-caption text-muted-foreground mb-1">Search</label>
               <div className="relative">
                 <input type="text" value={filters.search} placeholder="Notes, key level..." onChange={e => setFilters(p => ({ ...p, search: e.target.value }))} className="modern-input w-full px-2 py-1.5 pr-8 text-body" />
                 <Search className="w-4 h-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2" />
@@ -299,7 +299,7 @@ export default function CRTHistory() {
         )}
         <div className="flex gap-2">
           <button onClick={handleFilter} className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-xl text-button hover:from-[#6D28D9] hover:to-[#4338CA] shadow-lg shadow-[#7C3AED]/25 transition-all duration-200 hover:-translate-y-0.5"><Filter className="w-4 h-4" /> Apply</button>
-          <button onClick={loadEvents} className="flex items-center gap-1.5 px-4 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 text-button hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"><Calendar className="w-4 h-4" /> Refresh</button>
+          <button onClick={loadEvents} className="flex items-center gap-1.5 px-4 py-2 bg-white/[0.04] text-foreground rounded-xl border border-white/10 text-button hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"><Calendar className="w-4 h-4" /> Refresh</button>
         </div>
       </CardContainer>
 
@@ -336,16 +336,16 @@ export default function CRTHistory() {
                           {event.date?.split('T')[0]}{event.time && <span className="text-caption text-slate-400 ml-1 font-mono">{event.time}</span>}
                         </td>
                         <td className="py-3 px-3">
-                          <span className={cn('px-2.5 py-1 rounded-lg text-caption inline-block shadow-sm', DIRECTION_COLORS[event.crtDirection] || 'bg-slate-100 text-slate-600')}>{event.crtDirection}</span>
+                          <span className={cn('px-2.5 py-1 rounded-lg text-caption inline-block shadow-sm', DIRECTION_COLORS[event.crtDirection] || 'bg-slate-100 text-muted-foreground')}>{event.crtDirection}</span>
                         </td>
-                        <td className="py-3 px-3 text-table-cell text-slate-700 max-w-[120px] truncate" title={getKeyLevelDisplay(event)}>{getKeyLevelDisplay(event)}</td>
+                        <td className="py-3 px-3 text-table-cell text-foreground max-w-[120px] truncate" title={getKeyLevelDisplay(event)}>{getKeyLevelDisplay(event)}</td>
                         <td className="py-3 px-3">
-                          <span className={cn('px-2.5 py-1 rounded-full text-caption inline-block border shadow-sm', STATUS_COLORS[event.crtStatus] || 'bg-slate-100 text-slate-500')}>{event.crtStatus}</span>
+                          <span className={cn('px-2.5 py-1 rounded-full text-caption inline-block border shadow-sm', STATUS_COLORS[event.crtStatus] || 'bg-slate-100 text-muted-foreground')}>{event.crtStatus}</span>
                         </td>
                         <td className="py-3 px-3 text-table-cell text-foreground">{event.crtRangeRespected}</td>
                         <td className="py-3 px-3">
                           {event.imagePath ? (
-                            <img src={event.imagePath} alt="CRT" className="w-10 h-10 object-cover rounded-xl border border-slate-200 cursor-pointer hover:opacity-80 hover:shadow-md transition-all duration-200"
+                            <img src={event.imagePath} alt="CRT" className="w-10 h-10 object-cover rounded-xl border border-white/10 cursor-pointer hover:opacity-80 hover:shadow-md transition-all duration-200"
                               onClick={() => setViewingImage([{ url: event.imagePath, label: `${TIMEFRAME_LABELS[event.timeframe]} CRT` }])} />
                           ) : <span className="text-caption text-slate-300">--</span>}
                         </td>
@@ -425,9 +425,9 @@ export default function CRTHistory() {
 function SummaryWidget({ label, value, color }: { label: string; value: number; color: string }) {
   const iconColor = color === 'text-[#7C3AED]' ? 'bg-[#7C3AED]/10 text-[#7C3AED]' : color === 'text-purple-600' ? 'bg-purple-950/30 text-purple-400' : color === 'text-green-600' ? 'bg-emerald-950/30 text-emerald-400' : 'bg-rose-950/30 text-rose-400';
   return (
-    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="bg-white/[0.04] p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-body-sm text-slate-500">{label}</span>
+        <span className="text-body-sm text-muted-foreground">{label}</span>
         <div className={cn('p-2 rounded-xl', iconColor)}>
           <div className={cn('w-4 h-4 rounded-full', color.replace('text-', 'bg-').replace('-600', '-500'))} />
         </div>
@@ -490,51 +490,51 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
       <div className="p-5 space-y-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-caption text-slate-600 mb-1">Date</label>
-            <input type="date" value={event.date?.split('T')[0]} disabled className="modern-input w-full px-3 py-2 text-body bg-slate-50 text-slate-500" />
+            <label className="block text-caption text-muted-foreground mb-1">Date</label>
+            <input type="date" value={event.date?.split('T')[0]} disabled className="modern-input w-full px-3 py-2 text-body bg-slate-50 text-muted-foreground" />
           </div>
           <div>
-            <label className="block text-caption text-slate-600 mb-1">Time</label>
-            <input type="time" value={event.time} disabled className="modern-input w-full px-3 py-2 text-body bg-slate-50 text-slate-500" />
+            <label className="block text-caption text-muted-foreground mb-1">Time</label>
+            <input type="time" value={event.time} disabled className="modern-input w-full px-3 py-2 text-body bg-slate-50 text-muted-foreground" />
           </div>
         </div>
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1.5">Does Key Level Exist?</label>
+          <label className="block text-caption text-muted-foreground mb-1.5">Does Key Level Exist?</label>
           <div className="flex gap-2">
-            <button onClick={() => { setKeyLevelExists(true); }} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', keyLevelExists ? 'bg-violet-100 border-violet-300 text-[#7C3AED]' : 'border-slate-200 hover:border-slate-300')}>Yes</button>
-            <button onClick={() => { setKeyLevelExists(false); setKeyLevelType(''); setCustomKeyLevel(''); }} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', !keyLevelExists ? 'bg-slate-100 border-slate-300 text-slate-700' : 'border-slate-200 hover:border-slate-300')}>No</button>
+            <button onClick={() => { setKeyLevelExists(true); }} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', keyLevelExists ? 'bg-violet-100 border-violet-300 text-[#7C3AED]' : 'border-white/10 hover:border-slate-300')}>Yes</button>
+            <button onClick={() => { setKeyLevelExists(false); setKeyLevelType(''); setCustomKeyLevel(''); }} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', !keyLevelExists ? 'bg-slate-100 border-slate-300 text-foreground' : 'border-white/10 hover:border-slate-300')}>No</button>
           </div>
         </div>
 
         {keyLevelExists && (
           <div>
-            <label className="block text-caption text-slate-600 mb-1">Key Level Type</label>
-            <select value={keyLevelType} onChange={e => setKeyLevelType(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-body">
+            <label className="block text-caption text-muted-foreground mb-1">Key Level Type</label>
+            <select value={keyLevelType} onChange={e => setKeyLevelType(e.target.value)} className="w-full px-3 py-2 border border-white/10 rounded-lg text-body">
               <option value="">Select type...</option>
               {KEY_LEVEL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
             {keyLevelType === 'Custom' && (
-              <input type="text" value={customKeyLevel} placeholder="Enter custom key level..." onChange={e => setCustomKeyLevel(e.target.value)} className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-lg text-body" />
+              <input type="text" value={customKeyLevel} placeholder="Enter custom key level..." onChange={e => setCustomKeyLevel(e.target.value)} className="w-full mt-2 px-3 py-2 border border-white/10 rounded-lg text-body" />
             )}
           </div>
         )}
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1.5">Is CRT Playing?</label>
+          <label className="block text-caption text-muted-foreground mb-1.5">Is CRT Playing?</label>
           <div className="flex gap-2">
-            <button onClick={() => setCrtPlaying(true)} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', crtPlaying ? 'bg-green-100 border-green-300 text-green-700' : 'border-slate-200 hover:border-slate-300')}>Yes</button>
-            <button onClick={() => setCrtPlaying(false)} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', !crtPlaying ? 'bg-slate-100 border-slate-300 text-slate-700' : 'border-slate-200 hover:border-slate-300')}>No</button>
+            <button onClick={() => setCrtPlaying(true)} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', crtPlaying ? 'bg-green-100 border-green-300 text-green-700' : 'border-white/10 hover:border-slate-300')}>Yes</button>
+            <button onClick={() => setCrtPlaying(false)} className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors', !crtPlaying ? 'bg-slate-100 border-slate-300 text-foreground' : 'border-white/10 hover:border-slate-300')}>No</button>
           </div>
         </div>
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1.5">CRT Direction</label>
+          <label className="block text-caption text-muted-foreground mb-1.5">CRT Direction</label>
           <div className="flex flex-wrap gap-1.5">
             {CRT_DIRECTIONS.map(dir => (
               <button key={dir} onClick={() => setCrtDirection(dir)}
                 className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
-                  crtDirection === dir ? (DIRECTION_COLORS[dir] || 'bg-slate-800 text-white') : 'border-slate-200 hover:border-slate-300')}>
+                  crtDirection === dir ? (DIRECTION_COLORS[dir] || 'bg-slate-800 text-white') : 'border-white/10 hover:border-slate-300')}>
                 {dir}
               </button>
             ))}
@@ -542,12 +542,12 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
         </div>
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1.5">CRT Status</label>
+          <label className="block text-caption text-muted-foreground mb-1.5">CRT Status</label>
           <div className="flex flex-wrap gap-1.5">
             {CRT_STATUSES.map(st => (
               <button key={st} onClick={() => setCrtStatus(st)}
                 className={cn('px-3 py-1.5 rounded-lg border-2 text-caption transition-colors',
-                  crtStatus === st ? (STATUS_COLORS[st] || 'bg-violet-100 text-[#7C3AED] border-violet-200') : 'border-slate-200 hover:border-slate-300')}>
+                  crtStatus === st ? (STATUS_COLORS[st] || 'bg-violet-100 text-[#7C3AED] border-violet-200') : 'border-white/10 hover:border-slate-300')}>
                 {st}
               </button>
             ))}
@@ -555,12 +555,12 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
         </div>
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1.5">CRT Range Respected</label>
+          <label className="block text-caption text-muted-foreground mb-1.5">CRT Range Respected</label>
           <div className="flex gap-2">
             {CRT_RANGE_RESPECTED.map(r => (
               <button key={r} onClick={() => setCrtRangeRespected(r)}
                 className={cn('px-4 py-1.5 rounded-lg border-2 text-caption transition-colors',
-                  crtRangeRespected === r ? 'bg-indigo-100 border-indigo-300 text-indigo-700' : 'border-slate-200 hover:border-slate-300')}>
+                  crtRangeRespected === r ? 'bg-indigo-100 border-indigo-300 text-indigo-700' : 'border-white/10 hover:border-slate-300')}>
                 {r}
               </button>
             ))}
@@ -568,20 +568,20 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
         </div>
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1.5">Screenshot</label>
+          <label className="block text-caption text-muted-foreground mb-1.5">Screenshot</label>
           <div className="flex items-start gap-3">
             <div onClick={() => fileRef.current?.click()} className={cn('border-2 border-dashed rounded-xl p-4 cursor-pointer transition-colors text-center hover:border-[#7C3AED] hover:bg-violet-50/50', imagePath ? 'border-green-300 bg-green-50/30' : 'border-slate-300')}
               onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleImageUpload(f); }}>
               <input type="file" accept="image/*" ref={fileRef} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); }} />
               {uploading ? (
-                <div className="flex items-center gap-2"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#7C3AED]" /><span className="text-caption text-slate-500">Uploading...</span></div>
+                <div className="flex items-center gap-2"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#7C3AED]" /><span className="text-caption text-muted-foreground">Uploading...</span></div>
               ) : (
-                <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-[#7C3AED]" /><span className="text-caption text-slate-600">Upload</span></div>
+                <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-[#7C3AED]" /><span className="text-caption text-muted-foreground">Upload</span></div>
               )}
             </div>
             {imagePath && (
               <div className="relative group shrink-0">
-                <img src={imagePath} alt="CRT" className="w-20 h-20 object-cover rounded-lg border border-slate-200 cursor-pointer"
+                <img src={imagePath} alt="CRT" className="w-20 h-20 object-cover rounded-lg border border-white/10 cursor-pointer"
                   onClick={() => onViewImage([{ url: imagePath, label: `${TIMEFRAME_LABELS[tf]} CRT` }])} />
                 <button onClick={() => setImagePath('')} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600"><X className="w-3 h-3" /></button>
               </div>
@@ -590,8 +590,8 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
         </div>
 
         <div>
-          <label className="block text-caption text-slate-600 mb-1">Notes</label>
-          <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Strategy comments, observations..." rows={3} className="w-full px-4 py-3 border border-slate-200 rounded-xl text-body min-h-[80px] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/30 focus:border-transparent transition-all resize-none" />
+          <label className="block text-caption text-muted-foreground mb-1">Notes</label>
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Strategy comments, observations..." rows={3} className="w-full px-4 py-3 border border-white/10 rounded-xl text-body min-h-[80px] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/30 focus:border-transparent transition-all resize-none" />
         </div>
       </div>
 
@@ -637,8 +637,8 @@ function ViewCRTModal({ event, onClose, onViewImage }: {
 
         {event.imagePath && (
           <div>
-            <label className="block text-caption text-slate-500 mb-1">Screenshot</label>
-            <img src={event.imagePath} alt="CRT" className="w-full max-h-48 object-cover rounded-lg border border-slate-200 cursor-pointer"
+            <label className="block text-caption text-muted-foreground mb-1">Screenshot</label>
+            <img src={event.imagePath} alt="CRT" className="w-full max-h-48 object-cover rounded-lg border border-white/10 cursor-pointer"
               onClick={() => onViewImage([{ url: event.imagePath, label: `${TIMEFRAME_LABELS[tf]} CRT` }])} />
           </div>
         )}
@@ -647,12 +647,12 @@ function ViewCRTModal({ event, onClose, onViewImage }: {
 
         {/* Status History */}
         {event.statusHistory && event.statusHistory.length > 0 && (
-          <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <label className="block text-caption text-slate-500 mb-2">Status History</label>
+          <div className="bg-slate-50 rounded-xl p-3 border border-white/5">
+            <label className="block text-caption text-muted-foreground mb-2">Status History</label>
             <div className="space-y-1.5">
               {event.statusHistory.map((h, i) => (
-                <div key={i} className="flex items-center justify-between text-caption bg-white px-3 py-2 rounded-lg border border-slate-100">
-                  <span className={cn('px-2.5 py-0.5 rounded-lg text-caption border shadow-sm', STATUS_COLORS[h.status] || 'bg-slate-100 text-slate-500')}>{h.status}</span>
+                <div key={i} className="flex items-center justify-between text-caption bg-white/[0.04] px-3 py-2 rounded-lg border border-white/5">
+                  <span className={cn('px-2.5 py-0.5 rounded-lg text-caption border shadow-sm', STATUS_COLORS[h.status] || 'bg-slate-100 text-muted-foreground')}>{h.status}</span>
                   <span className="text-slate-400 font-mono">{format(new Date(h.date), 'MMM dd, yyyy HH:mm')}</span>
                 </div>
               ))}
@@ -660,7 +660,7 @@ function ViewCRTModal({ event, onClose, onViewImage }: {
           </div>
         )}
 
-        <div className="pt-3 border-t border-slate-100">
+        <div className="pt-3 border-t border-white/5">
           <div className="flex items-center justify-between text-caption text-slate-400">
             <span>Created: {format(new Date(event.createdAt), 'MMM dd, yyyy HH:mm')}</span>
             <span>Updated: {format(new Date(event.updatedAt), 'MMM dd, yyyy HH:mm')}</span>

@@ -306,22 +306,22 @@ export default function TradeImport() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4 text-body">
-              <div className="text-center p-4 bg-white rounded-xl border border-emerald-200 shadow-sm">
-                <p className="text-table-header text-slate-500">Total Rows</p>
-                <p className="text-display font-bold text-slate-900 mt-1">{result.total}</p>
+              <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-emerald-200 shadow-sm">
+                <p className="text-table-header text-muted-foreground">Total Rows</p>
+                <p className="text-display font-bold text-foreground mt-1">{result.total}</p>
               </div>
-              <div className="text-center p-4 bg-white rounded-xl border border-emerald-200 shadow-sm">
+              <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-emerald-200 shadow-sm">
                 <p className="text-table-header text-emerald-600">Imported</p>
                 <p className="text-display font-bold text-emerald-600 mt-1">{result.inserted}
 </p>
               </div>
-              <div className="text-center p-4 bg-white rounded-xl border border-amber-200 shadow-sm">
+              <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-amber-200 shadow-sm">
                 <p className="text-table-header text-amber-600">Skipped</p>
                 <p className="text-display font-bold text-amber-600 mt-1">{result.skipped}</p>
               </div>
             </div>
             {result.errors && result.errors.length > 0 && (
-              <div className="mt-4 p-4 bg-white rounded-xl border border-amber-200">
+              <div className="mt-4 p-4 bg-white/[0.04] rounded-xl border border-amber-200">
                 <p className="text-body-sm font-semibold text-amber-800 mb-2">
                   {result.errors.length} row(s) had errors:
                 </p>
@@ -337,7 +337,7 @@ export default function TradeImport() {
 
         <div className="p-6 space-y-6">
           <div>
-            <label className="block text-body-sm font-semibold text-slate-700 mb-3">
+            <label className="block text-body-sm font-semibold text-foreground mb-3">
               Select Account
             </label>
             {accounts.length > 0 ? (
@@ -346,17 +346,17 @@ export default function TradeImport() {
                 value={selectedAccount}
                 onValueChange={setSelectedAccount}
                 placeholder="Select an account"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 transition-all hover:bg-slate-100"
+                className="w-full px-4 py-3 bg-slate-50 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-foreground transition-all hover:bg-slate-100"
               />
             ) : (
-              <p className="mt-2 text-body text-slate-500">
+              <p className="mt-2 text-body text-muted-foreground">
                 No accounts found. Please create an account first.
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-body-sm font-semibold text-slate-700 mb-3">
+            <label className="block text-body-sm font-semibold text-foreground mb-3">
               Upload File
             </label>
             <div
@@ -392,7 +392,7 @@ export default function TradeImport() {
                         MT5 Format Detected
                       </span>
                     )}
-                    <p className="text-body text-slate-500">
+                    <p className="text-body text-muted-foreground">
                       {(file.size / 1024).toFixed(1)} KB
                     </p>
                     <button
@@ -411,7 +411,7 @@ export default function TradeImport() {
                     <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center">
                       <Upload className="w-8 h-8 text-slate-400" />
                     </div>
-                    <p className="text-slate-600 font-medium">
+                    <p className="text-muted-foreground font-medium">
                       Drag and drop your file here, or{' '}
                       <span className="text-[#7C3AED] font-semibold hover:underline">browse</span>
                     </p>
@@ -428,7 +428,7 @@ export default function TradeImport() {
             <button
               onClick={handlePreview}
               disabled={!file || !selectedAccount || isPreviewing || isLoading}
-              className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
+              className="flex-1 px-4 py-2.5 bg-slate-100 text-foreground rounded-xl hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
             >
               {isPreviewing ? 'Previewing...' : 'Preview Import'}
             </button>
@@ -448,15 +448,15 @@ export default function TradeImport() {
                 Import Preview Summary
               </h3>
               <div className="grid grid-cols-3 gap-4 text-body">
-                <div className="text-center p-4 bg-white rounded-xl border border-emerald-200 shadow-sm">
+                <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-emerald-200 shadow-sm">
                   <p className="text-table-header text-emerald-600 uppercase">New Trades</p>
                   <p className="text-display font-bold text-emerald-600 mt-1">{previewStats.newTrades}</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-xl border border-amber-200 shadow-sm">
+                <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-amber-200 shadow-sm">
                   <p className="text-table-header text-amber-600 uppercase">Duplicates</p>
                   <p className="text-display font-bold text-amber-600 mt-1">{previewStats.duplicates}</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-xl border border-orange-200 shadow-sm">
+                <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-orange-200 shadow-sm">
                   <p className="text-table-header text-orange-600 uppercase">In File</p>
                   <p className="text-display font-bold text-orange-600 mt-1">{previewStats.potentialDuplicates}</p>
                 </div>
@@ -466,10 +466,10 @@ export default function TradeImport() {
 
           {preview.length > 0 && (
             <div className="mt-6">
-              <h3 className="font-semibold text-slate-900 mb-3">
+              <h3 className="font-semibold text-foreground mb-3">
                 Preview (first {preview.length} rows)
               </h3>
-              <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-white/10">
+              <div className="overflow-x-auto bg-white/[0.04] rounded-2xl shadow-sm border border-white/10">
                 <table className="min-w-full divide-y divide-white/10 text-table-cell">
                   <thead className="bg-white/[0.02]">
                     <tr>
@@ -586,44 +586,44 @@ export default function TradeImport() {
             </div>
           )}
 
-          <div className="mt-6 p-5 bg-slate-50 rounded-2xl border border-slate-200/50">
+          <div className="mt-6 p-5 bg-slate-50 rounded-2xl border border-white/10/50">
             {fileFormat === 'mt5' ? (
               <>
-                <h4 className="font-semibold text-slate-700 mb-3">Expected MT5 CSV Columns:</h4>
+                <h4 className="font-semibold text-foreground mb-3">Expected MT5 CSV Columns:</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-body mb-4">
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time (Entry)</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Type</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Volume</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Price</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">S/L</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">T/P</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time (Exit)</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Price (Exit)</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Commission</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Swap</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Time (Entry)</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Position</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Symbol</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Type</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Volume</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Price</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">S/L</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">T/P</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Time (Exit)</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Price (Exit)</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Commission</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Swap</span>
                 </div>
-                <p className="text-caption text-slate-500">
+                <p className="text-caption text-muted-foreground">
                   Commission is automatically converted to positive values. Empty S/L and T/P are set to null.
                 </p>
               </>
             ) : (
               <>
-                <h4 className="font-semibold text-slate-700 mb-3">Expected Excel Columns:</h4>
+                <h4 className="font-semibold text-foreground mb-3">Expected Excel Columns:</h4>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-body">
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Position</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Symbol</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Type</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Volume</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Entry Price</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Exit Price</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">S / L</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">T / P</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Profit</span>
-                  <span className="font-mono bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-600 shadow-sm">Time</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Position</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Symbol</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Type</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Volume</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Entry Price</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Exit Price</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">S / L</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">T / P</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Profit</span>
+                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Time</span>
                 </div>
-                <p className="mt-4 text-caption text-slate-500">
+                <p className="mt-4 text-caption text-muted-foreground">
                   Column names are case-insensitive. Position column is used for duplicate detection. Default strategy "LONDON" and key level "No Key Level" will be assigned.
                 </p>
               </>

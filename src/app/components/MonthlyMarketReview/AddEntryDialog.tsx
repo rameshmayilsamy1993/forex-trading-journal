@@ -679,7 +679,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             key={tag}
                             type="button"
                             onClick={() => addTag(tag)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-[#F8FAFC] border border-white/10 hover:text-[#7C3AED] hover:border-[#7C3AED] hover:bg-purple-50 transition-all duration-200"
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-white/5 border border-white/10 hover:text-[#7C3AED] hover:border-[#7C3AED] hover:bg-purple-50 transition-all duration-200"
                           >
                             + {tag}
                           </button>

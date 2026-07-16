@@ -550,7 +550,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             'hover:shadow-lg hover:-translate-y-0.5',
                           )}
                         >
-                          <div className="aspect-[4/3] relative bg-[#F8FAFC]">
+                          <div className="aspect-[4/3] relative bg-white/5">
                             <img
                               src={img.preview || img.url}
                               alt={img.caption || `Image ${index + 1}`}
@@ -727,7 +727,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                         {tags.map(tag => (
                           <span
                             key={tag}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#F1F5F9] text-[13px] font-medium text-muted-foreground"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-white/5 text-[13px] font-medium text-muted-foreground"
                           >
                             {tag}
                             <button type="button" onClick={() => removeTag(tag)} className="text-muted-foreground hover:text-red-500 transition-colors">
@@ -757,7 +757,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             key={tag}
                             type="button"
                             onClick={() => addTag(tag)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-[#F8FAFC] border border-white/10 hover:text-[#2563EB] hover:border-[#2563EB] hover:bg-blue-50 transition-all duration-200"
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-white/5 border border-white/10 hover:text-[#2563EB] hover:border-[#2563EB] hover:bg-blue-50 transition-all duration-200"
                           >
                             + {tag}
                           </button>
