@@ -93,7 +93,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }: Image
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col" onClick={onClose}>
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-black/50" onClick={e => e.stopPropagation()}>
         <div className="text-white">
