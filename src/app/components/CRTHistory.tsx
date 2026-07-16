@@ -380,8 +380,8 @@ export default function CRTHistory() {
       {/* Edit Modal */}
       <Dialog.Root open={!!editingEvent} onOpenChange={(open) => !open && setEditingEvent(null)}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-200">
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1E293B]/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/30 border border-white/10">
             <Dialog.Title className="sr-only">Edit CRT Event</Dialog.Title>
             <Dialog.Description className="sr-only">Edit CRT event details including key level, direction, status, and screenshot</Dialog.Description>
             {editingEvent && (
@@ -400,8 +400,8 @@ export default function CRTHistory() {
       {/* View Modal */}
       <Dialog.Root open={!!viewingEvent} onOpenChange={(open) => !open && setViewingEvent(null)}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-200">
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#1E293B]/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/30 border border-white/10">
             <Dialog.Title className="sr-only">View CRT Event</Dialog.Title>
             <Dialog.Description className="sr-only">View CRT event details including key level, direction, status, and history</Dialog.Description>
             {viewingEvent && (
@@ -479,12 +479,12 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
   const tf = event.timeframe;
   return (
     <div>
-      <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-violet-50 to-white">
+      <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
         <div className="flex items-center gap-2">
           <span className={cn('px-3 py-1 rounded-full text-body-sm shadow-sm', TIMEFRAME_COLORS[tf])}>{TIMEFRAME_LABELS[tf] || tf}</span>
-          <span className="text-body text-slate-800">{event.pair}</span>
+          <span className="text-body text-foreground">{event.pair}</span>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-white/80 rounded-xl transition-colors"><X className="w-5 h-5 text-slate-500" /></button>
+        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors"><X className="w-5 h-5 text-muted-foreground" /></button>
       </div>
 
       <div className="p-5 space-y-5">
@@ -595,8 +595,8 @@ function EditCRTModal({ event, onSave, onClose, isSaving, onViewImage }: {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 p-5 border-t border-slate-200 bg-slate-50/50 rounded-b-2xl">
-        <button onClick={onClose} className="px-4 py-2 text-button text-slate-600 hover:text-slate-800 bg-white rounded-xl border border-slate-200 hover:bg-slate-50 transition-all duration-200">Cancel</button>
+      <div className="flex items-center justify-end gap-3 p-5 border-t border-white/10 bg-white/5 rounded-b-2xl">
+        <button onClick={onClose} className="px-4 py-2 text-button text-muted-foreground hover:text-foreground bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-200">Cancel</button>
         <button onClick={handleSubmit} disabled={isSaving} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl text-button hover:from-emerald-700 hover:to-green-700 shadow-lg shadow-emerald-500/25 disabled:opacity-50 transition-all duration-200 hover:-translate-y-0.5">
           <Save className="w-4 h-4" />{isSaving ? 'Saving...' : 'Save Changes'}
         </button>
@@ -614,12 +614,12 @@ function ViewCRTModal({ event, onClose, onViewImage }: {
   const tf = event.timeframe;
   return (
     <div>
-      <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-violet-50 to-white">
+      <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
         <div className="flex items-center gap-2">
           <span className={cn('px-3 py-1 rounded-full text-body-sm shadow-sm', TIMEFRAME_COLORS[tf])}>{TIMEFRAME_LABELS[tf] || tf}</span>
-          <span className="text-body text-slate-800">{event.pair}</span>
+          <span className="text-body text-foreground">{event.pair}</span>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-white/80 rounded-xl transition-colors"><X className="w-5 h-5 text-slate-500" /></button>
+        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors"><X className="w-5 h-5 text-muted-foreground" /></button>
       </div>
 
       <div className="p-5 space-y-4">
@@ -673,12 +673,12 @@ function ViewCRTModal({ event, onClose, onViewImage }: {
 
 function Field({ label, value, badge }: { label: string; value: string; badge?: string }) {
   return (
-    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-      <label className="block text-caption text-slate-500 mb-0.5">{label}</label>
+    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+      <label className="block text-caption text-muted-foreground mb-0.5">{label}</label>
       {badge ? (
         <span className={cn('px-2.5 py-1 rounded-lg text-caption inline-block shadow-sm', badge)}>{value}</span>
       ) : (
-        <p className="text-body text-slate-800">{value || '--'}</p>
+        <p className="text-body text-foreground">{value || '--'}</p>
       )}
     </div>
   );

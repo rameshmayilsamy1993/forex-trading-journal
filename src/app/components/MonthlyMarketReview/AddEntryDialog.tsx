@@ -88,10 +88,10 @@ function EditorToolbar({ editor }: { editor: any }) {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 bg-white border-b border-[#E5EAF2]">
+    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-white/10">
       {tools.map((tool, i) => {
         if ('type' in tool && tool.type === 'divider') {
-          return <div key={i} className="w-px h-5 bg-[#E5EAF2] mx-1" />;
+          return <div key={i} className="w-px h-5 bg-white/10 mx-1" />;
         }
         const t = tool as any;
         return (
@@ -104,7 +104,7 @@ function EditorToolbar({ editor }: { editor: any }) {
               'p-2 rounded-lg transition-all duration-150',
               t.active
                 ? 'bg-[#7C3AED] text-white shadow-sm shadow-purple-500/20'
-                : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A] hover:scale-105',
+                : 'text-muted-foreground hover:bg-white/5 hover:text-foreground hover:scale-105',
             )}
           >
             <t.icon className="size-4" />
@@ -402,21 +402,21 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="relative w-[1100px] max-w-[90vw] h-[90vh] max-h-[90vh] bg-white rounded-[28px] shadow-2xl shadow-black/10 overflow-hidden flex flex-col"
+               className="relative w-[1100px] max-w-[90vw] h-[90vh] max-h-[90vh] bg-[#1E293B]/95 backdrop-blur-xl rounded-[28px] shadow-2xl shadow-black/30 overflow-hidden flex flex-col"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex-shrink-0 h-[90px] flex items-center justify-between px-10 border-b border-[#E5EAF2] bg-white">
+              <div className="flex-shrink-0 h-[90px] flex items-center justify-between px-10 border-b border-white/10">
                 <div>
-                  <h2 className="text-[32px] font-bold text-[#0F172A] tracking-tight leading-tight">
+                  <h2 className="text-[32px] font-bold text-foreground tracking-tight leading-tight">
                     Add Timeline Entry
                   </h2>
-                  <p className="text-[15px] text-[#64748B] mt-0.5">
+                  <p className="text-[15px] text-muted-foreground mt-0.5">
                     Document your monthly analysis
                   </p>
                 </div>
                 <button
                   onClick={close}
-                  className="size-11 rounded-full border border-[#E5EAF2] flex items-center justify-center text-[#94A3B8] hover:text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] transition-all duration-200"
+                  className="size-11 rounded-full border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-white/20 hover:bg-white/5 transition-all duration-200"
                 >
                   <X className="size-5" />
                 </button>
@@ -427,33 +427,33 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                 className="flex-1 overflow-y-auto px-10 py-8 space-y-8 scrollbar-thin"
               >
                 <div className="space-y-2">
-                  <label className="text-[13px] font-semibold text-[#64748B] uppercase tracking-wider">
+                  <label className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Entry Title
                   </label>
                   <input
                     value={entryTitle}
                     onChange={e => setEntryTitle(e.target.value)}
                     placeholder="Describe this market update..."
-                    className="w-full h-14 px-5 rounded-2xl border border-[#E5EAF2] bg-white text-[16px] font-semibold text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#7C3AED] focus:ring-[3px] focus:ring-purple-500/10 transition-all duration-200"
+                    className="w-full h-14 px-5 rounded-2xl border border-white/10 bg-white/5 text-[16px] font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#7C3AED] focus:ring-[3px] focus:ring-purple-500/10 transition-all duration-200"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-semibold text-[#64748B] uppercase tracking-wider">
+                  <label className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Analysis Notes
                   </label>
-                  <div className="border border-[#E5EAF2] rounded-[18px] overflow-hidden bg-[#F8FAFC] shadow-sm">
+                  <div className="border border-white/10 rounded-[18px] overflow-hidden bg-white/5">
                     <div className="sticky top-0 z-10">
                       <EditorToolbar editor={editor} />
                     </div>
-                    <div className="bg-[#F8FAFC] min-h-[320px] max-h-[500px] overflow-y-auto">
+                    <div className="min-h-[320px] max-h-[500px] overflow-y-auto">
                       <EditorContent editor={editor} />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[13px] font-semibold text-[#64748B] uppercase tracking-wider">
+                  <label className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Images
                   </label>
 
@@ -467,12 +467,12 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                           onDragOver={e => handleDragOver(e, index)}
                           onDragEnd={handleDragEnd}
                           className={cn(
-                            'group relative rounded-2xl border border-[#E5EAF2] overflow-hidden bg-white shadow-sm transition-all duration-200',
+                            'group relative rounded-2xl border border-white/10 overflow-hidden bg-white/5 transition-all duration-200',
                             dragIndex === index && 'opacity-50 scale-95 ring-2 ring-[#7C3AED]',
                             'hover:shadow-lg hover:-translate-y-0.5',
                           )}
                         >
-                          <div className="aspect-[4/3] relative bg-[#F8FAFC]">
+                          <div className="aspect-[4/3] relative bg-white/5">
                             <img
                               src={img.preview || img.url}
                               alt={img.caption || `Image ${index + 1}`}
@@ -485,14 +485,14 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                               <button
                                 type="button"
                                 onClick={() => setFullscreenImage(img.preview || img.url!)}
-                                className="p-1.5 rounded-lg bg-white/90 hover:bg-white text-[#64748B] hover:text-[#0F172A] shadow-sm transition-all"
+                                className="p-1.5 rounded-lg bg-white/90 hover:bg-white text-muted-foreground hover:text-foreground shadow-sm transition-all"
                               >
                                 <Maximize2 className="size-3.5" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => { replaceIndexRef.current = index; replaceInputRef.current?.click(); }}
-                                className="p-1.5 rounded-lg bg-white/90 hover:bg-white text-[#64748B] hover:text-[#0F172A] shadow-sm transition-all"
+                                className="p-1.5 rounded-lg bg-white/90 hover:bg-white text-muted-foreground hover:text-foreground shadow-sm transition-all"
                               >
                                 <Replace className="size-3.5" />
                               </button>
@@ -506,7 +506,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             </div>
 
                             <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/80 text-[10px] font-medium text-[#64748B] shadow-sm cursor-grab">
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/80 text-[10px] font-medium text-muted-foreground shadow-sm cursor-grab">
                                 <GripVertical className="size-3" />
                                 Drag
                               </span>
@@ -537,14 +537,14 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                               value={img.caption || ''}
                               onChange={e => updateCaption(index, e.target.value)}
                               placeholder="Caption..."
-                              className="flex-1 text-[12px] text-[#64748B] bg-transparent border-0 outline-none placeholder:text-[#94A3B8]"
+                              className="flex-1 text-[12px] text-muted-foreground bg-transparent border-0 outline-none placeholder:text-muted-foreground"
                             />
                             <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 type="button"
                                 onClick={() => moveImage(index, index - 1)}
                                 disabled={index === 0}
-                                className="p-1 rounded-md text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F1F5F9] disabled:opacity-30 transition-all"
+                                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 disabled:opacity-30 transition-all"
                               >
                                 <ArrowUp className="size-3" />
                               </button>
@@ -552,7 +552,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                                 type="button"
                                 onClick={() => moveImage(index, index + 1)}
                                 disabled={index === images.length - 1}
-                                className="p-1 rounded-md text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F1F5F9] disabled:opacity-30 transition-all"
+                                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 disabled:opacity-30 transition-all"
                               >
                                 <ArrowDown className="size-3" />
                               </button>
@@ -564,8 +564,8 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                   )}
 
                   {uploading && totalUploading > 0 && (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-purple-50 border border-purple-200 mb-3">
-                      <div className="size-5 rounded-full border-2 border-purple-300 border-t-[#7C3AED] animate-spin" />
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-purple-950/30 border border-purple-500/30 mb-3">
+                      <div className="size-5 rounded-full border-2 border-purple-500/50 border-t-[#7C3AED] animate-spin" />
                       <span className="text-[13px] font-medium text-[#7C3AED]">
                         Uploading {uploadProgress} of {totalUploading} images...
                       </span>
@@ -574,15 +574,15 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
 
                   {remainingSlots > 0 && (
                     <>
-                      <label className="flex flex-col items-center justify-center h-[180px] border-2 border-dashed border-[#E5EAF2] rounded-2xl cursor-pointer hover:border-[#7C3AED] hover:bg-purple-50/30 transition-all duration-200 group">
+                      <label className="flex flex-col items-center justify-center h-[180px] border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:border-[#7C3AED] hover:bg-purple-950/30 transition-all duration-200 group">
                         <div className="flex flex-col items-center gap-2">
                           <div className="size-12 rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                             <Upload className="size-5 text-[#7C3AED]" />
                           </div>
-                          <span className="text-[15px] font-medium text-[#64748B] group-hover:text-[#7C3AED] transition-colors">
+                          <span className="text-[15px] font-medium text-muted-foreground group-hover:text-[#7C3AED] transition-colors">
                             Upload Images
                           </span>
-                          <span className="text-[12px] text-[#94A3B8]">
+                          <span className="text-[12px] text-muted-foreground">
                             PNG, JPEG, WEBP · Max 10MB each · {remainingSlots} slots left
                           </span>
                         </div>
@@ -607,13 +607,13 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                   )}
                 </div>
 
-                <div className="bg-white rounded-2xl border border-[#E5EAF2] p-6 shadow-sm">
-                  <h3 className="text-[13px] font-semibold text-[#64748B] uppercase tracking-wider mb-5">
+                <div className="bg-white/5 rounded-2xl border border-white/10 p-6">
+                  <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-5">
                     Market Metadata
                   </h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-5">
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-medium text-[#0F172A]">Time</label>
+                      <label className="text-[13px] font-medium text-foreground">Time</label>
                       <Select value={entryTime} onValueChange={setEntryTime}>
                         <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
                         <SelectContent>
@@ -624,7 +624,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-medium text-[#0F172A]">Bias</label>
+                      <label className="text-[13px] font-medium text-foreground">Bias</label>
                       <Select value={bias} onValueChange={setBias}>
                         <SelectTrigger><SelectValue placeholder="Select bias" /></SelectTrigger>
                         <SelectContent>
@@ -644,15 +644,15 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                       </Select>
                     </div>
                     <div className="space-y-1.5 col-span-2">
-                      <label className="text-[13px] font-medium text-[#0F172A]">Tags</label>
-                      <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl border border-[#E5EAF2] bg-white min-h-[48px] focus-within:border-[#7C3AED] focus-within:ring-[3px] focus-within:ring-purple-500/10 transition-all duration-200">
+                      <label className="text-[13px] font-medium text-foreground">Tags</label>
+                      <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl border border-white/10 bg-white/5 min-h-[48px] focus-within:border-[#7C3AED] focus-within:ring-[3px] focus-within:ring-purple-500/10 transition-all duration-200">
                         {tags.map(tag => (
                           <span
                             key={tag}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#F1F5F9] text-[13px] font-medium text-[#64748B]"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-white/10 text-[13px] font-medium text-muted-foreground"
                           >
                             {tag}
-                            <button type="button" onClick={() => removeTag(tag)} className="text-[#94A3B8] hover:text-red-500 transition-colors">
+                            <button type="button" onClick={() => removeTag(tag)} className="text-muted-foreground hover:text-red-500 transition-colors">
                               <X className="size-3" />
                             </button>
                           </span>
@@ -670,7 +670,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             }
                           }}
                           placeholder={tags.length === 0 ? 'Type a tag and press Enter...' : ''}
-                          className="flex-1 min-w-[120px] text-[14px] text-[#0F172A] bg-transparent border-0 outline-none placeholder:text-[#94A3B8]"
+                          className="flex-1 min-w-[120px] text-[14px] text-foreground bg-transparent border-0 outline-none placeholder:text-muted-foreground"
                         />
                       </div>
                       <div className="flex flex-wrap gap-1.5 mt-2">
@@ -679,7 +679,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             key={tag}
                             type="button"
                             onClick={() => addTag(tag)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-[#94A3B8] bg-[#F8FAFC] border border-[#E5EAF2] hover:text-[#7C3AED] hover:border-[#7C3AED] hover:bg-purple-50 transition-all duration-200"
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-[#F8FAFC] border border-white/10 hover:text-[#7C3AED] hover:border-[#7C3AED] hover:bg-purple-50 transition-all duration-200"
                           >
                             + {tag}
                           </button>
@@ -687,7 +687,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-medium text-[#0F172A]">Mood</label>
+                      <label className="text-[13px] font-medium text-foreground">Mood</label>
                       <Select value={mood} onValueChange={setMood}>
                         <SelectTrigger><SelectValue placeholder="Select mood" /></SelectTrigger>
                         <SelectContent>
@@ -698,7 +698,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-medium text-[#0F172A]">Importance</label>
+                      <label className="text-[13px] font-medium text-foreground">Importance</label>
                       <Select value={importance} onValueChange={setImportance}>
                         <SelectTrigger><SelectValue placeholder="Select importance" /></SelectTrigger>
                         <SelectContent>
@@ -719,7 +719,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                       </Select>
                     </div>
                     <div className="space-y-1.5 col-span-2">
-                      <label className="text-[13px] font-medium text-[#0F172A]">Session</label>
+                      <label className="text-[13px] font-medium text-foreground">Session</label>
                       <Select value={session} onValueChange={setSession}>
                         <SelectTrigger><SelectValue placeholder="Select trading session" /></SelectTrigger>
                         <SelectContent>
@@ -744,25 +744,25 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                     return (
                       <div
                         key={i}
-                        className="bg-white rounded-2xl border border-[#E5EAF2] p-4 shadow-sm"
+                        className="bg-white/5 rounded-2xl border border-white/10 p-4"
                       >
                         <div className={`size-8 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg flex items-center justify-center mb-2.5`}>
                           <Icon className="size-3.5 text-white" />
                         </div>
-                        <p className="text-[22px] font-bold text-[#0F172A] leading-tight">{stat.value}</p>
-                        <p className="text-[11px] font-medium text-[#94A3B8] mt-0.5">{stat.label}</p>
+                        <p className="text-[22px] font-bold text-foreground leading-tight">{stat.value}</p>
+                        <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{stat.label}</p>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="flex-shrink-0 h-16 flex items-center justify-between px-10 border-t border-[#E5EAF2] bg-white">
+              <div className="flex-shrink-0 h-16 flex items-center justify-between px-10 border-t border-white/10">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={close}
                     disabled={saving}
-                    className="h-12 px-6 rounded-2xl border border-[#E5EAF2] text-[14px] font-medium text-[#64748B] hover:text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] transition-all duration-200"
+                    className="h-12 px-6 rounded-2xl border border-white/10 text-[14px] font-medium text-muted-foreground hover:text-foreground hover:border-white/20 hover:bg-white/5 transition-all duration-200"
                   >
                     Cancel
                   </button>
@@ -779,7 +779,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                         }
                       }}
                       disabled={saving}
-                      className="h-12 px-6 rounded-2xl border border-red-200 text-[14px] font-medium text-red-500 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
+                      className="h-12 px-6 rounded-2xl border border-red-500/30 text-[14px] font-medium text-red-400 hover:bg-red-950/30 hover:border-red-500/50 transition-all duration-200"
                     >
                       Delete
                     </button>
@@ -789,7 +789,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                   <button
                     onClick={() => handleSubmit(true)}
                     disabled={saving || uploading}
-                    className="h-12 px-6 rounded-2xl border border-[#E5EAF2] text-[14px] font-medium text-[#64748B] hover:text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] transition-all duration-200"
+                    className="h-12 px-6 rounded-2xl border border-white/10 text-[14px] font-medium text-muted-foreground hover:text-foreground hover:border-white/20 hover:bg-white/5 transition-all duration-200"
                   >
                     Save Draft
                   </button>
