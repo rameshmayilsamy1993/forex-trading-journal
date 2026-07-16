@@ -56,7 +56,7 @@ export default function RecentActivity({ trades, accounts }: RecentActivityProps
           return (
             <div
               key={trade.id}
-              className="flex items-center justify-between rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2 hover:bg-white/[0.06] transition-colors"
+              className="flex items-center justify-between rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] px-3 py-2 hover:bg-[#F1F5F9]/60 transition-colors"
             >
               <div className="flex items-center gap-2">
                 <div className={`h-8 w-[3px] rounded-full ${isWin ? 'bg-emerald-500' : 'bg-rose-500'}`} />

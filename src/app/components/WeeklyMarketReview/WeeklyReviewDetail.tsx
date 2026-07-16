@@ -347,7 +347,7 @@ export default function WeeklyReviewDetail() {
                 <Target className="size-5 text-[#2563EB]" />
                 Weekly Analysis
               </h2>
-              <div className="relative bg-white/70 backdrop-blur-xl rounded-2xl border border-white/50 shadow-lg shadow-blue-500/5 p-6 space-y-5">
+              <div className="relative bg-white rounded-2xl border border-[#E2E8F0] shadow-lg shadow-blue-500/5 p-6 space-y-5">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 pointer-events-none" />
                 <div className="relative space-y-5">
                   {review.theme && (
@@ -502,7 +502,7 @@ export default function WeeklyReviewDetail() {
                 <Newspaper className="size-5 text-[#2563EB]" />
                 Economic Events
               </h2>
-              <div className="relative bg-white/70 backdrop-blur-xl rounded-2xl border border-white/50 shadow-lg shadow-blue-500/5 p-6">
+              <div className="relative bg-white rounded-2xl border border-[#E2E8F0] shadow-lg shadow-blue-500/5 p-6">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 pointer-events-none" />
                 <p className="relative text-body text-[#0F172A] leading-relaxed whitespace-pre-line">
                   {review.economicEvents}

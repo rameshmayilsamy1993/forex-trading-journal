@@ -1119,7 +1119,7 @@ export default function MissedTradeJournal() {
 
       {/* CRT Missed Trade Details Modal */}
       {viewingTrade && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200" onClick={() => setViewingTrade(null)}>
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200" onClick={() => setViewingTrade(null)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="p-5 border-b border-[#E2E8F0] bg-gradient-to-r from-violet-50/40 to-white flex-shrink-0">
               <div className="flex items-start justify-between">
@@ -1279,7 +1279,7 @@ export default function MissedTradeJournal() {
 
       {/* Missed Reason Viewer Modal */}
       {viewingReason && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setViewingReason(null)}>
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setViewingReason(null)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <div className="p-5 border-b border-[#E2E8F0] bg-gradient-to-r from-violet-50 to-indigo-50/50">
               <div className="flex items-center justify-between">

@@ -74,7 +74,7 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
           <select
             value={selectedFirm}
             onChange={(e) => onFirmChange(e.target.value)}
-            className="bg-white/[0.06] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-body-sm text-white/70 outline-none"
+            className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2.5 py-1.5 text-body-sm text-white/70 outline-none"
           >
             <option value="all">All Firms</option>
             {firms.map((firm) => (
@@ -113,7 +113,7 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
                 <AccountSparkline trades={accountTrades} initialBalance={account.initialBalance} width={60} height={20} />
               </div>
 
-              <div className="grid grid-cols-3 gap-2 py-1.5 border-y border-white/[0.06]">
+              <div className="grid grid-cols-3 gap-2 py-1.5 border-y border-[#E2E8F0]">
                 <div>
                   <p className="text-micro text-white/40 uppercase tracking-wider">Balance</p>
                   <p className="text-body-sm font-semibold text-white/90 tabular-nums">${currentBalance.toFixed(2)}</p>
@@ -137,7 +137,7 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
                   <span>Drawdown</span>
                   <span className="text-white/60">{dd.toFixed(1)}%</span>
                 </div>
-                <Progress value={dd} className="h-1 bg-white/[0.06] rounded-full [&>div]:rounded-full [&>div]:bg-gradient-to-r [&>div]:from-emerald-400 [&>div]:to-[#7C3AED]" />
+                <Progress value={dd} className="h-1 bg-[#F8FAFC] rounded-full [&>div]:rounded-full [&>div]:bg-gradient-to-r [&>div]:from-emerald-400 [&>div]:to-[#7C3AED]" />
               </div>
             </div>
           );

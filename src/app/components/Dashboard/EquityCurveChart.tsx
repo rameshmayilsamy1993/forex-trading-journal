@@ -48,7 +48,7 @@ export default function EquityCurveChart({ equityCurve, getEquityStats }: Equity
         )}
       </div>
 
-      <div className="mt-2 grid grid-cols-4 gap-1 rounded-xl bg-white/[0.04] p-2">
+      <div className="mt-2 grid grid-cols-4 gap-1 rounded-xl bg-[#F8FAFC] p-2">
         {[
           { label: 'Highest', value: getEquityStats.highest, color: 'text-emerald-400' },
           { label: 'Lowest', value: getEquityStats.lowest, color: 'text-rose-400' },

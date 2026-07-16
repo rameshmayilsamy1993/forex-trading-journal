@@ -110,7 +110,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB]">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -127,7 +127,7 @@ export default function App() {
           isCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
         }`}
       >
-        <header className="lg:hidden sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB]/60 px-4 py-3">
+        <header className="lg:hidden sticky top-0 z-30 bg-white border-b border-[#E2E8F0] px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
@@ -145,7 +145,7 @@ export default function App() {
           </div>
         </header>
 
-        <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB]/60 items-center justify-end px-6 gap-3">
+        <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-white border-b border-[#E2E8F0] items-center justify-end px-6 gap-3">
           <LiveISTClock />
           <div className="w-px h-6 bg-slate-200/60" />
           <NotificationDropdown onNavigateToReminders={() => {

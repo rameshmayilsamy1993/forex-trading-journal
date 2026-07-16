@@ -331,7 +331,7 @@ export default function StrategyChecklist({
       </Modal>
 
       {showUnsavedConfirm && (
-        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
             <h3 className="text-card-title text-slate-900 mb-2">Unsaved Changes</h3>
             <p className="text-body text-slate-600 mb-6">

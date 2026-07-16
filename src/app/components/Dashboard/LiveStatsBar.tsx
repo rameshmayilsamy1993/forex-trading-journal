@@ -36,8 +36,8 @@ export default function LiveStatsBar({ stats, netPL, netPct, winRate, activeAcco
         <div className="flex gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="flex-1 animate-pulse space-y-2">
-              <div className="h-3 bg-white/[0.06] rounded w-16" />
-              <div className="h-5 bg-white/[0.06] rounded w-20" />
+              <div className="h-3 bg-[#F8FAFC] rounded w-16" />
+              <div className="h-5 bg-[#F8FAFC] rounded w-20" />
             </div>
           ))}
         </div>
@@ -61,12 +61,12 @@ export default function LiveStatsBar({ stats, netPL, netPct, winRate, activeAcco
                   </p>
                 )}
                 {'bar' in m && m.bar !== undefined && m.bar > 0 && (
-                  <div className="mt-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                  <div className="mt-1 h-1 bg-[#F8FAFC] rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] rounded-full transition-all duration-500" style={{ width: `${m.bar}%` }} />
                   </div>
                 )}
               </div>
-              {i < metrics.length - 1 && <div className="w-px h-8 bg-white/[0.06] shrink-0" />}
+              {i < metrics.length - 1 && <div className="w-px h-8 bg-[#F8FAFC] shrink-0" />}
             </div>
           </div>
         ))}

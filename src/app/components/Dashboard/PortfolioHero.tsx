@@ -31,9 +31,9 @@ export default function PortfolioHero({
     return (
       <div className="glass-panel rounded-[20px] p-5 animate-pulse">
         <div className="space-y-3">
-          <div className="h-4 bg-white/[0.06] rounded w-24" />
-          <div className="h-10 bg-white/[0.06] rounded w-48" />
-          <div className="h-20 bg-white/[0.06] rounded w-full" />
+          <div className="h-4 bg-[#F8FAFC] rounded w-24" />
+          <div className="h-10 bg-[#F8FAFC] rounded w-48" />
+          <div className="h-20 bg-[#F8FAFC] rounded w-full" />
         </div>
       </div>
     );
@@ -55,7 +55,7 @@ export default function PortfolioHero({
                 {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {formatMoney(netPL, true)} ({netPct >= 0 ? '+' : ''}{netPct.toFixed(2)}%)
               </span>
-              <span className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-body-sm text-white/60">
+              <span className="rounded-full bg-[#F8FAFC] px-2.5 py-0.5 text-body-sm text-white/60">
                 {stats.totalTrades} trades
               </span>
             </div>
@@ -73,7 +73,7 @@ export default function PortfolioHero({
               </SelectContent>
             </Select>
             {equityCurve.length >= 2 && (
-              <div className="mt-2 rounded-xl bg-white/[0.06] p-2">
+              <div className="mt-2 rounded-xl bg-[#F8FAFC] p-2">
                 <MiniSparkline data={equityCurve} color="#FFFFFF" width={160} height={32} />
               </div>
             )}
@@ -92,13 +92,13 @@ export default function PortfolioHero({
                 <p className="text-micro text-white/50">{item.label}</p>
                 <p className={`text-body font-semibold text-white/90 tabular-nums ${item.color || ''}`}>{item.value}</p>
               </div>
-              {i < 3 && <div className="w-px h-8 bg-white/[0.06]" />}
+              {i < 3 && <div className="w-px h-8 bg-[#F8FAFC]" />}
             </div>
           ))}
         </div>
 
         {equityCurve.length >= 2 && (
-          <div className="grid grid-cols-4 gap-2 rounded-xl bg-white/[0.04] p-3">
+          <div className="grid grid-cols-4 gap-2 rounded-xl bg-[#F8FAFC] p-3">
             <div>
               <p className="text-micro text-white/50">Highest</p>
               <p className="text-body-sm font-semibold text-emerald-400 tabular-nums">${getEquityStats.highest.toFixed(2)}</p>

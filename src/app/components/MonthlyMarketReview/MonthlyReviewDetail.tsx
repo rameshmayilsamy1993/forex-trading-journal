@@ -300,7 +300,7 @@ export default function MonthlyReviewDetail() {
                 <Target className="size-5 text-[#7C3AED]" />
                 Monthly Summary
               </h2>
-              <div className="relative bg-white/70 backdrop-blur-xl rounded-2xl border border-white/50 shadow-lg shadow-purple-500/5 p-6">
+              <div className="relative bg-white rounded-2xl border border-[#E2E8F0] shadow-lg shadow-purple-500/5 p-6">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-50/50 via-transparent to-blue-50/50 pointer-events-none" />
                 <div
                   className="relative prose prose-sm max-w-none text-gray-700 leading-relaxed"

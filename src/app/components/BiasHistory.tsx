@@ -433,7 +433,7 @@ export default function BiasHistory() {
       {/* Details Modal */}
       {selectedEvent && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           onClick={closeModal}
         >
           <div 
@@ -455,7 +455,7 @@ export default function BiasHistory() {
               </div>
               <button
                 onClick={closeModal}
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors"
+                className="p-2 hover:bg-[#F1F5F9] rounded-xl transition-colors"
               >
                 <X className="w-5 h-5 text-muted-foreground" />
               </button>

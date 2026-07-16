@@ -904,7 +904,7 @@ export default function DailyReviewForm() {
       </div>
 
       {/* STICKY BOTTOM FOOTER */}
-      <div className="sticky bottom-0 z-20 -mx-6 px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-[#E2E8F0] shadow-[0_-4px_24px_rgba(15,23,42,0.06)]">
+      <div className="sticky bottom-0 z-20 -mx-6 px-6 py-4 bg-white border-t border-[#E2E8F0] shadow-[0_-4px_24px_rgba(15,23,42,0.06)]">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Button type="button" variant="ghost" onClick={handleBack} className="text-[14px]">
             Cancel

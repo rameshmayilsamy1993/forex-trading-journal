@@ -216,7 +216,7 @@ export default function H4History() {
       {/* Details Modal */}
       {selectedEntry && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           onClick={() => setSelectedEntry(null)}
         >
           <div 

@@ -10,7 +10,7 @@ interface ViewChecklistModalProps {
 export default function ViewChecklistModal({ isOpen, checklist, isLoading, onClose }: ViewChecklistModalProps) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200">
         {isLoading ? (
           <div className="p-12 flex flex-col items-center justify-center">

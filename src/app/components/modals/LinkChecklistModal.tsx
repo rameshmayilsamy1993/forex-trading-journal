@@ -14,7 +14,7 @@ interface LinkChecklistModalProps {
 export default function LinkChecklistModal({ isOpen, activeChecklists, selectedChecklistId, isLinking, selectedTradesCount, onSelectChecklist, onLink, onClose }: LinkChecklistModalProps) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
         <div className="relative overflow-hidden bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white p-5 sm:p-6">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#22c55e,_transparent_32%),radial-gradient(circle_at_top_right,_#38bdf8,_transparent_30%)]" />

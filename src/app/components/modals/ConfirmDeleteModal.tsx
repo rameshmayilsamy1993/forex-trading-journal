@@ -11,7 +11,7 @@ interface ConfirmDeleteModalProps {
 export default function ConfirmDeleteModal({ isOpen, count, isDeleting, onConfirm, onCancel }: ConfirmDeleteModalProps) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
         <div className="relative overflow-hidden bg-gradient-to-r from-rose-600 to-red-600 text-white p-5 sm:p-6">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#f43f5e,_transparent_32%)]" />
