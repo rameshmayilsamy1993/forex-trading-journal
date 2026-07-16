@@ -55,25 +55,26 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="w-full max-w-md px-6">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-white/10">
+    <div className="min-h-screen bg-[#0B1620] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(124,58,237,0.08)_0%,_transparent_70%)] pointer-events-none" />
+      <div className="w-full max-w-md relative">
+        <div className="glass-panel rounded-3xl p-6 shadow-2xl space-y-5">
           <div className="space-y-2 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 mb-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] shadow-lg shadow-[#7C3AED]/25 mb-3">
               <span className="text-page-title font-bold text-white">FX</span>
             </div>
-            <h1 className="text-display-lg font-bold text-slate-900">
+            <h1 className="text-display-lg font-bold text-foreground">
               FX Journal
             </h1>
-            <p className="text-slate-500">
+            <p className="text-muted-foreground">
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {!isLogin && (
               <div>
-                <label className="block text-body-sm text-slate-700 mb-1.5">
+                <label className="block text-body-sm text-muted-foreground mb-1">
                   Name
                 </label>
                 <Input
@@ -88,7 +89,7 @@ export default function Login() {
             )}
 
             <div>
-              <label className="block text-body-sm text-slate-700 mb-1.5">
+              <label className="block text-body-sm text-muted-foreground mb-1">
                 Email
               </label>
               <Input
@@ -102,7 +103,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-body-sm text-slate-700 mb-1.5">
+              <label className="block text-body-sm text-muted-foreground mb-1">
                 Password
               </label>
               <Input
@@ -117,7 +118,7 @@ export default function Login() {
 
             {!isLogin && (
               <div>
-                <label className="block text-body-sm text-slate-700 mb-1.5">
+                <label className="block text-body-sm text-muted-foreground mb-1">
                   Confirm Password
                 </label>
                 <Input
@@ -132,8 +133,8 @@ export default function Login() {
             )}
 
             {error && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-body flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+              <div className="bg-red-950/40 border border-red-800/40 text-red-400 px-3.5 py-2.5 rounded-xl text-body flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                 {error}
               </div>
             )}
@@ -141,7 +142,7 @@ export default function Login() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+              className="w-full"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -156,7 +157,7 @@ export default function Login() {
             <button
               type="button"
               onClick={toggleMode}
-              className="text-body-sm text-blue-600 hover:text-blue-700"
+              className="text-body-sm text-[#7C3AED] hover:text-[#6D28D9]"
             >
               {isLogin
                 ? "Don't have an account? Sign up"
