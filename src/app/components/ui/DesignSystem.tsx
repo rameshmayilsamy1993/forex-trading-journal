@@ -176,7 +176,7 @@ export function TableCard({ children, className }: TableCardProps) {
 }
 
 export function TableHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('px-3 py-2 bg-white/5 border-b border-white/10', className)}>{children}</div>;
+  return <div className={cn('px-3 py-2 bg-white/5 border-b border-white/10 text-table-header', className)}>{children}</div>;
 }
 
 export function TableBody({ children, className }: { children: React.ReactNode; className?: string }) {
