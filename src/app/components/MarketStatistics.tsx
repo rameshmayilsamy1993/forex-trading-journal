@@ -666,7 +666,7 @@ export default function MarketStatistics() {
               <div className="overflow-x-auto">
                 <table className="w-full text-table-cell">
                   <thead>
-                    <tr className="bg-white/[0.02]">
+                    <tr className="bg-[#F8FAFC]">
                       <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Session</th>
                       <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Description</th>
                       <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Body</th>
@@ -682,7 +682,7 @@ export default function MarketStatistics() {
                       const activityPct = s ? Math.round((s.avg_range / maxRange) * 100) : 0;
                       const volLevel = s ? getVolatilityLevel(s.avg_range, sessionsData) : 'Medium';
                       return (
-                        <tr key={session} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={session} className="hover:bg-[#F1F5F9]/60 transition-colors">
                           <td className="px-6 py-4 font-semibold text-foreground whitespace-nowrap">{session}</td>
                           <td className="px-6 py-4 text-caption text-muted-foreground whitespace-nowrap">{sessionDescriptions[session]}</td>
                           <td className="px-6 py-4 text-right text-foreground font-medium tabular-nums whitespace-nowrap">
@@ -732,7 +732,7 @@ export default function MarketStatistics() {
               <div className="overflow-x-auto">
                 <table className="w-full text-table-cell">
                   <thead>
-                    <tr className="bg-white/[0.02]">
+                    <tr className="bg-[#F8FAFC]">
                       <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Day</th>
                       <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Body</th>
                       <th className="px-6 py-3 text-right text-table-header text-muted-foreground uppercase">Avg Range</th>
@@ -744,7 +744,7 @@ export default function MarketStatistics() {
                       const d = results.weekdays[day];
                       const style = d ? getTradingStyle(day, d.avg_range) : 'Range Trading';
                       return (
-                        <tr key={day} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={day} className="hover:bg-[#F1F5F9]/60 transition-colors">
                           <td className="px-6 py-4 font-semibold text-foreground">{day}</td>
                           <td className="px-6 py-4 text-right text-foreground font-medium tabular-nums">
                             {d ? `${formatNumber(d.avg_body)} ${unit}` : '—'}
@@ -779,7 +779,7 @@ export default function MarketStatistics() {
               <div className="overflow-x-auto">
                 <table className="w-full text-table-cell">
                   <thead>
-                    <tr className="bg-white/[0.02]">
+                    <tr className="bg-[#F8FAFC]">
                       <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Direction</th>
                       <th className="px-6 py-3 text-left text-table-header text-muted-foreground uppercase">Metric</th>
                       {[50, 60, 70, 80, 90, 95].map((lvl) => (
@@ -794,7 +794,7 @@ export default function MarketStatistics() {
                       const dirColor = isBullish ? 'text-emerald-400' : 'text-rose-400';
                       const dirLabel = isBullish ? 'Bullish' : 'Bearish';
                       return (
-                        <tr key={`${row.dir}-${row.metric}`} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={`${row.dir}-${row.metric}`} className="hover:bg-[#F1F5F9]/60 transition-colors">
                           <td className={`px-6 py-4 font-semibold ${dirColor} capitalize`}>{dirLabel}</td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-1.5">

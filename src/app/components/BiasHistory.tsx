@@ -258,7 +258,7 @@ export default function BiasHistory() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-body-sm text-muted-foreground">Total Shifts</span>
             <div className="p-2 bg-orange-50 rounded-xl">
@@ -267,7 +267,7 @@ export default function BiasHistory() {
           </div>
           <div className="text-page-title text-orange-600">{stats.totalShifts}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-body-sm text-muted-foreground">Bullish Days</span>
             <div className="p-2 bg-emerald-50 rounded-xl">
@@ -276,7 +276,7 @@ export default function BiasHistory() {
           </div>
           <div className="text-page-title text-emerald-600">{stats.bullishDays}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-body-sm text-muted-foreground">Bearish Days</span>
             <div className="p-2 bg-rose-950/30 rounded-xl">
@@ -285,7 +285,7 @@ export default function BiasHistory() {
           </div>
           <div className="text-page-title text-rose-600">{stats.bearishDays}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-white/10 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-body-sm text-muted-foreground">Neutral Days</span>
             <div className="p-2 bg-slate-50 rounded-xl">
@@ -310,10 +310,10 @@ export default function BiasHistory() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEvents]) => (
-                  <div key={date} className="border border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+                  <div key={date} className="border border-[#E2E8F0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                 {/* Date Header */}
                 <div 
-                  className="flex items-center justify-between p-4 bg-white/5 cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
+                  className="flex items-center justify-between p-4 bg-[#F8FAFC] cursor-pointer hover:bg-[#F1F5F9] transition-all duration-200"
                   onClick={() => toggleDateExpand(date)}
                 >
                   <div className="flex items-center gap-3">
@@ -321,7 +321,7 @@ export default function BiasHistory() {
                       <ChevronRight className={cn("w-4 h-4 text-muted-foreground transition-transform duration-200", expandedDates.has(date) && "rotate-90")} />
                     </div>
                     <span className="font-semibold text-foreground">{formatDate(date)}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-muted-foreground text-caption">{dateEvents.length} event{dateEvents.length !== 1 ? 's' : ''}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#F8FAFC] text-muted-foreground text-caption">{dateEvents.length} event{dateEvents.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {dateEvents.some(hasAnyShift) && (
@@ -338,7 +338,7 @@ export default function BiasHistory() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/10 bg-white/5">
+                        <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                           <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Time</th>
                           <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Pair</th>
                           <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Monthly</th>
@@ -348,12 +348,12 @@ export default function BiasHistory() {
                           <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Details</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-[#E2E8F0]/60">
                         {dateEvents.map((entry) => (
                           <tr 
                             key={entry.id} 
                             className={cn(
-                              "hover:bg-white/[0.02] transition-all duration-150 cursor-pointer group",
+                              "hover:bg-[#F1F5F9]/60 transition-all duration-150 cursor-pointer group",
                               hasAnyShift(entry) && "bg-orange-50/30"
                             )}
                             onClick={() => openModal(entry)}
@@ -406,7 +406,7 @@ export default function BiasHistory() {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#E2E8F0]">
             <div className="text-body text-muted-foreground">
               Page {pagination.page} of {pagination.pages} ({pagination.total} events)
             </div>
@@ -414,14 +414,14 @@ export default function BiasHistory() {
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9]/60 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9]/60 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Next
               </button>
@@ -441,7 +441,7 @@ export default function BiasHistory() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-r from-purple-950/20 to-transparent">
+            <div className="flex items-center justify-between p-5 border-b border-[#E2E8F0] bg-gradient-to-r from-purple-950/20 to-transparent">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-section-title text-foreground">
@@ -544,7 +544,7 @@ export default function BiasHistory() {
                         key={event.id} 
                         className={cn(
                           "flex gap-4 p-4 rounded-xl border transition-all duration-200 hover:shadow-sm",
-                          event.id === selectedEvent.id ? "border-violet-300 bg-violet-500/10" : "border-white/10 bg-white"
+                          event.id === selectedEvent.id ? "border-violet-300 bg-violet-500/10" : "border-[#E2E8F0] bg-white"
                         )}
                       >
                         <div className="flex flex-col items-center gap-1">

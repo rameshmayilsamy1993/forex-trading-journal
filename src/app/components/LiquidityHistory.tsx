@@ -262,17 +262,17 @@ export default function LiquidityHistory() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedByDate).map(([date, dateEntries]) => (
-              <div key={date} className="border border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
+              <div key={date} className="border border-[#E2E8F0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="p-4 bg-[#F8FAFC] border-b border-[#E2E8F0] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-foreground">{formatDate(date)}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-muted-foreground text-caption">{dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#F8FAFC] text-muted-foreground text-caption">{dateEntries.length} entry{dateEntries.length !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-white/10 bg-white/5">
+                      <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                         <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Time</th>
                         <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Pair</th>
                         <th className="text-center py-3 px-4 text-table-header text-muted-foreground">Monthly</th>
@@ -285,7 +285,7 @@ export default function LiquidityHistory() {
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 
-                          className="group hover:bg-white/[0.02] transition-all duration-150 cursor-pointer"
+                          className="group hover:bg-[#F1F5F9]/60 transition-all duration-150 cursor-pointer"
                           onClick={() => setSelectedEntry(entry)}
                         >
                           <td className="py-3 px-4 text-table-cell text-muted-foreground font-mono">{formatTime(entry.createdAt)}</td>
@@ -314,7 +314,7 @@ export default function LiquidityHistory() {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#E2E8F0]">
             <div className="text-body text-muted-foreground">
               Page {pagination.page} of {pagination.pages} ({pagination.total} entries)
             </div>
@@ -322,14 +322,14 @@ export default function LiquidityHistory() {
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                 disabled={pagination.page === 1}
-                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9]/60 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-4 py-2 bg-white text-foreground rounded-xl border border-white/10 hover:bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
+                className="px-4 py-2 bg-white text-foreground rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9]/60 disabled:opacity-50 disabled:cursor-not-allowed text-button transition-all duration-200"
               >
                 Next
               </button>
@@ -362,7 +362,7 @@ export default function LiquidityHistory() {
               </div>
               <button
                 onClick={() => setSelectedEntry(null)}
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors"
+                className="p-2 hover:bg-[#F1F5F9] rounded-xl transition-colors"
               >
                 <X className="w-5 h-5 text-slate-500" />
               </button>
@@ -390,7 +390,7 @@ export default function LiquidityHistory() {
                       >
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-body-sm font-semibold text-slate-600">{label}</span>
-                          <div className={cn("p-2 rounded-xl bg-white/50", meta.cardText)}>
+                          <div className={cn("p-2 rounded-xl bg-[#F8FAFC]0", meta.cardText)}>
                             {meta.icon}
                           </div>
                         </div>

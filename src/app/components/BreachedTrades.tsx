@@ -78,7 +78,7 @@ export default function BreachedTrades() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-white/10">
+        <div className="bg-white rounded-xl p-6 border border-[#E2E8F0]">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
             <span className="text-body-sm text-muted-foreground">Total Breached Trades</span>
@@ -86,7 +86,7 @@ export default function BreachedTrades() {
           <p className="text-display-lg font-bold text-foreground">{breachedTrades.length}</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-white/10">
+        <div className="bg-white rounded-xl p-6 border border-[#E2E8F0]">
           <div className="flex items-center gap-3 mb-2">
             {totalBreachedPL >= 0 ? (
               <TrendingUp className="w-5 h-5 text-green-600" />
@@ -100,7 +100,7 @@ export default function BreachedTrades() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-white/10">
+        <div className="bg-white rounded-xl p-6 border border-[#E2E8F0]">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
             <span className="text-body-sm text-muted-foreground">Breached Accounts</span>
@@ -115,7 +115,7 @@ export default function BreachedTrades() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10 bg-white/[0.02]">
+              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                 <th className="text-left p-4 text-table-header text-muted-foreground">Date</th>
                 <th className="text-left p-4 text-table-header text-muted-foreground">Account</th>
                 <th className="text-left p-4 text-table-header text-muted-foreground">Firm</th>
@@ -135,7 +135,7 @@ export default function BreachedTrades() {
                 </tr>
               ) : (
                 breachedTrades.map((trade, i) => (
-                  <tr key={trade.id ?? i} className="border-b border-white/5 hover:bg-white/[0.02]">
+                  <tr key={trade.id ?? i} className="border-b border-[#E2E8F0]/60 hover:bg-[#F1F5F9]/60">
                     <td className="p-4 text-table-cell text-foreground">
                       {trade.entryDate ? format(new Date(trade.entryDate), 'MMM dd, yyyy') : '-'}
                     </td>

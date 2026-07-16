@@ -229,18 +229,18 @@ export default function ForexLotCalculator() {
             <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
               <table className="w-full text-table-cell">
                 <thead>
-                  <tr className="bg-white/[0.02]">
+                  <tr className="bg-[#F8FAFC]">
                     <th className="px-4 py-2.5 text-left text-table-header text-muted-foreground">SL Pips</th>
                     <th className="px-4 py-2.5 text-right text-table-header text-muted-foreground">Lot Size</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#E2E8F0]/60">
                   {QUICK_REFERENCE_SL.map((sl) => {
                     const lot = riskAmount / (sl * dollarPerPip);
                     return (
                       <tr
                         key={sl}
-                        className={`hover:bg-white/[0.02] transition-colors ${
+                        className={`hover:bg-[#F8FAFC] transition-colors ${
                           Math.abs(sl - slPips) < 0.01 ? 'bg-indigo-900/20 font-semibold' : ''
                         }`}
                       >

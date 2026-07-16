@@ -339,7 +339,7 @@ export default function Reports() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5">
+                <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                   <th className="text-left py-3 px-4 text-table-header text-muted-foreground">
                     Month
                   </th>
@@ -370,7 +370,7 @@ export default function Reports() {
                     }
                   })();
                   return (
-                    <tr key={month.month} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <tr key={month.month} className="border-b border-[#E2E8F0]/60 hover:bg-[#F1F5F9]/60 transition-colors">
                       <td className="py-3 px-4 text-table-cell text-foreground">
                         {monthDate || month.month}
                       </td>

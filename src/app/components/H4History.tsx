@@ -166,7 +166,7 @@ export default function H4History() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-white/10 bg-white/5">
+                      <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                         <th className="text-left py-2 px-4 text-table-header text-muted-foreground uppercase">Pair</th>
                         {H4_TIMES.map(time => (
                           <th key={time} className="text-center py-2 px-2 text-table-header text-muted-foreground uppercase">{time}</th>
@@ -178,7 +178,7 @@ export default function H4History() {
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 
-                          className="hover:bg-white/[0.02] cursor-pointer"
+                          className="hover:bg-[#F1F5F9]/60 cursor-pointer"
                           onClick={() => setSelectedEntry(entry)}
                         >
                           <td className="py-3 px-4 font-medium">{entry.pair}</td>

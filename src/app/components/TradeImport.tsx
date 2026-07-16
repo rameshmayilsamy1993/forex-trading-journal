@@ -306,22 +306,22 @@ export default function TradeImport() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4 text-body">
-              <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-emerald-200 shadow-sm">
+              <div className="text-center p-4 bg-[#F8FAFC] rounded-xl border border-emerald-200 shadow-sm">
                 <p className="text-table-header text-muted-foreground">Total Rows</p>
                 <p className="text-display font-bold text-foreground mt-1">{result.total}</p>
               </div>
-              <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-emerald-200 shadow-sm">
+              <div className="text-center p-4 bg-[#F8FAFC] rounded-xl border border-emerald-200 shadow-sm">
                 <p className="text-table-header text-emerald-600">Imported</p>
                 <p className="text-display font-bold text-emerald-600 mt-1">{result.inserted}
 </p>
               </div>
-              <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-amber-200 shadow-sm">
+              <div className="text-center p-4 bg-[#F8FAFC] rounded-xl border border-amber-200 shadow-sm">
                 <p className="text-table-header text-amber-600">Skipped</p>
                 <p className="text-display font-bold text-amber-600 mt-1">{result.skipped}</p>
               </div>
             </div>
             {result.errors && result.errors.length > 0 && (
-              <div className="mt-4 p-4 bg-white/[0.04] rounded-xl border border-amber-200">
+              <div className="mt-4 p-4 bg-[#F8FAFC] rounded-xl border border-amber-200">
                 <p className="text-body-sm font-semibold text-amber-800 mb-2">
                   {result.errors.length} row(s) had errors:
                 </p>
@@ -346,7 +346,7 @@ export default function TradeImport() {
                 value={selectedAccount}
                 onValueChange={setSelectedAccount}
                 placeholder="Select an account"
-                className="w-full px-4 py-3 bg-slate-50 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-foreground transition-all hover:bg-slate-100"
+                className="w-full px-4 py-3 bg-slate-50 border border-[#E2E8F0] rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-foreground transition-all hover:bg-slate-100"
               />
             ) : (
               <p className="mt-2 text-body text-muted-foreground">
@@ -448,15 +448,15 @@ export default function TradeImport() {
                 Import Preview Summary
               </h3>
               <div className="grid grid-cols-3 gap-4 text-body">
-                <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-emerald-200 shadow-sm">
+                <div className="text-center p-4 bg-[#F8FAFC] rounded-xl border border-emerald-200 shadow-sm">
                   <p className="text-table-header text-emerald-600 uppercase">New Trades</p>
                   <p className="text-display font-bold text-emerald-600 mt-1">{previewStats.newTrades}</p>
                 </div>
-                <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-amber-200 shadow-sm">
+                <div className="text-center p-4 bg-[#F8FAFC] rounded-xl border border-amber-200 shadow-sm">
                   <p className="text-table-header text-amber-600 uppercase">Duplicates</p>
                   <p className="text-display font-bold text-amber-600 mt-1">{previewStats.duplicates}</p>
                 </div>
-                <div className="text-center p-4 bg-white/[0.04] rounded-xl border border-orange-200 shadow-sm">
+                <div className="text-center p-4 bg-[#F8FAFC] rounded-xl border border-orange-200 shadow-sm">
                   <p className="text-table-header text-orange-600 uppercase">In File</p>
                   <p className="text-display font-bold text-orange-600 mt-1">{previewStats.potentialDuplicates}</p>
                 </div>
@@ -469,9 +469,9 @@ export default function TradeImport() {
               <h3 className="font-semibold text-foreground mb-3">
                 Preview (first {preview.length} rows)
               </h3>
-              <div className="overflow-x-auto bg-white/[0.04] rounded-2xl shadow-sm border border-white/10">
-                <table className="min-w-full divide-y divide-white/10 text-table-cell">
-                  <thead className="bg-white/[0.02]">
+              <div className="overflow-x-auto bg-[#F8FAFC] rounded-2xl shadow-sm border border-[#E2E8F0]">
+                <table className="min-w-full divide-y divide-[#E2E8F0]/60 text-table-cell">
+                  <thead className="bg-[#F8FAFC]">
                     <tr>
                       <th className="px-3 py-3 text-left text-table-header text-muted-foreground uppercase">
                         Status
@@ -515,7 +515,7 @@ export default function TradeImport() {
                     {preview.map((trade, idx) => (
                       <tr
                         key={idx}
-                        className={`hover:bg-white/[0.02] transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-950/20' : ''}`}
+                        className={`hover:bg-[#F8FAFC] transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-950/20' : ''}`}
                       >
                         <td className="px-3 py-3">
                           {trade.isDuplicate ? (
@@ -541,7 +541,7 @@ export default function TradeImport() {
 ? 'text-emerald-400 bg-emerald-950/30'
                               : trade.type === 'SELL'
                               ? 'text-rose-400 bg-rose-950/30'
-                              : 'text-foreground bg-white/5'
+                              : 'text-foreground bg-[#F8FAFC]'
                           }`}>
                             {trade.type || '-'}
                           </span>
@@ -586,23 +586,23 @@ export default function TradeImport() {
             </div>
           )}
 
-          <div className="mt-6 p-5 bg-slate-50 rounded-2xl border border-white/10/50">
+          <div className="mt-6 p-5 bg-slate-50 rounded-2xl border border-[#E2E8F0]/50">
             {fileFormat === 'mt5' ? (
               <>
                 <h4 className="font-semibold text-foreground mb-3">Expected MT5 CSV Columns:</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-body mb-4">
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Time (Entry)</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Position</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Symbol</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Type</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Volume</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Price</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">S/L</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">T/P</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Time (Exit)</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Price (Exit)</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Commission</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Swap</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Time (Entry)</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Position</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Symbol</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Type</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Volume</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Price</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">S/L</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">T/P</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Time (Exit)</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Price (Exit)</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Commission</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Swap</span>
                 </div>
                 <p className="text-caption text-muted-foreground">
                   Commission is automatically converted to positive values. Empty S/L and T/P are set to null.
@@ -612,16 +612,16 @@ export default function TradeImport() {
               <>
                 <h4 className="font-semibold text-foreground mb-3">Expected Excel Columns:</h4>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-body">
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Position</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Symbol</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Type</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Volume</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Entry Price</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Exit Price</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">S / L</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">T / P</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Profit</span>
-                  <span className="font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/10 text-muted-foreground shadow-sm">Time</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Position</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Symbol</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Type</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Volume</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Entry Price</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Exit Price</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">S / L</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">T / P</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Profit</span>
+                  <span className="font-mono bg-[#F8FAFC] px-3 py-2 rounded-lg border border-[#E2E8F0] text-muted-foreground shadow-sm">Time</span>
                 </div>
                 <p className="mt-4 text-caption text-muted-foreground">
                   Column names are case-insensitive. Position column is used for duplicate detection. Default strategy "LONDON" and key level "No Key Level" will be assigned.

@@ -187,18 +187,18 @@ export default function XauusdCalculator() {
             <div className="overflow-hidden rounded-xl border border-slate-200">
               <table className="w-full text-table-cell">
                 <thead>
-                  <tr className="bg-white/[0.02]">
+                  <tr className="bg-[#F8FAFC]">
                     <th className="px-4 py-2.5 text-left text-table-header text-muted-foreground">SL</th>
                     <th className="px-4 py-2.5 text-right text-table-header text-muted-foreground">Lot</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#E2E8F0]/60">
                   {QUICK_REFERENCE_SL.map((sl) => {
                     const lot = riskAmount / sl;
                     return (
                       <tr
                         key={sl}
-                        className={`hover:bg-white/[0.02] transition-colors ${
+                        className={`hover:bg-[#F8FAFC] transition-colors ${
                           sl === slPoints ? 'bg-blue-950/20 font-semibold' : ''
                         }`}
                       >
