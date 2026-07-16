@@ -515,7 +515,7 @@ export default function TradeImport() {
                     {preview.map((trade, idx) => (
                       <tr
                         key={idx}
-                        className={`hover:bg-[#F8FAFC] transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-950/20' : ''}`}
+                        className={`hover:bg-[#F1F5F9]/60 transition-colors duration-150 ${trade.isDuplicate ? 'bg-amber-950/20' : ''}`}
                       >
                         <td className="px-3 py-3">
                           {trade.isDuplicate ? (
