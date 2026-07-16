@@ -1,35 +1,33 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 14px;
+  --font-size: 12px;
 
-  --background: #F7F8FC;
-  --foreground: #0F172A;
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
+  --background: #0B1620;
+  --foreground: #F1F5F9;
+  --card: rgba(255, 255, 255, 0.04);
+  --card-foreground: #F1F5F9;
+  --popover: rgba(30, 41, 59, 0.95);
+  --popover-foreground: #F1F5F9;
   --primary: #7C3AED;
   --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #0F172A;
-  --muted: #F8FAFC;
-  --muted-foreground: #64748B;
-  --accent: #F5F3FF;
-  --accent-foreground: #5B21B6;
+  --secondary: rgba(255, 255, 255, 0.04);
+  --secondary-foreground: #F1F5F9;
+  --muted: rgba(255, 255, 255, 0.02);
+  --muted-foreground: #94A3B8;
+  --accent: rgba(124, 58, 237, 0.1);
+  --accent-foreground: #C4B5FD;
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
   --success: #16A34A;
   --success-foreground: #FFFFFF;
   --warning: #F59E0B;
   --warning-foreground: #FFFFFF;
-  --border: #E5EAF2;
-  --input: #E5EAF2;
-  --input-background: #FFFFFF;
-  --switch-background: #CBD5E1;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --ring: rgba(124, 58, 237, 0.25);
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.1);
+  --input-background: rgba(255, 255, 255, 0.04);
+  --switch-background: rgba(255, 255, 255, 0.15);
+  --ring: rgba(124, 58, 237, 0.4);
   --chart-1: #7C3AED;
   --chart-2: #16A34A;
   --chart-3: #F59E0B;
@@ -44,10 +42,10 @@
   --sidebar-accent-foreground: #F8FAFC;
   --sidebar-border: rgba(148, 163, 184, 0.14);
   --sidebar-ring: rgba(124, 58, 237, 0.35);
-  --shell-bg: #F7F8FC;
-  --panel-bg: #FFFFFF;
-  --panel-border: #E5EAF2;
-  --panel-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  --shell-bg: #0B1620;
+  --panel-bg: rgba(255, 255, 255, 0.04);
+  --panel-border: rgba(255, 255, 255, 0.06);
+  --panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 
   --font-sans: "Inter", "Aptos", "Segoe UI Variable", sans-serif;
   --font-display: "Inter", "Aptos Display", "Segoe UI Variable Display", sans-serif;
@@ -100,278 +98,29 @@
    Usage: className="text-page-title text-foreground"
    ═══════════════════════════════════════════ */
 
-@utility text-display {
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-@utility text-display-lg {
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-@utility text-page-title {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-@utility text-section-title {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-}
-
-@utility text-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0;
-}
-
-@utility text-heading {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0;
-}
-
-@utility text-body-lg {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-body {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-body-sm {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-caption {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-micro {
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-badge {
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-table-header {
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-@utility text-table-cell {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-sidebar-menu {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-sidebar-group {
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-@utility text-button {
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-}
-
-@utility text-input {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-placeholder {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-dropdown {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-tooltip {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0;
-}
-
-@utility text-metric {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-@utility text-display-xl {
-  font-size: 34px;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-}
-
-/* Dense scope - DesignSystem component overrides */
-.dense .bg-white.rounded-\[20px\].p-5 {
-  padding: 0.75rem !important;
-}
-
-.dense .px-5.py-4 {
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-  padding-top: 0.75rem !important;
-  padding-bottom: 0.75rem !important;
-}
-
-.dense .gap-6 {
-  gap: 0.75rem !important;
-}
-
-.dense .gap-4 {
-  gap: 0.5rem !important;
-}
-
-.dense .gap-3 {
-  gap: 0.5rem !important;
-}
-
-.dense .space-y-6 > :not(style) ~ :not(style) {
-  margin-top: 0.75rem !important;
-}
-
-.dense .text-2xl {
-  font-size: 1.125rem !important;
-}
-
-.dense .text-\[11px\] {
-  font-size: 9px !important;
-}
-
-.dense .text-xs {
-  font-size: 0.625rem !important;
-}
-
-.dense .text-sm {
-  font-size: 0.75rem !important;
-}
-
-.dense .h-10 {
-  height: 2rem !important;
-}
-
-.dense .w-\[200px\] {
-  width: 140px !important;
-}
-
-.dense .p-3 {
-  padding: 0.5rem !important;
-}
-
-.dense .py-8 {
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
-}
-
-.dense .py-3.px-4 {
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
-  padding-left: 0.75rem !important;
-  padding-right: 0.75rem !important;
-}
-
-.dense .p-3.bg-\[#16A34A\]\/5,
-.dense .p-3.bg-\[#DC2626\]\/5,
-.dense .p-3.bg-\[#7C3AED\]\/5,
-.dense .p-3.bg-\[#EA580C\]\/5 {
-  padding: 0.5rem !important;
-}
-
-.dense .p-3.bg-\[#F8FAFC\] {
-  padding: 0.5rem !important;
-}
-
-/* Dense scope - override original text utilities */
-.dense .text-body {
-  font-size: 12px !important;
-  line-height: 1.4 !important;
-}
-
-.dense .text-body-sm {
-  font-size: 11px !important;
-  line-height: 1.4 !important;
-}
-
-.dense .text-caption {
-  font-size: 10px !important;
-  line-height: 1.3 !important;
-}
-
-.dense .text-table-header {
-  font-size: 9px !important;
-  line-height: 1.3 !important;
-}
-
-.dense .text-table-cell {
-  font-size: 10px !important;
-  line-height: 1.4 !important;
-}
-
-.dense .text-card-title {
-  font-size: 14px !important;
-  line-height: 1.3 !important;
-}
+@utility text-display-xl { font-size: 30px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
+@utility text-display { font-size: 26px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+@utility text-display-lg { font-size: 22px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+@utility text-page-title { font-size: 20px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+@utility text-section-title { font-size: 16px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
+@utility text-metric { font-size: 24px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+@utility text-card-title { font-size: 13px; font-weight: 600; line-height: 1.3; letter-spacing: 0; }
+@utility text-heading { font-size: 13px; font-weight: 600; line-height: 1.3; letter-spacing: 0; }
+@utility text-body-lg { font-size: 12px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-body { font-size: 12px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-body-sm { font-size: 11px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-caption { font-size: 10px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-micro { font-size: 9px; font-weight: 600; line-height: 1.4; letter-spacing: 0; }
+@utility text-badge { font-size: 9px; font-weight: 600; line-height: 1.4; letter-spacing: 0; }
+@utility text-table-header { font-size: 10px; font-weight: 600; line-height: 1.4; letter-spacing: 0.06em; text-transform: uppercase; }
+@utility text-table-cell { font-size: 11px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-sidebar-menu { font-size: 12px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-sidebar-group { font-size: 9px; font-weight: 700; line-height: 1.4; letter-spacing: 0.12em; text-transform: uppercase; }
+@utility text-button { font-size: 11px; font-weight: 600; line-height: 1.4; letter-spacing: 0.01em; }
+@utility text-input { font-size: 12px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-placeholder { font-size: 11px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-dropdown { font-size: 11px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
+@utility text-tooltip { font-size: 10px; font-weight: 500; line-height: 1.4; letter-spacing: 0; }
 
 /* ═══════════════════════════════════════════
    BASE TAG STYLES
@@ -383,14 +132,15 @@
   }
 
   html {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   body {
     background: var(--shell-bg);
+    background-color: #0B1620;
     color: var(--foreground);
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     line-height: 1.4;
     @apply antialiased;
@@ -398,7 +148,7 @@
 
   h1 {
     font-family: var(--font-display);
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.02em;
@@ -406,7 +156,7 @@
 
   h2 {
     font-family: var(--font-display);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     line-height: 1.3;
     letter-spacing: -0.01em;
@@ -414,44 +164,42 @@
 
   h3 {
     font-family: var(--font-display);
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0;
-  }
-
-  h4 {
     font-size: 14px;
     font-weight: 600;
     line-height: 1.3;
     letter-spacing: 0;
   }
 
+  h4 {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
   label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     line-height: 1.4;
   }
 
   button {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     line-height: 1.4;
     letter-spacing: 0;
   }
 
-  input,
-  textarea,
-  select {
-    font-size: 13px;
+  input, textarea, select {
+    font-size: 12px;
     font-weight: 500;
     line-height: 1.4;
   }
+}
 
-  ::selection {
-    background: rgba(124, 58, 237, 0.15);
-    color: #0f172a;
-  }
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: #ffffff;
 }
 
 @layer components {
@@ -461,37 +209,44 @@
 
   .fx-surface {
     background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--panel-border);
     box-shadow: var(--panel-shadow);
     border-radius: 16px;
   }
 
   .fx-surface-strong {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     border-radius: 16px;
   }
 
   .fx-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5;
-    font-size: 10px;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5;
+    font-size: 9px;
     font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: 0;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .modern-input {
-    @apply rounded-xl border border-[#E5EAF2] bg-white px-3.5 py-2.5 transition-all duration-200 outline-none h-[42px];
-    @apply focus:border-[#7C3AED] focus:bg-white focus:ring-4 focus:ring-[#7C3AED]/15;
-    font-size: 13px;
+    @apply rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-all duration-200 outline-none h-[38px];
+    @apply focus:border-[#7C3AED] focus:bg-white/10 focus:ring-4 focus:ring-[#7C3AED]/25;
+    font-size: 12px;
+    color: #F1F5F9;
   }
 
   .modern-select {
-    @apply rounded-xl border border-[#E5EAF2] bg-white px-3.5 py-2.5 transition-all duration-200 outline-none appearance-none h-[42px];
-    @apply focus:border-[#7C3AED] focus:bg-white focus:ring-4 focus:ring-[#7C3AED]/15;
-    font-size: 13px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    @apply rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-all duration-200 outline-none appearance-none h-[38px];
+    @apply focus:border-[#7C3AED] focus:bg-white/10 focus:ring-4 focus:ring-[#7C3AED]/25;
+    font-size: 12px;
+    color: #F1F5F9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1rem;
@@ -499,14 +254,16 @@
   }
 
   .modern-date-time {
-    @apply rounded-xl border border-[#E5EAF2] bg-white px-3.5 py-2.5 transition-all duration-200 outline-none h-[42px];
-    @apply focus:border-[#7C3AED] focus:bg-white focus:ring-4 focus:ring-[#7C3AED]/15;
-    font-size: 13px;
+    @apply rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-all duration-200 outline-none h-[38px];
+    @apply focus:border-[#7C3AED] focus:bg-white/10 focus:ring-4 focus:ring-[#7C3AED]/25;
+    font-size: 12px;
+    color: #F1F5F9;
   }
 
   .modern-file-upload {
-    @apply relative rounded-xl border border-dashed border-[#E5EAF2] bg-white/70 p-4 text-center transition-all duration-200 cursor-pointer;
-    @apply hover:border-[#7C3AED] hover:bg-[#F5F3FF];
+    @apply relative rounded-xl border border-dashed border-white/10 bg-white/3 p-3 text-center transition-all duration-200 cursor-pointer;
+    @apply hover:border-[#7C3AED] hover:bg-[#7C3AED]/10;
+    backdrop-filter: blur(12px);
   }
 
   .missed-reason-editor .ql-container {
