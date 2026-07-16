@@ -198,7 +198,7 @@ export default function XauusdCalculator() {
                     return (
                       <tr
                         key={sl}
-                        className={`hover:bg-[#F8FAFC] transition-colors ${
+                        className={`hover:bg-[#F1F5F9]/60 transition-colors ${
                           sl === slPoints ? 'bg-blue-950/20 font-semibold' : ''
                         }`}
                       >

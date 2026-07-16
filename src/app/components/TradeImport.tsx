@@ -511,7 +511,7 @@ export default function TradeImport() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-[#E2E8F0]/60">
                     {preview.map((trade, idx) => (
                       <tr
                         key={idx}

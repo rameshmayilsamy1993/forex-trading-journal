@@ -174,7 +174,7 @@ export default function H4History() {
                         <th className="text-left py-2 px-4 text-table-header text-muted-foreground uppercase">Notes</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-[#E2E8F0]/60">
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 

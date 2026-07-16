@@ -281,7 +281,7 @@ export default function LiquidityHistory() {
                         <th className="text-left py-3 px-4 text-table-header text-muted-foreground">Notes</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-[#E2E8F0]/60">
                       {dateEntries.map((entry) => (
                         <tr 
                           key={entry.id} 
@@ -390,7 +390,7 @@ export default function LiquidityHistory() {
                       >
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-body-sm font-semibold text-slate-600">{label}</span>
-                          <div className={cn("p-2 rounded-xl bg-[#F8FAFC]0", meta.cardText)}>
+                          <div className={cn("p-2 rounded-xl bg-[#F8FAFC]/50", meta.cardText)}>
                             {meta.icon}
                           </div>
                         </div>
