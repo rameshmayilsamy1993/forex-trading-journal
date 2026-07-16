@@ -97,10 +97,10 @@ function EditorToolbar({ editor }: { editor: any }) {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-white/10">
+    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-[#E2E8F0]">
       {tools.map((tool, i) => {
         if ('type' in tool && tool.type === 'divider') {
-          return <div key={i} className="w-px h-5 bg-white/10 mx-1" />;
+          return <div key={i} className="w-px h-5 bg-[#E2E8F0] mx-1" />;
         }
         const t = tool as any;
         return (
@@ -113,7 +113,7 @@ function EditorToolbar({ editor }: { editor: any }) {
               'p-2 rounded-lg transition-all duration-150',
               t.active
                       ? 'bg-[#2563EB] text-white shadow-sm shadow-blue-500/20'
-                      : 'text-muted-foreground hover:bg-white/5 hover:text-foreground hover:scale-105',
+                      : 'text-muted-foreground hover:bg-[#F1F5F9] hover:text-foreground hover:scale-105',
             )}
           >
             <t.icon className="size-4" />
@@ -423,7 +423,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
               onClick={close}
             />
 
@@ -432,10 +432,10 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-               className="relative w-[1100px] max-w-[90vw] h-[90vh] max-h-[90vh] bg-[#1E293B]/95 backdrop-blur-xl rounded-[28px] shadow-2xl shadow-black/30 overflow-hidden flex flex-col"
+               className="relative w-[1100px] max-w-[90vw] h-[90vh] max-h-[90vh] bg-white rounded-[28px] shadow-2xl overflow-hidden flex flex-col"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex-shrink-0 h-[90px] flex items-center justify-between px-10 border-b border-white/10">
+              <div className="flex-shrink-0 h-[90px] flex items-center justify-between px-10 border-b border-[#E2E8F0]">
                 <div>
                   <h2 className="text-[32px] font-bold text-foreground tracking-tight leading-tight">
                     Add Timeline Entry
@@ -446,7 +446,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                 </div>
                 <button
                   onClick={close}
-                  className="size-11 rounded-full border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                  className="size-11 rounded-full border border-[#E2E8F0] flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-[#CBD5E1] hover:bg-[#F1F5F9] transition-all duration-200"
                 >
                   <X className="size-5" />
                 </button>
@@ -464,12 +464,12 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                     value={entryTitle}
                     onChange={e => setEntryTitle(e.target.value)}
                     placeholder="Describe this market update..."
-                    className="w-full h-14 px-5 rounded-2xl border border-white/10 bg-white/5 text-[16px] font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#2563EB] focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
+                    className="w-full h-14 px-5 rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] text-[16px] font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#2563EB] focus:ring-[3px] focus:ring-blue-500/10 transition-all duration-200"
                   />
                 </div>
 
                 {/* Checklist Section */}
-                <div className="bg-white/5 rounded-2xl border border-white/10 p-6">
+                <div className="bg-[#F1F5F9] rounded-2xl border border-[#E2E8F0] p-6">
                   <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                     Pre-Trade Checklist
                   </h3>
@@ -485,7 +485,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             'size-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200',
                             item.checked
                               ? 'bg-[#2563EB] border-[#2563EB] shadow-sm shadow-blue-500/25'
-                              : 'border-white/20 group-hover:border-[#2563EB] group-hover:bg-blue-950/30'
+                              : 'border-[#E2E8F0] group-hover:border-[#2563EB] group-hover:bg-blue-50'
                           )}
                         >
                           {item.checked && (
@@ -503,8 +503,8 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                       </label>
                     ))}
                   </div>
-                  <div className="mt-3 flex items-center gap-2 pt-3 border-t border-white/10">
-                    <div className="h-1.5 flex-1 rounded-full bg-white/10 overflow-hidden">
+                  <div className="mt-3 flex items-center gap-2 pt-3 border-t border-[#E2E8F0]">
+                    <div className="h-1.5 flex-1 rounded-full bg-[#E2E8F0] overflow-hidden">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] transition-all duration-500"
                         style={{ width: `${(checklistCompleted / CHECKLIST_OPTIONS.length) * 100}%` }}
@@ -520,7 +520,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                   <label className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Analysis Notes
                   </label>
-                  <div className="border border-white/10 rounded-[18px] overflow-hidden bg-white/5">
+                  <div className="border border-[#E2E8F0] rounded-[18px] overflow-hidden bg-[#F1F5F9]">
                     <div className="sticky top-0 z-10">
                       <EditorToolbar editor={editor} />
                     </div>
@@ -545,12 +545,12 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                           onDragOver={e => handleDragOver(e, index)}
                           onDragEnd={handleDragEnd}
                           className={cn(
-                            'group relative rounded-2xl border border-white/10 overflow-hidden bg-white/5 transition-all duration-200',
+                            'group relative rounded-2xl border border-[#E2E8F0] overflow-hidden bg-[#F1F5F9] transition-all duration-200',
                             dragIndex === index && 'opacity-50 scale-95 ring-2 ring-[#2563EB]',
                             'hover:shadow-lg hover:-translate-y-0.5',
                           )}
                         >
-                          <div className="aspect-[4/3] relative bg-white/5">
+                          <div className="aspect-[4/3] relative bg-[#F1F5F9]">
                             <img
                               src={img.preview || img.url}
                               alt={img.caption || `Image ${index + 1}`}
@@ -622,7 +622,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                                 type="button"
                                 onClick={() => moveImage(index, index - 1)}
                                 disabled={index === 0}
-                                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 disabled:opacity-30 transition-all"
+                                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-[#F1F5F9] disabled:opacity-30 transition-all"
                               >
                                 <ArrowUp className="size-3" />
                               </button>
@@ -630,7 +630,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                                 type="button"
                                 onClick={() => moveImage(index, index + 1)}
                                 disabled={index === images.length - 1}
-                                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 disabled:opacity-30 transition-all"
+                                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-[#F1F5F9] disabled:opacity-30 transition-all"
                               >
                                 <ArrowDown className="size-3" />
                               </button>
@@ -652,7 +652,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
 
                   {remainingSlots > 0 && (
                     <>
-                       <label className="flex flex-col items-center justify-center h-[180px] border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:border-[#2563EB] hover:bg-blue-950/30 transition-all duration-200 group">
+                       <label className="flex flex-col items-center justify-center h-[180px] border-2 border-dashed border-[#E2E8F0] rounded-2xl cursor-pointer hover:border-[#2563EB] hover:bg-blue-50 transition-all duration-200 group">
                         <div className="flex flex-col items-center gap-2">
                           <div className="size-12 rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                             <Upload className="size-5 text-[#2563EB]" />
@@ -685,7 +685,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                   )}
                 </div>
 
-                <div className="bg-white/5 rounded-2xl border border-white/10 p-6">
+                <div className="bg-[#F1F5F9] rounded-2xl border border-[#E2E8F0] p-6">
                   <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-5">
                     Market Metadata
                   </h3>
@@ -723,11 +723,11 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                     </div>
                     <div className="space-y-1.5 col-span-2">
                       <label className="text-[13px] font-medium text-foreground">Tags</label>
-                      <div                   className="flex flex-wrap items-center gap-2 p-3 rounded-2xl border border-white/10 bg-white/5 min-h-[48px] focus-within:border-[#2563EB] focus-within:ring-[3px] focus-within:ring-blue-500/10 transition-all duration-200">
+                      <div                   className="flex flex-wrap items-center gap-2 p-3 rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] min-h-[48px] focus-within:border-[#2563EB] focus-within:ring-[3px] focus-within:ring-blue-500/10 transition-all duration-200">
                         {tags.map(tag => (
                           <span
                             key={tag}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-white/5 text-[13px] font-medium text-muted-foreground"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#F1F5F9] text-[13px] font-medium text-muted-foreground"
                           >
                             {tag}
                             <button type="button" onClick={() => removeTag(tag)} className="text-muted-foreground hover:text-red-500 transition-colors">
@@ -757,7 +757,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                             key={tag}
                             type="button"
                             onClick={() => addTag(tag)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-white/5 border border-white/10 hover:text-[#2563EB] hover:border-[#2563EB] hover:bg-blue-50 transition-all duration-200"
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-muted-foreground bg-[#F1F5F9] border border-[#E2E8F0] hover:text-[#2563EB] hover:border-[#2563EB] hover:bg-blue-50 transition-all duration-200"
                           >
                             + {tag}
                           </button>
@@ -823,7 +823,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                     return (
                       <div
                         key={i}
-                        className="bg-white/5 rounded-2xl border border-white/10 p-4"
+                        className="bg-[#F1F5F9] rounded-2xl border border-[#E2E8F0] p-4"
                       >
                         <div className={`size-8 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg flex items-center justify-center mb-2.5`}>
                           <Icon className="size-3.5 text-white" />
@@ -836,12 +836,12 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                 </div>
               </div>
 
-              <div className="flex-shrink-0 h-16 flex items-center justify-between px-10 border-t border-white/10">
+              <div className="flex-shrink-0 h-16 flex items-center justify-between px-10 border-t border-[#E2E8F0]">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={close}
                     disabled={saving}
-                    className="h-12 px-6 rounded-2xl border border-white/10 text-[14px] font-medium text-muted-foreground hover:text-foreground hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                    className="h-12 px-6 rounded-2xl border border-[#E2E8F0] text-[14px] font-medium text-muted-foreground hover:text-foreground hover:border-[#CBD5E1] hover:bg-[#F1F5F9] transition-all duration-200"
                   >
                     Cancel
                   </button>
@@ -858,7 +858,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                         }
                       }}
                       disabled={saving}
-                      className="h-12 px-6 rounded-2xl border border-red-500/30 text-[14px] font-medium text-red-400 hover:bg-red-950/30 hover:border-red-500/50 transition-all duration-200"
+                      className="h-12 px-6 rounded-2xl border border-red-300 text-[14px] font-medium text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
                     >
                       Delete
                     </button>
@@ -868,7 +868,7 @@ export default function AddEntryDialog({ open, onOpenChange, onSaved, reviewId, 
                   <button
                     onClick={() => handleSubmit(true)}
                     disabled={saving || uploading}
-                    className="h-12 px-6 rounded-2xl border border-white/10 text-[14px] font-medium text-muted-foreground hover:text-foreground hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                    className="h-12 px-6 rounded-2xl border border-[#E2E8F0] text-[14px] font-medium text-muted-foreground hover:text-foreground hover:border-[#CBD5E1] hover:bg-[#F1F5F9] transition-all duration-200"
                   >
                     Save Draft
                   </button>

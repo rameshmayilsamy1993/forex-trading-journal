@@ -380,7 +380,7 @@ export default function CRTHistory() {
       {/* Edit Modal */}
       <Dialog.Root open={!!editingEvent} onOpenChange={(open) => !open && setEditingEvent(null)}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <Dialog.Overlay className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50" />
           <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-sm border border-[#E2E8F0]">
             <Dialog.Title className="sr-only">Edit CRT Event</Dialog.Title>
             <Dialog.Description className="sr-only">Edit CRT event details including key level, direction, status, and screenshot</Dialog.Description>
@@ -400,7 +400,7 @@ export default function CRTHistory() {
       {/* View Modal */}
       <Dialog.Root open={!!viewingEvent} onOpenChange={(open) => !open && setViewingEvent(null)}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <Dialog.Overlay className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50" />
           <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-sm border border-[#E2E8F0]">
             <Dialog.Title className="sr-only">View CRT Event</Dialog.Title>
             <Dialog.Description className="sr-only">View CRT event details including key level, direction, status, and history</Dialog.Description>
