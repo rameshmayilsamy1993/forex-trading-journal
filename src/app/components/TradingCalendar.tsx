@@ -302,19 +302,16 @@ export default function TradingCalendar() {
             label="Total P&L"
             value={`$${monthStats.totalPnl.toFixed(2)}`}
             icon={monthStats.totalPnl >= 0 ? TrendingUp : TrendingDown}
-            color={monthStats.totalPnl >= 0 ? 'green' : 'red'}
           />
           <StatCard
             label="Trading Days"
             value={monthStats.tradingDays}
             icon={Calendar}
-            color="blue"
           />
           <StatCard
             label="Total Trades"
             value={monthStats.totalTrades}
             icon={Calendar}
-            color="purple"
           />
         </div>
 

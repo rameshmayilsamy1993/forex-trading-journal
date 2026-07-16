@@ -243,26 +243,21 @@ export default function Reports() {
 
       {/* Executive Summary - Top Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard label="Total Trades" value={stats.totalTrades} icon={Target} color="blue" />
+        <StatCard label="Total Trades" value={stats.totalTrades} icon={Target} />
         <StatCard
           label="Win Rate"
           value={`${stats.winRate.toFixed(1)}%`}
           icon={Award}
-          color="purple"
-          trend={{ value: `${stats.winningTrades}W / ${stats.losingTrades}L`, positive: stats.winRate >= 50 }}
+          trend={stats.winRate >= 50 ? 'up' : 'down'}
         />
-        <StatCard label="Total Profit" value={`$${stats.totalProfit.toFixed(2)}`} icon={TrendingUp} color="green" />
+        <StatCard label="Total Profit" value={`$${stats.totalProfit.toFixed(2)}`} icon={TrendingUp} />
         <StatCard
           label="Net P/L"
           value={`$${stats.netProfit.toFixed(2)}`}
           icon={stats.netProfit >= 0 ? TrendingUp : TrendingDown}
-          color={stats.netProfit >= 0 ? 'green' : 'red'}
-          trend={{
-            value: `PF: ${stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}`,
-            positive: stats.netProfit >= 0,
-          }}
+          trend={stats.netProfit >= 0 ? 'up' : 'down'}
         />
-        <StatCard label="Avg Win" value={`$${stats.averageWin.toFixed(2)}`} icon={AlertCircle} color="orange" />
+        <StatCard label="Avg Win" value={`$${stats.averageWin.toFixed(2)}`} icon={AlertCircle} />
       </div>
 
       {/* Detailed Performance */}

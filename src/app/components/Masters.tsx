@@ -81,9 +81,9 @@ export default function Masters() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard label="Strategies" value={masterCounts.strategy} icon={Brain} color="purple" />
-        <StatCard label="Sessions" value={masterCounts.session} icon={Clock} color="blue" />
-        <StatCard label="Key Levels" value={masterCounts.keyLevel} icon={List} color="green" />
+        <StatCard label="Strategies" value={masterCounts.strategy} icon={Brain} />
+        <StatCard label="Sessions" value={masterCounts.session} icon={Clock} />
+        <StatCard label="Key Levels" value={masterCounts.keyLevel} icon={List} />
       </div>
 
       <CardContainer className="!p-0">

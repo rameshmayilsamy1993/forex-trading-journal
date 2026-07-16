@@ -128,7 +128,6 @@ export default function PropFirms() {
           label="Total Firms"
           value={firms.length}
           icon={Building2}
-          color="blue"
         />
       </div>
 

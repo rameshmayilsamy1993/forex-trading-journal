@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import { cn } from './utils';
 
 export type ColorTheme = 'blue' | 'green' | 'orange' | 'purple' | 'teal' | 'pink' | 'red' | 'indigo' | 'yellow' | 'slate';
@@ -30,7 +30,7 @@ export function IconBadge({ icon: Icon, color, size = 'md', className }: IconBad
   const theme = color ? (colorThemes[color] || defaultTheme) : defaultTheme;
 
   const sizeClasses = { sm: 'w-7 h-7', md: 'w-9 h-9', lg: 'w-11 h-11' };
-  const iconSizes = { sm: 'w-3.5 h-3.5', md: 'w-4.5 h-4.5', lg: 'w-5.5 h-5.5' };
+  const iconSizes = { sm: 'w-3.5 h-3.5', md: 'w-4 h-4', lg: 'w-5.5 h-5.5' };
 
   return (
     <div
@@ -87,29 +87,27 @@ interface StatCardProps {
   label: string;
   value: string | number;
   icon?: LucideIcon;
-  color?: ColorTheme;
-  trend?: { value: string; positive?: boolean };
+  trend?: 'up' | 'down' | 'neutral';
   className?: string;
 }
 
-export function StatCard({ label, value, icon: Icon, color = 'blue', trend, className }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, trend, className }: StatCardProps) {
   return (
     <div className={cn('glass-panel rounded-2xl p-3 flex items-center gap-3', className)}>
       {Icon && (
         <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
-          <Icon className="w-4.5 h-4.5 text-foreground" />
+          <Icon className="w-4 h-4 text-foreground" />
         </div>
       )}
       <div className="min-w-0 flex-1">
         <p className="text-caption text-muted-foreground truncate">{label}</p>
         <p className="text-metric text-foreground tabular-nums">{value}</p>
-        {trend && (
+        {trend && trend !== 'neutral' && (
           <p className={cn(
-            'text-micro mt-1 inline-flex items-center gap-1',
-            trend.positive !== false ? 'text-emerald-400' : 'text-red-400',
+            'text-micro mt-1',
+            trend === 'up' ? 'text-emerald-400' : 'text-red-400',
           )}>
-            {trend.positive !== false ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-            {trend.value}
+            {trend === 'up' ? '↑' : '↓'}
           </p>
         )}
       </div>

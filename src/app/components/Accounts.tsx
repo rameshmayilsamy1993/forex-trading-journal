@@ -281,14 +281,13 @@ export default function Accounts() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard label="Total Accounts" value={accounts.length} icon={Wallet} color="teal" />
+        <StatCard label="Total Accounts" value={accounts.length} icon={Wallet} />
         <StatCard
           label="Total Balance"
           value={`$${accounts.reduce((sum, acc) => sum + acc.initialBalance, 0).toLocaleString()}`}
           icon={Building2}
-          color="blue"
         />
-        <StatCard label="Prop Firms" value={firms.length} icon={Building2} color="green" />
+        <StatCard label="Prop Firms" value={firms.length} icon={Building2} />
       </div>
 
       <CardContainer className="!p-0">
