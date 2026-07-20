@@ -35,27 +35,27 @@ function Calendar({
           "text-slate-400 rounded-lg w-8 font-medium text-caption",
         row: "flex w-full mt-1",
         cell: cn(
-          "relative p-0 text-center text-body focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-blue-50 [&:has([aria-selected].day-range-end)]:rounded-r-lg",
+          "relative p-0 text-center text-body focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-[#EDE9FE] [&:has([aria-selected].day-range-end)]:rounded-r-lg",
           props.mode === "range"
             ? "[&:has(>.day-range-end)]:rounded-r-lg [&:has(>.day-range-start)]:rounded-l-lg first:[&:has([aria-selected])]:rounded-l-lg last:[&:has([aria-selected])]:rounded-r-lg"
             : "[&:has([aria-selected])]:rounded-lg",
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "size-8 p-0 font-normal aria-selected:opacity-100 rounded-lg hover:bg-slate-100",
+          "size-9 p-0 font-normal aria-selected:opacity-100 rounded-lg hover:bg-[#F1F5F9] transition-colors duration-150",
         ),
         day_range_start:
           "day-range-start aria-selected:bg-primary aria-selected:text-primary-foreground rounded-lg",
         day_range_end:
           "day-range-end aria-selected:bg-primary aria-selected:text-primary-foreground rounded-lg",
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-lg",
-        day_today: "bg-blue-50 text-primary font-semibold",
+          "bg-[#7C3AED] text-white hover:bg-[#6D28D9] hover:text-white focus:bg-[#7C3AED] focus:text-white rounded-lg shadow-sm shadow-[#7C3AED]/25",
+        day_today: "bg-[#EDE9FE] text-[#7C3AED] font-semibold rounded-lg",
         day_outside:
           "day-outside text-slate-300 aria-selected:text-muted-foreground",
         day_disabled: "text-slate-300 opacity-50",
         day_range_middle:
-          "aria-selected:bg-blue-50 aria-selected:text-accent-foreground",
+          "aria-selected:bg-[#EDE9FE] aria-selected:text-[#7C3AED]",
         day_hidden: "invisible",
         ...classNames,
       }}

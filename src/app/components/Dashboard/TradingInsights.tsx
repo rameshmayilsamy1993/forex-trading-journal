@@ -46,7 +46,7 @@ export default function TradingInsights({ bestPair, averageRR, currentStreak, st
         <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] flex items-center justify-center">
           <Award className="w-3 h-3 text-white" />
         </div>
-        <h3 className="text-body font-semibold text-white/90">Trading Insights</h3>
+        <h3 className="text-body font-semibold text-[#0F172A]">Trading Insights</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -55,9 +55,9 @@ export default function TradingInsights({ bestPair, averageRR, currentStreak, st
             <div className={`w-6 h-6 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center mb-1.5`}>
               <item.icon className="w-3 h-3 text-white" />
             </div>
-            <p className="text-micro text-white/40 uppercase tracking-wider">{item.label}</p>
-            <p className="text-body font-semibold text-white/90 mt-0.5">{item.value}</p>
-            <p className="text-micro text-white/40 mt-0.5">{item.sub}</p>
+            <p className="text-micro text-[#64748B] uppercase tracking-wider">{item.label}</p>
+            <p className="text-body font-semibold text-[#0F172A] mt-0.5">{item.value}</p>
+            <p className="text-micro text-[#64748B] mt-0.5">{item.sub}</p>
           </div>
         ))}
       </div>

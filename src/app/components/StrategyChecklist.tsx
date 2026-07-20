@@ -204,12 +204,18 @@ export default function StrategyChecklist({
               </button>
 
               {showStrategyDropdown && (
-                <div className="absolute z-10 w-full mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
-                  {strategiesWithChecklist.map(strategy => (
+                <div
+                  className="absolute z-10 w-full mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden"
+                  style={{ animation: 'modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}
+                >
+                  {strategiesWithChecklist.map((strategy, index) => (
                     <button
                       key={strategy.id}
                       onClick={() => handleStrategySelect(strategy)}
                       className="w-full px-4 py-3 text-left hover:bg-violet-50 transition-colors border-b border-slate-100 last:border-b-0"
+                      style={{
+                        animation: `itemSlideIn 0.3s ease-out ${index * 0.05}s both`,
+                      }}
                     >
                       <p className="font-medium text-slate-900">{strategy.name}</p>
                       <p className="text-body text-slate-500">{strategy.checklist?.length} checklist items</p>
@@ -254,6 +260,28 @@ export default function StrategyChecklist({
                 </div>
               </div>
 
+              {/* Progress Bar */}
+              <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    "absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out",
+                    isValid
+                      ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                      : "bg-gradient-to-r from-[#7C3AED] to-[#4F46E5]"
+                  )}
+                  style={{
+                    width: `${progress.total > 0 ? (progress.completed / progress.total) * 100 : 0}%`,
+                    animation: 'progressFill 0.8s ease-out',
+                  }}
+                />
+                {isValid && (
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-white/30"
+                    style={{ animation: 'pulseGlow 2s ease-in-out infinite' }}
+                  />
+                )}
+              </div>
+
               <div className="space-y-2">
                 {currentChecklist.map((item, index) => {
                   const isChecked = checkedItems.get(item.label);
@@ -262,31 +290,49 @@ export default function StrategyChecklist({
                       key={`${item.label}-${index}`}
                       onClick={() => toggleItem(item.label)}
                       className={cn(
-                        "w-full flex items-center gap-3 p-4 rounded-xl border transition-all",
+                        "w-full flex items-center gap-3 p-4 rounded-xl border transition-all duration-300",
                         isChecked
-                          ? "bg-green-50 border-green-200"
+                          ? "bg-green-50 border-green-200 shadow-sm shadow-green-200/50"
                           : item.required && !isChecked
                             ? "bg-red-50 border-red-200"
-                            : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                            : "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
                       )}
+                      style={{
+                        animation: `itemSlideIn 0.4s ease-out ${index * 0.06}s both`,
+                      }}
                     >
                       {isChecked ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <div
+                          className="flex-shrink-0"
+                          style={{ animation: 'checkScale 0.3s ease-out' }}
+                        >
+                          <svg className="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
+                            <path
+                              d="M8 12.5l2.5 2.5 5.5-5.5"
+                              style={{
+                                strokeDasharray: 24,
+                                strokeDashoffset: 0,
+                                animation: 'checkTick 0.35s ease-out',
+                              }}
+                            />
+                          </svg>
+                        </div>
                       ) : (
                         <Circle className={cn(
-                          "w-5 h-5 flex-shrink-0",
+                          "w-5 h-5 flex-shrink-0 transition-colors duration-200",
                           item.required ? "text-red-400" : "text-slate-400"
                         )} />
                       )}
                       <span className={cn(
-                        "flex-1 text-left",
+                        "flex-1 text-left transition-colors duration-200",
                         isChecked ? "text-green-800 font-medium" : "text-slate-700"
                       )}>
                         {item.label}
                       </span>
                       {item.required && (
                         <span className={cn(
-                          "text-caption font-semibold px-2 py-0.5 rounded",
+                          "text-caption font-semibold px-2 py-0.5 rounded transition-colors duration-200",
                           isChecked ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                         )}>
                           REQUIRED
@@ -299,7 +345,10 @@ export default function StrategyChecklist({
             </div>
 
             {missingRequired.length > 0 && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div
+                className="p-4 bg-red-50 border border-red-200 rounded-xl"
+                style={{ animation: 'itemSlideIn 0.4s ease-out' }}
+              >
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div>

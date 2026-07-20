@@ -108,7 +108,7 @@ export default function TradeForm({
 }: TradeFormProps) {
   const isEditMode = !!editingId;
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-lg border border-slate-200/50">
+    <div className="p-6 bg-white rounded-2xl shadow-lg border border-slate-200/50 border-t-4 border-t-[#7C3AED] animate-in fade-in slide-in-from-top-3 duration-400">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-card-title font-bold text-slate-900">
           {editingId ? 'Edit Trade' : 'New Trade'}
@@ -177,8 +177,9 @@ export default function TradeForm({
               <Button
                 variant="outline"
                 className={cn(
-                  "w-full justify-start text-left font-normal h-10 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors",
-                  !formData.entryDate && "text-slate-400"
+                  "w-full justify-start text-left font-normal h-12 bg-slate-50 border-slate-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all duration-200",
+                  !formData.entryDate && "text-slate-400",
+                  formData.entryDate && "text-[#0F172A]"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -332,41 +333,7 @@ export default function TradeForm({
           </Select>
         </FormField>
 
-        <FormField label="SMT">
-          <Select value={formData.smt} onValueChange={value => setFormData({ ...formData, smt: value as SMTType })}>
-            <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes with GBPUSD">Yes with GBPUSD</SelectItem>
-              <SelectItem value="Yes with EURUSD">Yes with EURUSD</SelectItem>
-              <SelectItem value="Yes with DXY">Yes with DXY</SelectItem>
-            </SelectContent>
-          </Select>
-        </FormField>
-
-        <FormField label="Model #1">
-          <Select value={formData.model1} onValueChange={value => setFormData({ ...formData, model1: value as Model1Type })}>
-            <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Yes (Both EUR and GBP)">Yes (Both EUR and GBP)</SelectItem>
-              <SelectItem value="Yes (EUR)">Yes (EUR)</SelectItem>
-              <SelectItem value="Yes (GBP)">Yes (GBP)</SelectItem>
-              <SelectItem value="No">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </FormField>
-
-        <FormField label="High/Low Time">
-          <TimePicker
-            value={formData.highLowTime || ''}
-            onChange={(val) => setFormData({ ...formData, highLowTime: val })}
-          />
-        </FormField>
-
+        
         <FormField label="Status" required>
           <Select value={formData.status} onValueChange={value => setFormData({ ...formData, status: value as 'OPEN' | 'CLOSED' })}>
             <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
@@ -409,8 +376,9 @@ export default function TradeForm({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal h-10 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors",
-                      !formData.exitDate && "text-slate-400"
+                      "w-full justify-start text-left font-normal h-12 bg-slate-50 border-slate-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all duration-200",
+                      !formData.exitDate && "text-slate-400",
+                      formData.exitDate && "text-[#0F172A]"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -467,8 +435,9 @@ export default function TradeForm({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal h-10 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors",
-                      !formData.exitDate && "text-slate-400"
+                      "w-full justify-start text-left font-normal h-12 bg-slate-50 border-slate-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all duration-200",
+                      !formData.exitDate && "text-slate-400",
+                      formData.exitDate && "text-[#0F172A]"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />

@@ -36,8 +36,8 @@ export default function LiveStatsBar({ stats, netPL, netPct, winRate, activeAcco
         <div className="flex gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="flex-1 animate-pulse space-y-2">
-              <div className="h-3 bg-[#F8FAFC] rounded w-16" />
-              <div className="h-5 bg-[#F8FAFC] rounded w-20" />
+              <div className="h-3 bg-[#F1F5F9] rounded w-16" />
+              <div className="h-5 bg-[#F1F5F9] rounded w-20" />
             </div>
           ))}
         </div>
@@ -52,21 +52,21 @@ export default function LiveStatsBar({ stats, netPL, netPct, winRate, activeAcco
           <div key={m.label} className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <p className="text-micro text-white/50 uppercase tracking-wider">{m.label}</p>
-                <p className="text-body font-semibold text-white/90 tabular-nums mt-0.5">{m.value}</p>
+                <p className="text-micro text-[#64748B] uppercase tracking-wider">{m.label}</p>
+                <p className="text-body font-semibold text-[#0F172A] tabular-nums mt-0.5">{m.value}</p>
                 {'trend' in m && m.trend && (
-                  <p className={`text-micro mt-0.5 inline-flex items-center gap-0.5 ${m.positive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <p className={`text-micro mt-0.5 inline-flex items-center gap-0.5 ${m.positive ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {m.positive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                     {m.trend}
                   </p>
                 )}
                 {'bar' in m && m.bar !== undefined && m.bar > 0 && (
-                  <div className="mt-1 h-1 bg-[#F8FAFC] rounded-full overflow-hidden">
+                  <div className="mt-1 h-1 bg-[#F1F5F9] rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] rounded-full transition-all duration-500" style={{ width: `${m.bar}%` }} />
                   </div>
                 )}
               </div>
-              {i < metrics.length - 1 && <div className="w-px h-8 bg-[#F8FAFC] shrink-0" />}
+              {i < metrics.length - 1 && <div className="w-px h-8 bg-[#E2E8F0] shrink-0" />}
             </div>
           </div>
         ))}

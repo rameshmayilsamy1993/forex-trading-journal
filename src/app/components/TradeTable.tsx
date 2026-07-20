@@ -86,8 +86,8 @@ export default function TradeTable({
 
   return (
     <>
-      <div className="flex items-center gap-4 p-5 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB]">
-        <span className="text-body-sm text-slate-500">Filters:</span>
+      <div className="flex items-center gap-4 p-5 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] border-l-4 border-l-[#7C3AED]">
+        <span className="text-body-sm font-semibold text-[#7C3AED]">Filters</span>
         <div className="flex gap-4 items-center">
           <Select
             value={filterAccount || 'all'}
@@ -169,26 +169,30 @@ export default function TradeTable({
 
       {/* Mobile Trade Cards */}
       <div className="lg:hidden space-y-3">
-        {trades.map(trade => (
-          <TradeCard
-            key={trade.id}
-            trade={trade}
-            accounts={accounts}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onView={onView}
-            isSelected={selectedTrades.includes(trade.id)}
-            onSelect={onToggleSelect}
-          />
+        {trades.map((trade, i) => (
+          <div key={trade.id} style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }} className="animate-in fade-in slide-in-from-bottom-2 duration-400">
+            <TradeCard
+              trade={trade}
+              accounts={accounts}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onView={onView}
+              isSelected={selectedTrades.includes(trade.id)}
+              onSelect={onToggleSelect}
+            />
+          </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB]">
+      <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] transition-all duration-300 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
         <div className="p-6">
           {trades.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-slate-600">No trades recorded yet</p>
-              <p className="text-body text-slate-500">Click "Add Trade" to start logging</p>
+            <div className="text-center py-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#EDE9FE] mb-4">
+                <TrendingUp className="w-8 h-8 text-[#7C3AED]" />
+              </div>
+              <p className="text-slate-800 font-semibold text-card-title">No trades recorded yet</p>
+              <p className="text-body text-slate-500 mt-1">Click "Add Trade" to start logging</p>
             </div>
           ) : (
             <>
@@ -258,8 +262,8 @@ export default function TradeTable({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {trades.map(trade => (
-                      <TableRow key={trade.id} className={`group ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50' : ''}`}>
+                    {trades.map((trade, i) => (
+                      <TableRow key={trade.id} className={`group animate-in fade-in slide-in-from-bottom-1 duration-300 ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50' : ''}`} style={{ animationDelay: `${i * 30}ms`, animationFillMode: 'both' }}>
                         <TableCell>
                           <input
                             type="checkbox"

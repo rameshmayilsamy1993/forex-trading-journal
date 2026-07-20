@@ -180,11 +180,17 @@ export function useTradeState() {
   }, [formData.lotSize]);
 
   const calculatedRealPL = useMemo(() => {
-    const profit = parseFloat(formData.profit) || 0;
-    const commission = Math.abs(parseFloat(formData.commission) || calculatedCommission);
-    const swap = Math.abs(parseFloat(formData.swap) || 0);
+    let profit = parseFloat(formData.profit) || 0;
+    if (!formData.profit && formData.status === 'CLOSED' && formData.exitPrice && formData.entryPrice && formData.lotSize) {
+      const priceDiff = formData.type === 'BUY'
+        ? parseFloat(formData.exitPrice) - parseFloat(formData.entryPrice)
+        : parseFloat(formData.entryPrice) - parseFloat(formData.exitPrice);
+      profit = priceDiff * parseFloat(formData.lotSize) * 100000;
+    }
+    const commission = formData.commission === '' ? calculatedCommission : Math.abs(parseFloat(formData.commission) || 0);
+    const swap = formData.swap === '' ? 0 : Math.abs(parseFloat(formData.swap) || 0);
     return Number((profit - commission - swap).toFixed(2));
-  }, [formData.profit, formData.commission, formData.swap, calculatedCommission]);
+  }, [formData.profit, formData.commission, formData.swap, calculatedCommission, formData.status, formData.exitPrice, formData.entryPrice, formData.lotSize, formData.type]);
 
   const getTradeAccountId = (trade: Trade): string => {
     if (typeof trade.accountId === 'object' && trade.accountId !== null) {

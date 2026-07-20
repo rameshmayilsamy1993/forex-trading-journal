@@ -38,12 +38,18 @@ export default function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 z-50">
+    <div
+      className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 z-50"
+      style={{ animation: 'modalBackdropIn 0.3s ease-out forwards' }}
+    >
       <div
         className={cn(
-          'bg-white rounded-2xl shadow-2xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-white/20 animate-in zoom-in-95 duration-200',
+          'bg-white rounded-2xl shadow-2xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-white/20',
           sizeClasses[size]
         )}
+        style={{
+          animation: 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || showX) && (

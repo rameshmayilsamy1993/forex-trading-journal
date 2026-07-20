@@ -20,7 +20,7 @@ function getAccountName(trade: Trade, accounts: TradingAccount[]): string {
 export default function TradeCard({ trade, accounts, onEdit, onDelete, onView, isSelected, onSelect }: TradeCardProps) {
   const realPL = (trade as any).realPL ?? trade.profit ?? 0;
   return (
-    <div className={`bg-white rounded-[20px] border-[#E5E7EB] p-4 space-y-3 transition-all shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 ${isSelected ? 'border-[#7C3AED] ring-2 ring-[#7C3AED]/20' : 'border'}`}>
+    <div className={`bg-white rounded-[20px] border-[#E5E7EB] p-4 space-y-3 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-2 duration-400 ${isSelected ? 'border-[#7C3AED] ring-2 ring-[#7C3AED]/20' : 'border'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <input type="checkbox" checked={isSelected} onChange={() => onSelect(trade.id)}

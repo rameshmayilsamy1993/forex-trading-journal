@@ -19,23 +19,23 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: '#0B1620' }}>
+      <div className="min-h-screen">
         <div className="max-w-[1600px] mx-auto p-4 lg:p-6 space-y-3">
           <div className="glass-panel rounded-[20px] p-3 animate-pulse">
             <div className="flex gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="flex-1 space-y-2">
-                  <div className="h-3 bg-white/[0.06] rounded w-16" />
-                  <div className="h-5 bg-white/[0.06] rounded w-20" />
+                  <div className="h-3 bg-[#F1F5F9] rounded w-16" />
+                  <div className="h-5 bg-[#F1F5F9] rounded w-20" />
                 </div>
               ))}
             </div>
           </div>
           <div className="glass-panel rounded-[20px] p-5 animate-pulse">
             <div className="space-y-3">
-              <div className="h-4 bg-white/[0.06] rounded w-24" />
-              <div className="h-10 bg-white/[0.06] rounded w-48" />
-              <div className="h-20 bg-white/[0.06] rounded w-full" />
+              <div className="h-4 bg-[#F1F5F9] rounded w-24" />
+              <div className="h-10 bg-[#F1F5F9] rounded w-48" />
+              <div className="h-20 bg-[#F1F5F9] rounded w-full" />
             </div>
           </div>
         </div>
@@ -44,7 +44,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0B1620' }}>
+    <div className="min-h-screen">
       <div className="max-w-[1600px] mx-auto p-4 lg:p-6 space-y-3">
         <LiveStatsBar
           stats={stats}

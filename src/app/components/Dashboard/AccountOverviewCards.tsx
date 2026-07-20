@@ -48,8 +48,8 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
     return (
       <div className="glass-panel rounded-[20px] p-5">
         <div className="flex flex-col items-center justify-center py-6 text-center">
-          <Wallet className="w-8 h-8 text-white/20 mb-2" />
-          <p className="text-body text-white/50">No accounts match the selected filters</p>
+          <Wallet className="w-8 h-8 text-[#CBD5E1] mb-2" />
+          <p className="text-body text-[#64748B]">No accounts match the selected filters</p>
         </div>
       </div>
     );
@@ -67,14 +67,14 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
           <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] flex items-center justify-center">
             <Wallet className="w-3 h-3 text-white" />
           </div>
-          <h3 className="text-body font-semibold text-white/90">Accounts</h3>
-          <span className="text-micro text-white/40">({accounts.length})</span>
+          <h3 className="text-body font-semibold text-[#0F172A]">Accounts</h3>
+          <span className="text-micro text-[#94A3B8]">({accounts.length})</span>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={selectedFirm}
             onChange={(e) => onFirmChange(e.target.value)}
-            className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2.5 py-1.5 text-body-sm text-white/70 outline-none"
+            className="bg-white border border-[#E2E8F0] rounded-lg px-2.5 py-1.5 text-body-sm text-[#475569] outline-none"
           >
             <option value="all">All Firms</option>
             {firms.map((firm) => (
@@ -101,7 +101,7 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#4F46E5]" />
-                    <h4 className="text-body-sm font-semibold text-white/90">{account.name}</h4>
+                    <h4 className="text-body-sm font-semibold text-[#0F172A]">{account.name}</h4>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Badge variant={account.status === 'FUNDED' ? 'success' : account.status === 'BREACHED' ? 'destructive' : 'secondary'} className="text-micro px-1.5 py-0.5">
@@ -115,29 +115,29 @@ export default function AccountOverviewCards({ accounts, trades, firms, selected
 
               <div className="grid grid-cols-3 gap-2 py-1.5 border-y border-[#E2E8F0]">
                 <div>
-                  <p className="text-micro text-white/40 uppercase tracking-wider">Balance</p>
-                  <p className="text-body-sm font-semibold text-white/90 tabular-nums">${currentBalance.toFixed(2)}</p>
+                  <p className="text-micro text-[#94A3B8] uppercase tracking-wider">Balance</p>
+                  <p className="text-body-sm font-semibold text-[#0F172A] tabular-nums">${currentBalance.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-micro text-white/40 uppercase tracking-wider">P/L</p>
-                  <p className={`text-body-sm font-semibold tabular-nums ${pl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <p className="text-micro text-[#94A3B8] uppercase tracking-wider">P/L</p>
+                  <p className={`text-body-sm font-semibold tabular-nums ${pl >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {pl >= 0 ? '+' : ''}${pl.toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-micro text-white/40 uppercase tracking-wider">Profit %</p>
-                  <p className={`text-body-sm font-semibold tabular-nums ${plPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <p className="text-micro text-[#94A3B8] uppercase tracking-wider">Profit %</p>
+                  <p className={`text-body-sm font-semibold tabular-nums ${plPercent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {plPercent >= 0 ? '+' : ''}{plPercent.toFixed(2)}%
                   </p>
                 </div>
               </div>
 
               <div className="mt-2">
-                <div className="flex items-center justify-between text-micro text-white/40 mb-0.5">
+                <div className="flex items-center justify-between text-micro text-[#94A3B8] mb-0.5">
                   <span>Drawdown</span>
-                  <span className="text-white/60">{dd.toFixed(1)}%</span>
+                  <span className="text-[#475569]">{dd.toFixed(1)}%</span>
                 </div>
-                <Progress value={dd} className="h-1 bg-[#F8FAFC] rounded-full [&>div]:rounded-full [&>div]:bg-gradient-to-r [&>div]:from-emerald-400 [&>div]:to-[#7C3AED]" />
+                <Progress value={dd} className="h-1 bg-[#F1F5F9] rounded-full [&>div]:rounded-full [&>div]:bg-gradient-to-r [&>div]:from-emerald-600 [&>div]:to-[#7C3AED]" />
               </div>
             </div>
           );

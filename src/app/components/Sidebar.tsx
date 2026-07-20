@@ -83,12 +83,8 @@ const navigationGroups: NavGroup[] = [
   {
     title: 'Analysis',
     items: [
-      {
-        id: 'missed', label: 'CRT Missed Trades', icon: EyeOff,
-        children: [
-          { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
-        ],
-      },
+      { id: 'missed', label: 'CRT Missed Trades', icon: EyeOff },
+      { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
       { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
       { id: 'monthly-review', label: 'Monthly Market Review', icon: NotebookText },
