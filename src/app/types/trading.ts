@@ -156,3 +156,41 @@ export interface MissedTrade {
   };
   createdAt: string;
 }
+
+export type GeneralMissedTradeStatus = 'PLANNED' | 'MISSED' | 'EXECUTED_LATER';
+
+export interface GeneralMissedTrade {
+  id: string;
+  accountId: string;
+  propFirmId: string;
+  pair: string;
+  type: TradeType;
+  status: TradeStatus;
+  entryPrice: number;
+  exitPrice?: number;
+  lotSize: number;
+  commission?: number;
+  swap?: number;
+  profit?: number;
+  realPL?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  riskRewardRatio?: number;
+  notes?: string;
+  entryDate: string;
+  entryTime?: string;
+  exitDate?: string;
+  exitTime?: string;
+  session?: string;
+  strategy?: string;
+  keyLevel?: string;
+  highLowTime?: string;
+  ssmtType?: SSMTType;
+  smt?: SMTType;
+  model1?: Model1Type;
+  beforeScreenshot?: string;
+  afterScreenshot?: string;
+  reason: string;
+  missedStatus: GeneralMissedTradeStatus;
+  createdAt: string;
+}

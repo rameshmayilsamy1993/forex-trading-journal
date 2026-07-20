@@ -30,7 +30,7 @@ function saveHiddenTabs(hidden: Set<Tab>) {
   localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
 }
 
-export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats' | 'monthly-review' | 'monthly-review-detail' | 'monthly-review-form' | 'weekly-review' | 'weekly-review-detail' | 'weekly-review-form' | 'daily-review' | 'daily-review-detail' | 'daily-review-form' | 'reminders';
+export type Tab = 'dashboard' | 'journal' | 'calendar' | 'missed' | 'missed-calendar' | 'missed-log' | 'missed-log-calendar' | 'firms' | 'accounts' | 'reports' | 'settings' | 'import' | 'convert' | 'checklist' | 'strategy-master' | 'bias' | 'bias-input' | 'bias-history' | 'liquidity-input' | 'liquidity-history' | 'crt-input' | 'crt-history' | 'breached-trades' | 'xauusd-calculator' | 'forex-lot-calculator' | 'market-stats' | 'monthly-review' | 'monthly-review-detail' | 'monthly-review-form' | 'weekly-review' | 'weekly-review-detail' | 'weekly-review-form' | 'daily-review' | 'daily-review-detail' | 'daily-review-form' | 'reminders';
 
 interface NavItem {
   id: Tab;
@@ -85,6 +85,8 @@ const navigationGroups: NavGroup[] = [
     items: [
       { id: 'missed', label: 'CRT Missed Trades', icon: EyeOff },
       { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
+      { id: 'missed-log', label: 'Missed Trades', icon: EyeOff },
+      { id: 'missed-log-calendar', label: 'Missed Trade Calendar', icon: Calendar },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
       { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
       { id: 'monthly-review', label: 'Monthly Market Review', icon: NotebookText },

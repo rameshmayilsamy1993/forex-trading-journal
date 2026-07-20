@@ -276,7 +276,7 @@ export default function TradeTable({
                           <div>
                             {getLocalDateString(trade.entryDate)}
                             {trade.entryTime && (
-                              <div className="text-caption text-slate-400">{trade.entryTime}</div>
+                              <div className="text-caption text-slate-700">{trade.entryTime}</div>
                             )}
                           </div>
                         </TableCell>

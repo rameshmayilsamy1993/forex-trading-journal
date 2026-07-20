@@ -46,6 +46,8 @@ const DailyReviewList = lazy(() => import('./components/DailyMarketReview/DailyR
 const DailyReviewDetail = lazy(() => import('./components/DailyMarketReview/DailyReviewDetail'));
 const DailyReviewForm = lazy(() => import('./components/DailyMarketReview/DailyReviewForm'));
 const Reminders = lazy(() => import('./components/Reminders'));
+const GeneralMissedTradeJournal = lazy(() => import('./components/GeneralMissedTradeJournal'));
+const GeneralMissedTradesCalendar = lazy(() => import('./components/GeneralMissedTradesCalendar'));
 
 function TabContent({ activeTab }: { activeTab: Tab }) {
   return (
@@ -61,6 +63,8 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
             {activeTab === 'calendar' && <TradingCalendar />}
             {activeTab === 'missed' && <MissedTradeJournal />}
             {activeTab === 'missed-calendar' && <MissedTradesCalendar />}
+            {activeTab === 'missed-log' && <GeneralMissedTradeJournal />}
+            {activeTab === 'missed-log-calendar' && <GeneralMissedTradesCalendar />}
             {activeTab === 'firms' && <PropFirms />}
             {activeTab === 'accounts' && <Accounts />}
             {activeTab === 'reports' && <Reports />}
@@ -97,9 +101,16 @@ function TabContent({ activeTab }: { activeTab: Tab }) {
 export default function App() {
   const { user: currentUser, logout: handleLogout } = useAuthContext();
   const { unreadCount } = useNotifications();
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const saved = localStorage.getItem('fx-journal-active-tab');
+    return (saved && ['dashboard', 'journal', 'import', 'convert', 'checklist', 'calendar', 'missed', 'missed-calendar', 'missed-log', 'missed-log-calendar', 'firms', 'accounts', 'reports', 'strategy-master', 'bias', 'bias-input', 'bias-history', 'liquidity-input', 'liquidity-history', 'crt-input', 'crt-history', 'breached-trades', 'settings', 'xauusd-calculator', 'forex-lot-calculator', 'market-stats', 'monthly-review', 'monthly-review-detail', 'monthly-review-form', 'weekly-review', 'weekly-review-detail', 'weekly-review-form', 'daily-review', 'daily-review-detail', 'daily-review-form', 'reminders'].includes(saved)) ? saved as Tab : 'dashboard';
+  });
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('fx-journal-active-tab', activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     const handleNavigation = (e: CustomEvent) => {

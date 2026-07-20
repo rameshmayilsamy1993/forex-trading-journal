@@ -137,6 +137,26 @@ const apiService = {
     return apiDelete(`/missed-trades/${id}`);
   },
 
+  getGeneralMissedTrades: async (filters?: { pair?: string; status?: string }): Promise<any[]> => {
+    const params = new URLSearchParams();
+    if (filters?.pair) params.append('pair', filters.pair);
+    if (filters?.status) params.append('status', filters.status);
+    const qs = params.toString();
+    return apiGet(`/general-missed-trades${qs ? `?${qs}` : ''}`);
+  },
+
+  createGeneralMissedTrade: async (trade: any): Promise<any> => {
+    return apiPost('/general-missed-trades', trade);
+  },
+
+  updateGeneralMissedTrade: async (id: string, trade: any): Promise<any> => {
+    return apiPut(`/general-missed-trades/${id}`, trade);
+  },
+
+  deleteGeneralMissedTrade: async (id: string): Promise<void> => {
+    return apiDelete(`/general-missed-trades/${id}`);
+  },
+
   getMasters: async (type?: string): Promise<MasterData[]> => {
     const url = type ? `/masters?type=${type}` : '/masters';
     return apiGet(url);
