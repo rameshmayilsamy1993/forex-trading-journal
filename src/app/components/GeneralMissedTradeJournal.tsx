@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, Clock, BarChart3 } from 'lucide-react';
-import { GeneralMissedTrade, GeneralMissedTradeStatus, MasterData, SMTType, Model1Type, SSMTType } from '../types/trading';
+import { GeneralMissedTrade, GeneralMissedTradeStatus, MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { showSuccess, showError, showConfirm } from '../hooks/useToast';
@@ -34,10 +34,6 @@ const MISSED_STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   MISSED: { bg: 'bg-slate-100', text: 'text-muted-foreground' },
   EXECUTED_LATER: { bg: 'bg-violet-50', text: 'text-violet-700' },
 };
-
-const SSMT_OPTIONS: SSMTType[] = ['NO', 'GBPUSD', 'EURUSD', 'DXY'];
-const SMT_OPTIONS: SMTType[] = ['No', 'Yes with GBPUSD', 'Yes with EURUSD', 'Yes with DXY'];
-const MODEL1_OPTIONS: Model1Type[] = ['Yes (Both EUR and GBP)', 'Yes (EUR)', 'Yes (GBP)', 'No'];
 
 function formatTimeDisplay(time?: string): string {
   if (!time) return '';
@@ -123,10 +119,6 @@ export default function GeneralMissedTradeJournal() {
     session: '',
     strategy: '',
     keyLevel: '',
-    highLowTime: '',
-    smt: 'No' as SMTType,
-    model1: 'Yes (EUR)' as Model1Type,
-    ssmtType: 'NO' as SSMTType,
     beforeScreenshot: '',
     afterScreenshot: '',
     reason: '',
@@ -249,10 +241,6 @@ export default function GeneralMissedTradeJournal() {
       session: '',
       strategy: '',
       keyLevel: '',
-      highLowTime: '',
-      smt: 'No',
-      model1: 'Yes (EUR)',
-      ssmtType: 'NO',
       beforeScreenshot: '',
       afterScreenshot: '',
       reason: '',
@@ -284,10 +272,6 @@ export default function GeneralMissedTradeJournal() {
       session: trade.session || '',
       strategy: trade.strategy || '',
       keyLevel: trade.keyLevel || '',
-      highLowTime: trade.highLowTime || '',
-      smt: trade.smt || 'No',
-      model1: trade.model1 || 'Yes (EUR)',
-      ssmtType: trade.ssmtType || 'NO',
       beforeScreenshot: trade.beforeScreenshot || '',
       afterScreenshot: trade.afterScreenshot || '',
       reason: trade.reason,
@@ -334,10 +318,6 @@ export default function GeneralMissedTradeJournal() {
       session: formData.session || undefined,
       strategy: formData.strategy || undefined,
       keyLevel: formData.keyLevel || undefined,
-      highLowTime: formData.highLowTime || undefined,
-      smt: formData.smt,
-      model1: formData.model1,
-      ssmtType: formData.ssmtType,
       beforeScreenshot: formData.beforeScreenshot || undefined,
       afterScreenshot: formData.afterScreenshot || undefined,
       reason: formData.reason,
@@ -743,46 +723,6 @@ export default function GeneralMissedTradeJournal() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-body-sm text-muted-foreground mb-1">High/Low Time</label>
-                  <TimePicker
-                    value={formData.highLowTime}
-                    onChange={(val) => setFormData({ ...formData, highLowTime: val })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-body-sm text-muted-foreground mb-1">SMT</label>
-                  <Select value={formData.smt} onValueChange={(value: SMTType) => setFormData({ ...formData, smt: value })}>
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SMT_OPTIONS.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-body-sm text-muted-foreground mb-1">Model #1</label>
-                  <Select value={formData.model1} onValueChange={(value: Model1Type) => setFormData({ ...formData, model1: value })}>
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MODEL1_OPTIONS.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-body-sm text-muted-foreground mb-1">SSMT Type</label>
-                  <Select value={formData.ssmtType} onValueChange={(value: SSMTType) => setFormData({ ...formData, ssmtType: value })}>
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SSMT_OPTIONS.map(o => <SelectItem key={o} value={o}>{o === 'NO' ? 'No' : o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <label className="block text-body-sm text-muted-foreground mb-1">Trade Status</label>
                   <Select value={formData.status} onValueChange={(value: 'OPEN' | 'CLOSED') => setFormData({ ...formData, status: value })}>
                     <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0]">
@@ -1153,7 +1093,7 @@ export default function GeneralMissedTradeJournal() {
               </div>
 
               {/* Section 4: Trade Analysis */}
-              {(viewingTrade.session || viewingTrade.strategy || viewingTrade.keyLevel || viewingTrade.smt || viewingTrade.model1 || viewingTrade.ssmtType) && (
+              {(viewingTrade.session || viewingTrade.strategy || viewingTrade.keyLevel) && (
                 <div className="bg-[#F8FAFC] rounded-xl p-4">
                   <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
                     <span className="w-1 h-4 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></span>
@@ -1176,30 +1116,6 @@ export default function GeneralMissedTradeJournal() {
                       <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
                         <p className="text-caption text-muted-foreground">Key Level</p>
                         <p className="text-body-sm text-foreground mt-0.5">{viewingTrade.keyLevel}</p>
-                      </div>
-                    )}
-                    {viewingTrade.highLowTime && (
-                      <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
-                        <p className="text-caption text-muted-foreground">High/Low Time</p>
-                        <div className="mt-1"><EntryTimeBadge time={viewingTrade.highLowTime} /></div>
-                      </div>
-                    )}
-                    {viewingTrade.smt && (
-                      <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
-                        <p className="text-caption text-muted-foreground">SMT</p>
-                        <p className="text-body-sm text-foreground mt-0.5">{viewingTrade.smt}</p>
-                      </div>
-                    )}
-                    {viewingTrade.model1 && (
-                      <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
-                        <p className="text-caption text-muted-foreground">Model #1</p>
-                        <p className="text-body-sm text-foreground mt-0.5">{viewingTrade.model1}</p>
-                      </div>
-                    )}
-                    {viewingTrade.ssmtType && (
-                      <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
-                        <p className="text-caption text-muted-foreground">SSMT Type</p>
-                        <p className="text-body-sm text-foreground mt-0.5">{viewingTrade.ssmtType === 'NO' ? 'No' : viewingTrade.ssmtType}</p>
                       </div>
                     )}
                   </div>
