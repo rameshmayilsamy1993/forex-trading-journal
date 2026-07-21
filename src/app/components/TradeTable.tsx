@@ -86,7 +86,7 @@ export default function TradeTable({
 
   return (
     <>
-      <div className="flex items-center gap-4 p-5 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] border-l-4 border-l-[#7C3AED]">
+      <div className="flex items-center gap-4 p-5 glass-panel rounded-[20px] border-l-4 border-l-[#7C3AED]">
         <span className="text-body-sm font-semibold text-[#7C3AED]">Filters</span>
         <div className="flex gap-4 items-center">
           <Select
@@ -184,7 +184,7 @@ export default function TradeTable({
         ))}
       </div>
 
-      <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] transition-all duration-300 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
+      <div className="glass-panel rounded-[20px] hover:glass-panel-hover">
         <div className="p-6">
           {trades.length === 0 ? (
             <div className="text-center py-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -263,7 +263,7 @@ export default function TradeTable({
                   </TableHeader>
                   <TableBody>
                     {trades.map((trade, i) => (
-                      <TableRow key={trade.id} className={`group animate-in fade-in slide-in-from-bottom-1 duration-300 ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50' : ''}`} style={{ animationDelay: `${i * 30}ms`, animationFillMode: 'both' }}>
+                      <TableRow key={trade.id} className={`group animate-in fade-in slide-in-from-bottom-1 duration-300 border-l-[3px] transition-all ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50 border-l-violet-500' : getTradeRealPL(trade) > 0 ? 'border-l-emerald-500/30 hover:border-l-emerald-500' : getTradeRealPL(trade) < 0 ? 'border-l-rose-500/30 hover:border-l-rose-500' : 'border-l-transparent hover:border-l-slate-300'}`} style={{ animationDelay: `${i * 30}ms`, animationFillMode: 'both' }}>
                         <TableCell>
                           <input
                             type="checkbox"
@@ -308,10 +308,19 @@ export default function TradeTable({
                         <TableCell className="text-right tabular-nums">
                           {(() => {
                             const realPL = getTradeRealPL(trade);
+                            const absPL = Math.abs(realPL);
                             return (
-                              <span className={`inline-flex items-center gap-1 font-bold tabular-nums ${realPL > 0 ? 'text-emerald-700' : realPL < 0 ? 'text-rose-700' : 'text-slate-400'}`}>
-                                {formatMoney(realPL, true)}
-                              </span>
+                              <div className="relative flex items-center justify-end">
+                                {realPL !== 0 && (
+                                  <div
+                                    className={`absolute right-0 h-5 rounded-sm transition-all duration-300 ${realPL > 0 ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}
+                                    style={{ width: `${Math.min(absPL / 10, 100)}%`, maxWidth: '100%' }}
+                                  />
+                                )}
+                                <span className={`relative z-10 inline-flex items-center gap-1 font-bold tabular-nums ${realPL > 0 ? 'text-emerald-700' : realPL < 0 ? 'text-rose-700' : 'text-slate-400'}`}>
+                                  {formatMoney(realPL, true)}
+                                </span>
+                              </div>
                             );
                           })()}
                         </TableCell>
@@ -331,7 +340,7 @@ export default function TradeTable({
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => onChecklistDetails(trade)}
-                              className={`p-1.5 rounded-lg transition-all duration-150 ${(trade as any).checklistId ? 'text-violet-500 hover:text-violet-700 hover:bg-violet-50' : 'text-slate-400 hover:text-violet-700 hover:bg-violet-50'}`}
+                              className={`p-1.5 rounded-lg transition-all duration-150 glass-panel ${(trade as any).checklistId ? 'text-violet-500 hover:shadow-sm' : 'text-slate-400 hover:text-violet-600 hover:shadow-sm'}`}
                               title="Checklist"
                             >
                               <ClipboardCheck className="w-4 h-4" />
@@ -339,7 +348,7 @@ export default function TradeTable({
                             {getTradeRealPL(trade) < 0 && (
                               <button
                                 onClick={() => onLossAnalysis(trade)}
-                                className={`p-1.5 rounded-lg transition-all duration-150 ${analysesMap[trade.id] ? 'text-orange-500 hover:text-orange-700 hover:bg-orange-50' : 'text-rose-400 hover:text-rose-700 hover:bg-rose-50'}`}
+                                className={`p-1.5 rounded-lg transition-all duration-150 glass-panel ${analysesMap[trade.id] ? 'text-orange-500 hover:shadow-sm' : 'text-rose-400 hover:text-rose-600 hover:shadow-sm'}`}
                                 title={analysesMap[trade.id] ? 'View Loss Analysis' : 'Create Loss Analysis'}
                               >
                                 <FileText className="w-4 h-4" />
@@ -347,21 +356,21 @@ export default function TradeTable({
                             )}
                             <button
                               onClick={() => onView(trade)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-150"
+                              className="p-1.5 rounded-lg transition-all duration-150 glass-panel text-slate-400 hover:text-slate-700 hover:shadow-sm"
                               title="View trade"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => onEdit(trade)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-150"
+                              className="p-1.5 rounded-lg transition-all duration-150 glass-panel text-slate-400 hover:text-slate-700 hover:shadow-sm"
                               title="Edit"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => onDelete(trade.id)}
-                              className="p-1.5 rounded-lg text-rose-400 hover:text-rose-700 hover:bg-rose-50 transition-all duration-150"
+                              className="p-1.5 rounded-lg transition-all duration-150 glass-panel text-rose-400 hover:text-rose-600 hover:shadow-sm"
                               title="Delete"
                             >
                               <Trash2 className="w-4 h-4" />
