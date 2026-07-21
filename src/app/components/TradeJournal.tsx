@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Plus, X, TrendingUp, TrendingDown, Clock, CalendarDays, Target, BarChart3, FileText, ClipboardCheck, Image as ImageIcon } from 'lucide-react';
 import { useTradeState } from '../hooks/useTradeState';
 import { PageLayout } from './ui/PageLayout';
@@ -12,7 +13,7 @@ import StrategyChecklist from './StrategyChecklist';
 import ImageViewer from './ImageViewer';
 import Modal from './ui/Modal';
 import { useAuthContext } from '../context/AuthContext';
-import { formatPrice, formatMoney } from '../utils/calculations';
+import { formatPrice, formatMoney, calculateTradeStats } from '../utils/calculations';
 import { getLocalDateString } from '../utils/dateUtils';
 
 export default function TradeJournal() {
@@ -22,6 +23,8 @@ export default function TradeJournal() {
   const editingTrade = state.editingId
     ? state.trades.find(t => t.id === state.editingId)
     : null;
+
+  const tradeStats = useMemo(() => calculateTradeStats(state.filteredTrades), [state.filteredTrades]);
 
   return (
     <PageLayout
@@ -52,6 +55,79 @@ export default function TradeJournal() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Stats Summary */}
+      {tradeStats && state.filteredTrades.filter(t => t.status === 'CLOSED').length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Win Rate */}
+          <div className="glass-panel rounded-[20px] p-4 flex flex-col items-center">
+            <div className="relative w-14 h-14 mb-2">
+              <svg className="w-14 h-14 -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#E2E8F0" strokeWidth="3" />
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#winRateGrad)" strokeWidth="3"
+                  strokeDasharray={`${tradeStats.winRate} ${100 - tradeStats.winRate}`}
+                  strokeLinecap="round" />
+                <defs>
+                  <linearGradient id="winRateGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#7C3AED" />
+                    <stop offset="100%" stopColor="#4F46E5" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-body-sm font-bold text-[#0F172A]">
+                {tradeStats.winRate.toFixed(0)}%
+              </span>
+            </div>
+            <p className="text-micro text-[#64748B] uppercase tracking-wider">Win Rate</p>
+            <p className="text-caption text-[#94A3B8] mt-0.5">
+              {tradeStats.winningTrades}W / {tradeStats.losingTrades}L
+            </p>
+          </div>
+
+          {/* Net P/L */}
+          <div className="glass-panel rounded-[20px] p-4 flex flex-col items-center justify-center">
+            <p className={`text-card-title font-bold tabular-nums ${tradeStats.netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {formatMoney(tradeStats.netProfit, true)}
+            </p>
+            <p className="text-micro text-[#64748B] uppercase tracking-wider mt-1">Net P/L</p>
+            <p className="text-caption text-[#94A3B8] mt-0.5">
+              Avg W <span className="text-emerald-600 font-medium">{formatMoney(tradeStats.averageWin)}</span>
+              {' / '}
+              Avg L <span className="text-rose-600 font-medium">{formatMoney(tradeStats.averageLoss)}</span>
+            </p>
+          </div>
+
+          {/* Profit Factor */}
+          <div className="glass-panel rounded-[20px] p-4 flex flex-col items-center justify-center">
+            <p className="text-card-title font-bold text-[#0F172A] tabular-nums">
+              {tradeStats.profitFactor === Infinity ? '∞' : tradeStats.profitFactor.toFixed(2)}
+            </p>
+            <p className="text-micro text-[#64748B] uppercase tracking-wider mt-1">Profit Factor</p>
+            <div className="flex items-center gap-2 mt-1.5 w-full max-w-[100px]">
+              <div className="flex-1 h-1.5 rounded-full bg-[#F1F5F9] overflow-hidden flex">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(tradeStats.totalProfit / (tradeStats.totalProfit + tradeStats.totalLoss) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Total Trades */}
+          <div className="glass-panel rounded-[20px] p-4 flex flex-col items-center justify-center">
+            <p className="text-card-title font-bold text-[#0F172A] tabular-nums">
+              {tradeStats.totalTrades}
+            </p>
+            <p className="text-micro text-[#64748B] uppercase tracking-wider mt-1">Total Trades</p>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="glass-chip text-micro px-2 py-0.5">{tradeStats.totalTrades} Closed</span>
+              <span className="text-caption text-[#94A3B8]">
+                {state.filteredTrades.filter(t => t.status === 'OPEN').length} Open
+              </span>
+            </div>
           </div>
         </div>
       )}
