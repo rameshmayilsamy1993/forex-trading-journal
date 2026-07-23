@@ -30,9 +30,7 @@ const create = async (req, res, next) => {
       return res.status(404).json({ message: 'Review not found' });
     }
 
-    const { entryTitle, comment, images, entryTime, bias, tags, mood, importance, session } = req.body;
-    const maxOrder = await DailyReviewEntry.findOne({ dailyReviewId: reviewId })
-      .sort({ displayOrder: -1 }).select('displayOrder');
+    const { entryTitle, comment, images, bias } = req.body;
 
     const entry = new DailyReviewEntry({
       dailyReviewId: reviewId,
@@ -40,13 +38,7 @@ const create = async (req, res, next) => {
       entryTitle: entryTitle || '',
       comment: comment || '',
       images: images || [],
-      entryTime: entryTime || '',
       bias: bias || '',
-      tags: tags || [],
-      mood: mood || '',
-      importance: importance || '',
-      session: session || '',
-      displayOrder: (maxOrder?.displayOrder || 0) + 1,
     });
     const saved = await entry.save();
     res.status(201).json(saved);
