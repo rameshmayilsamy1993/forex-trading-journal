@@ -290,6 +290,17 @@ export default function MissedTradeJournal() {
     return { total, q1, q2, q3, q4, mostMissedPair };
   }, [filteredMissedTrades]);
 
+  const keyLevelStats = useMemo(() => {
+    const grouped = new Map<string, number>();
+    for (const trade of filteredMissedTrades) {
+      const kl = trade.keyLevel || 'No Key Level';
+      grouped.set(kl, (grouped.get(kl) || 0) + 1);
+    }
+    return Array.from(grouped.entries())
+      .map(([keyLevel, count]) => ({ keyLevel, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [filteredMissedTrades]);
+
   const resetForm = () => {
     setFormData({
       pair: '',
@@ -576,6 +587,38 @@ export default function MissedTradeJournal() {
             <p className="text-page-title font-bold text-foreground mt-1">{stats.mostMissedPair || '-'}</p>
           </div>
         </div>
+
+        {/* Key Level Breakdown */}
+        {keyLevelStats.length > 0 && (
+          <div className="bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] p-4 mt-4">
+            <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+              Key Level Breakdown
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
+                    <th className="pb-2 pr-4 font-medium">Key Level</th>
+                    <th className="pb-2 font-medium text-right">Trades</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {keyLevelStats.map(stat => (
+                    <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
+                      <td className="py-2.5 pr-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
+                          {stat.keyLevel}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-right font-medium">{stat.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Filters Card */}
@@ -1022,6 +1065,7 @@ export default function MissedTradeJournal() {
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">T.S.Time</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Pair</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Type</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Key Level</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Entry</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">SL</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">TP</th>
@@ -1037,7 +1081,7 @@ export default function MissedTradeJournal() {
                   const realPL = trade.realPL ?? ((trade.profitLoss || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
                   const statusStyle = STATUS_STYLES[trade.status] || STATUS_STYLES.MISSED;
                   return (
-                    <tr key={trade.id} className="border-b border-[#E2E8F0]/60 hover:bg-[#F1F5F9]/60 transition-colors duration-150">
+                    <tr key={trade.id} className={`border-b border-[#E2E8F0]/60 hover:bg-[#F1F5F9]/60 transition-colors duration-150${!trade.keyLevel ? ' border-l-[3px] border-l-orange-400 bg-orange-50' : ''}`}>
                       <td className="py-3.5 px-4 text-table-cell text-foreground whitespace-nowrap">
                         {new Date(trade.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                       </td>
@@ -1057,6 +1101,15 @@ export default function MissedTradeJournal() {
                           }`}>
                           {trade.type}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {trade.keyLevel ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                            {trade.keyLevel}
+                          </span>
+                        ) : (
+                          <span className="text-caption text-slate-400">&mdash;</span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 text-table-cell text-right font-mono text-foreground whitespace-nowrap">{formatPrice(trade.entryPrice, trade.pair)}</td>
                       <td className="py-3.5 px-4 text-table-cell text-right font-mono text-[#EF4444] whitespace-nowrap">{formatPrice(trade.stopLoss, trade.pair)}</td>
@@ -1233,6 +1286,21 @@ export default function MissedTradeJournal() {
                   </div>
                 </div>
               </div>
+
+              {/* Section 3.5: Key Level */}
+              {viewingTrade.keyLevel && (
+                <div className="bg-[#F8FAFC] rounded-xl p-4">
+                  <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+                    Key Level
+                  </h4>
+                  <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                      {viewingTrade.keyLevel}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Section 4: Analysis Notes */}
               <div className="bg-[#F8FAFC] rounded-xl p-4">

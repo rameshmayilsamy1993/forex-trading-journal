@@ -525,6 +525,13 @@ export default function MissedTradesCalendar() {
                           {trade.rr?.toFixed(2) || '-'}
                         </div>
                       </div>
+                      {trade.keyLevel && (
+                        <div className="mb-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                            {trade.keyLevel}
+                          </span>
+                        </div>
+                      )}
                       <div className="text-body text-slate-500">
                         <span className="text-orange-500">Reason:</span> {' '}
                         {trade.reason || trade.missedReason ? (

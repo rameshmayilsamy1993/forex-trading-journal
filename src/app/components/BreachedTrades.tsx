@@ -151,6 +151,15 @@ export default function BreachedTrades() {
                         {trade.type}
                       </span>
                     </td>
+                    <td className="p-4 whitespace-nowrap">
+                      {(trade as any).keyLevel ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                          {(trade as any).keyLevel}
+                        </span>
+                      ) : (
+                        <span className="text-caption text-slate-400">&mdash;</span>
+                      )}
+                    </td>
                     <td className="p-4 text-table-cell text-foreground">{trade.entryPrice}</td>
                     <td className="p-4 text-table-cell text-foreground">{trade.exitPrice || '-'}</td>
                     <td className={`p-4 text-right text-table-cell font-bold ${

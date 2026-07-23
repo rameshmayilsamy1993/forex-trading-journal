@@ -534,6 +534,13 @@ export default function TradingCalendar() {
                           {trade.lotSize || 0}
                         </div>
                       </div>
+                      {trade.keyLevel && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                            {trade.keyLevel}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -1,7 +1,7 @@
 import { Edit2, Trash2, Eye, TrendingUp, TrendingDown, Check } from 'lucide-react';
 import { Trade, TradingAccount } from '../types/trading';
 import { getLocalDateString } from '../utils/dateUtils';
-import { formatPrice, formatMoney } from '../utils/calculations';
+import { formatPrice, formatMoney, getTradeCategory } from '../utils/calculations';
 
 interface TradeCardProps {
   trade: Trade;
@@ -20,7 +20,7 @@ function getAccountName(trade: Trade, accounts: TradingAccount[]): string {
 export default function TradeCard({ trade, accounts, onEdit, onDelete, onView, isSelected, onSelect }: TradeCardProps) {
   const realPL = (trade as any).realPL ?? trade.profit ?? 0;
   return (
-    <div className={`glass-panel rounded-[20px] p-4 space-y-3 transition-all duration-300 hover:glass-panel-hover animate-in fade-in slide-in-from-bottom-2 duration-400 border-l-[3px] ${isSelected ? 'border-[#7C3AED] ring-2 ring-[#7C3AED]/20' : realPL > 0 ? 'border-l-emerald-500/50' : realPL < 0 ? 'border-l-rose-500/50' : 'border-l-transparent'}`}>
+    <div className={`glass-panel rounded-[20px] p-4 space-y-3 transition-all duration-300 hover:glass-panel-hover animate-in fade-in slide-in-from-bottom-2 duration-400 border-l-[3px] ${isSelected ? 'border-[#7C3AED] ring-2 ring-[#7C3AED]/20' : (() => { const c = getTradeCategory(trade); return c === 'win' ? 'border-l-emerald-500/50' : c === 'loss' ? 'border-l-rose-500/50' : 'border-l-amber-400/50'; })()}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <input type="checkbox" checked={isSelected} onChange={() => onSelect(trade.id)}
@@ -36,10 +36,10 @@ export default function TradeCard({ trade, accounts, onEdit, onDelete, onView, i
         <div className="relative">
           {realPL !== 0 && (
             <div
-              className={`absolute -inset-x-2 -inset-y-1 rounded-lg transition-all duration-300 ${realPL > 0 ? 'bg-emerald-500/8' : 'bg-rose-500/8'}`}
+              className={`absolute -inset-x-2 -inset-y-1 rounded-lg transition-all duration-300 ${(() => { const c = getTradeCategory(trade); return c === 'win' ? 'bg-emerald-500/8' : c === 'loss' ? 'bg-rose-500/8' : 'bg-amber-400/8'; })()}`}
             />
           )}
-          <span className={`relative text-body font-bold ${realPL > 0 ? 'text-emerald-600' : realPL < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+          <span className={`relative text-body font-bold ${(() => { const c = getTradeCategory(trade); return c === 'win' ? 'text-emerald-600' : c === 'loss' ? 'text-rose-600' : 'text-amber-600'; })()}`}>
             {formatMoney(realPL, true)}
           </span>
         </div>
@@ -64,6 +64,16 @@ export default function TradeCard({ trade, accounts, onEdit, onDelete, onView, i
             <span className="font-medium text-violet-600 text-body-sm">1:{trade.riskRewardRatio.toFixed(1)}</span>
           </div>
         )}
+        <div>
+          <span className="block text-[#94A3B8] text-micro">Key Level</span>
+          {trade.keyLevel ? (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+              {trade.keyLevel}
+            </span>
+          ) : (
+            <span className="text-micro text-slate-400">&mdash;</span>
+          )}
+        </div>
         <div>
           <span className="block text-[#94A3B8] text-micro">Status</span>
           <span className={`inline-flex items-center gap-1 text-micro font-semibold ${trade.status === 'OPEN' ? 'text-amber-600' : 'text-emerald-600'}`}>

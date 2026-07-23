@@ -64,6 +64,11 @@ export default function RecentActivity({ trades, accounts }: RecentActivityProps
                   <div className="flex items-center gap-1.5">
                     <p className="text-body-sm font-semibold text-[#0F172A]">{trade.pair}</p>
                     <span className={`rounded-full px-1.5 py-0.5 text-micro ${trade.type === 'BUY' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>{trade.type}</span>
+                    {trade.keyLevel && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-micro font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                        {trade.keyLevel}
+                      </span>
+                    )}
                   </div>
                   <p className="text-micro text-[#94A3B8]">{entryDate} · {entryTime} · {tradeAccount?.name || 'Unknown'}</p>
                 </div>

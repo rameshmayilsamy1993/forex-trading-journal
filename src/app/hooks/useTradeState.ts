@@ -205,7 +205,7 @@ export function useTradeState() {
 
   const getAnalysisStatus = (trade: Trade): 'Not Required' | 'Pending' | 'Completed' => {
     const realPL = getTradeRealPL(trade);
-    if (realPL >= 0) return 'Not Required';
+    if (realPL >= -50) return 'Not Required';
     if (analysesMap[trade.id]) return 'Completed';
     return 'Pending';
   };
@@ -814,11 +814,18 @@ export function useTradeState() {
       if (filterAccount !== 'all' && getTradeAccountId(trade) !== filterAccount) return false;
       if (filterStatus !== 'all' && trade.status !== filterStatus) return false;
       if (filterAnalysis !== 'all') {
-        const status = getAnalysisStatus(trade);
-        if (filterAnalysis === 'pending' && status !== 'Pending') return false;
-        if (filterAnalysis === 'completed' && status !== 'Completed') return false;
-        if (filterAnalysis === 'profit' && status !== 'Not Required') return false;
-        if (filterAnalysis === 'loss' && status === 'Not Required') return false;
+        if (filterAnalysis === 'profit') {
+          if (getTradeRealPL(trade) <= 50) return false;
+        } else if (filterAnalysis === 'loss') {
+          if (getTradeRealPL(trade) >= -50) return false;
+        } else if (filterAnalysis === 'be') {
+          const pl = getTradeRealPL(trade);
+          if (pl < -50 || pl > 50) return false;
+        } else {
+          const status = getAnalysisStatus(trade);
+          if (filterAnalysis === 'pending' && status !== 'Pending') return false;
+          if (filterAnalysis === 'completed' && status !== 'Completed') return false;
+        }
       }
       return true;
     });

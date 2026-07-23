@@ -10,7 +10,7 @@ import { Button } from './ui/button';
 import ImageViewer from './ImageViewer';
 import AccountSelect from './ui/AccountSelect';
 import { cn } from './ui/utils';
-import { formatPrice } from '../utils/calculations';
+import { formatPrice, formatMoney } from '../utils/calculations';
 
 const REASON_OPTIONS = [
   'Late Entry',
@@ -218,6 +218,27 @@ export default function GeneralMissedTradeJournal() {
     return { total, planned, missed, executedLater, totalPL, mostMissedPair };
   }, [filteredMissedTrades]);
 
+  const keyLevelStats = useMemo(() => {
+    const grouped = new Map<string, { trades: number; wins: number; losses: number; netPL: number }>();
+    for (const trade of filteredMissedTrades) {
+      const kl = trade.keyLevel || 'No Key Level';
+      const existing = grouped.get(kl) || { trades: 0, wins: 0, losses: 0, netPL: 0 };
+      existing.trades += 1;
+      const pl = trade.realPL ?? 0;
+      existing.netPL += pl;
+      if (pl > 0) existing.wins += 1;
+      else if (pl < 0) existing.losses += 1;
+      grouped.set(kl, existing);
+    }
+    return Array.from(grouped.entries())
+      .map(([keyLevel, data]) => ({
+        keyLevel,
+        ...data,
+        winRate: data.trades > 0 ? (data.wins / data.trades) * 100 : 0,
+      }))
+      .sort((a, b) => b.trades - a.trades);
+  }, [filteredMissedTrades]);
+
   const resetForm = () => {
     setFormData({
       accountId: '',
@@ -420,6 +441,48 @@ export default function GeneralMissedTradeJournal() {
             <p className="text-page-title font-bold text-foreground mt-1">{stats.mostMissedPair || '-'}</p>
           </div>
         </div>
+
+        {/* Key Level Performance */}
+        {keyLevelStats.length > 0 && (
+          <div className="bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] p-4 mt-4">
+            <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+              Key Level Performance
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
+                    <th className="pb-2 pr-4 font-medium">Key Level</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Trades</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Wins</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Losses</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Win Rate</th>
+                    <th className="pb-2 font-medium text-right">Net P/L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {keyLevelStats.map(stat => (
+                    <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
+                      <td className="py-2.5 pr-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
+                          {stat.keyLevel}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-right font-medium">{stat.trades}</td>
+                      <td className="py-2.5 pr-4 text-right text-emerald-600 font-medium">{stat.wins}</td>
+                      <td className="py-2.5 pr-4 text-right text-rose-600 font-medium">{stat.losses}</td>
+                      <td className="py-2.5 pr-4 text-right font-medium">{stat.winRate.toFixed(1)}%</td>
+                      <td className={`py-2.5 text-right font-bold tabular-nums ${stat.netPL >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {formatMoney(stat.netPL, true)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Filters Card */}
@@ -870,6 +933,7 @@ export default function GeneralMissedTradeJournal() {
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Date</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Pair</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Type</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Key Level</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Entry</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Exit</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">P/L</th>
@@ -883,7 +947,7 @@ export default function GeneralMissedTradeJournal() {
                   const realPL = trade.realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs(trade.swap || 0));
                   const statusStyle = MISSED_STATUS_STYLES[trade.missedStatus] || MISSED_STATUS_STYLES.MISSED;
                   return (
-                    <tr key={trade.id} className="border-b border-[#E2E8F0]/60 hover:bg-[#F1F5F9]/60 transition-colors duration-150">
+                    <tr key={trade.id} className={`border-b border-[#E2E8F0]/60 hover:bg-[#F1F5F9]/60 transition-colors duration-150${!trade.keyLevel ? ' border-l-[3px] border-l-orange-400 bg-orange-50' : ''}`}>
                       <td className="py-3.5 px-4 text-table-cell text-foreground whitespace-nowrap">
                         {new Date(trade.entryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                       </td>
@@ -897,6 +961,15 @@ export default function GeneralMissedTradeJournal() {
                           }`}>
                           {trade.type}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {trade.keyLevel ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                            {trade.keyLevel}
+                          </span>
+                        ) : (
+                          <span className="text-caption text-slate-400">&mdash;</span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 text-table-cell text-right font-mono text-foreground whitespace-nowrap">{formatPrice(trade.entryPrice, trade.pair)}</td>
                       <td className="py-3.5 px-4 text-table-cell text-right font-mono whitespace-nowrap">
@@ -1115,7 +1188,11 @@ export default function GeneralMissedTradeJournal() {
                     {viewingTrade.keyLevel && (
                       <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
                         <p className="text-caption text-muted-foreground">Key Level</p>
-                        <p className="text-body-sm text-foreground mt-0.5">{viewingTrade.keyLevel}</p>
+                        <p className="text-body-sm text-foreground mt-0.5">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                            {viewingTrade.keyLevel}
+                          </span>
+                        </p>
                       </div>
                     )}
                   </div>

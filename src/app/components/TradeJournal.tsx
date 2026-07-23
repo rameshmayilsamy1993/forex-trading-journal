@@ -13,7 +13,7 @@ import StrategyChecklist from './StrategyChecklist';
 import ImageViewer from './ImageViewer';
 import Modal from './ui/Modal';
 import { useAuthContext } from '../context/AuthContext';
-import { formatPrice, formatMoney, calculateTradeStats } from '../utils/calculations';
+import { formatPrice, formatMoney, calculateTradeStats, calculateKeyLevelStats, getRealPL, getTradeCategory } from '../utils/calculations';
 import { getLocalDateString } from '../utils/dateUtils';
 
 export default function TradeJournal() {
@@ -25,6 +25,20 @@ export default function TradeJournal() {
     : null;
 
   const tradeStats = useMemo(() => calculateTradeStats(state.filteredTrades), [state.filteredTrades]);
+
+  const closedTrades = useMemo(() =>
+    state.filteredTrades.filter(t => t.status === 'CLOSED' && t.profit !== undefined),
+    [state.filteredTrades]
+  );
+  const beStats = useMemo(() => {
+    const wins = closedTrades.filter(t => getTradeCategory(t) === 'win').length;
+    const be = closedTrades.filter(t => getTradeCategory(t) === 'be').length;
+    const losses = closedTrades.filter(t => getTradeCategory(t) === 'loss').length;
+    const total = wins + be + losses;
+    return { wins, be, losses, total, beAdjustedWinRate: total > 0 ? (wins / total) * 100 : 0 };
+  }, [closedTrades]);
+
+  const keyLevelStats = useMemo(() => calculateKeyLevelStats(state.filteredTrades), [state.filteredTrades]);
 
   return (
     <PageLayout
@@ -60,7 +74,7 @@ export default function TradeJournal() {
       )}
 
       {/* Stats Summary */}
-      {tradeStats && state.filteredTrades.filter(t => t.status === 'CLOSED').length > 0 && (
+      {tradeStats && beStats.total > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Win Rate */}
           <div className="glass-panel rounded-[20px] p-4 flex flex-col items-center">
@@ -68,7 +82,7 @@ export default function TradeJournal() {
               <svg className="w-14 h-14 -rotate-90" viewBox="0 0 36 36">
                 <circle cx="18" cy="18" r="15.5" fill="none" stroke="#E2E8F0" strokeWidth="3" />
                 <circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#winRateGrad)" strokeWidth="3"
-                  strokeDasharray={`${tradeStats.winRate} ${100 - tradeStats.winRate}`}
+                  strokeDasharray={`${beStats.beAdjustedWinRate} ${100 - beStats.beAdjustedWinRate}`}
                   strokeLinecap="round" />
                 <defs>
                   <linearGradient id="winRateGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -78,12 +92,16 @@ export default function TradeJournal() {
                 </defs>
               </svg>
               <span className="absolute inset-0 flex items-center justify-center text-body-sm font-bold text-[#0F172A]">
-                {tradeStats.winRate.toFixed(0)}%
+                {beStats.beAdjustedWinRate.toFixed(0)}%
               </span>
             </div>
             <p className="text-micro text-[#64748B] uppercase tracking-wider">Win Rate</p>
             <p className="text-caption text-[#94A3B8] mt-0.5">
-              {tradeStats.winningTrades}W / {tradeStats.losingTrades}L
+              <span className="text-emerald-600 font-medium">{beStats.wins}W</span>
+              {' / '}
+              <span className="text-amber-500 font-medium">{beStats.be}BE</span>
+              {' / '}
+              <span className="text-rose-600 font-medium">{beStats.losses}L</span>
             </p>
           </div>
 
@@ -128,6 +146,48 @@ export default function TradeJournal() {
                 {state.filteredTrades.filter(t => t.status === 'OPEN').length} Open
               </span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Key Level Performance */}
+      {keyLevelStats.length > 0 && (
+        <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] p-4 transition-all duration-200">
+          <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+            Key Level Performance
+          </h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <th className="pb-2 pr-4 font-medium">Key Level</th>
+                  <th className="pb-2 pr-4 font-medium text-right">Trades</th>
+                  <th className="pb-2 pr-4 font-medium text-right">Wins</th>
+                  <th className="pb-2 pr-4 font-medium text-right">Losses</th>
+                  <th className="pb-2 pr-4 font-medium text-right">Win Rate</th>
+                  <th className="pb-2 font-medium text-right">Net P/L</th>
+                </tr>
+              </thead>
+              <tbody>
+                {keyLevelStats.map(stat => (
+                  <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
+                    <td className="py-2.5 pr-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
+                        {stat.keyLevel}
+                      </span>
+                    </td>
+                    <td className="py-2.5 pr-4 text-right font-medium">{stat.trades}</td>
+                    <td className="py-2.5 pr-4 text-right text-emerald-600 font-medium">{stat.wins}</td>
+                    <td className="py-2.5 pr-4 text-right text-rose-600 font-medium">{stat.losses}</td>
+                    <td className="py-2.5 pr-4 text-right font-medium">{stat.winRate.toFixed(1)}%</td>
+                    <td className={`py-2.5 text-right font-bold tabular-nums ${stat.netPL >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {formatMoney(stat.netPL, true)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -392,7 +452,11 @@ export default function TradeJournal() {
                   {state.viewingTrade.keyLevel && (
                     <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
                       <p className="text-caption text-muted-foreground">Key Level</p>
-                      <p className="text-body-sm text-foreground mt-0.5 font-medium">{state.viewingTrade.keyLevel}</p>
+                      <p className="text-body-sm text-foreground mt-0.5 font-medium">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                          {state.viewingTrade.keyLevel}
+                        </span>
+                      </p>
                     </div>
                   )}
                   {(state.viewingTrade as any).highLowTime && (

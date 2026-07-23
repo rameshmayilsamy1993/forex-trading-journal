@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown, Edit2, Trash2, Eye, FileText, ClipboardCheck, Link2, Unlink, Trash, AlertTriangle, Check } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm } from '../types/trading';
-import { formatPrice, formatMoney } from '../utils/calculations';
+import { formatPrice, formatMoney, getTradeCategory } from '../utils/calculations';
 import { getLocalDateString } from '../utils/dateUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './ui/table';
@@ -151,10 +151,11 @@ export default function TradeTable({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Trades</SelectItem>
+              <SelectItem value="profit">Profit Trades</SelectItem>
+              <SelectItem value="be">Break Even</SelectItem>
+              <SelectItem value="loss">Loss Trades</SelectItem>
               <SelectItem value="pending">Pending Analysis</SelectItem>
               <SelectItem value="completed">Completed Analysis</SelectItem>
-              <SelectItem value="profit">Profit Trades</SelectItem>
-              <SelectItem value="loss">Loss Trades</SelectItem>
             </SelectContent>
           </Select>
 
@@ -254,6 +255,7 @@ export default function TradeTable({
                       <TableHead className="w-[300px]">Account</TableHead>
                       <TableHead className="w-[120px]">Pair</TableHead>
                       <TableHead className="w-[120px]">Type</TableHead>
+                      <TableHead className="w-[130px]">Key Level</TableHead>
                       <TableHead className="text-right hidden sm:table-cell w-[120px]">Entry</TableHead>
                       <TableHead className="text-right hidden sm:table-cell w-[120px]">Exit</TableHead>
                       <TableHead className="text-right w-[120px]">Real P/L</TableHead>
@@ -263,7 +265,7 @@ export default function TradeTable({
                   </TableHeader>
                   <TableBody>
                     {trades.map((trade, i) => (
-                      <TableRow key={trade.id} className={`group animate-in fade-in slide-in-from-bottom-1 duration-300 border-l-[3px] transition-all ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50 border-l-violet-500' : getTradeRealPL(trade) > 0 ? 'border-l-emerald-500/30 hover:border-l-emerald-500' : getTradeRealPL(trade) < 0 ? 'border-l-rose-500/30 hover:border-l-rose-500' : 'border-l-transparent hover:border-l-slate-300'}`} style={{ animationDelay: `${i * 30}ms`, animationFillMode: 'both' }}>
+                      <TableRow key={trade.id} className={`group animate-in fade-in slide-in-from-bottom-1 duration-300 border-l-[3px] transition-all ${selectedTrades.includes(trade.id) ? 'bg-violet-50/50 border-l-violet-500' : !trade.keyLevel ? 'border-l-orange-400 hover:border-l-orange-500 bg-orange-50' : (() => { const c = getTradeCategory(trade); return c === 'win' ? 'border-l-emerald-500/30 hover:border-l-emerald-500' : c === 'loss' ? 'border-l-rose-500/30 hover:border-l-rose-500' : 'border-l-amber-400/30 hover:border-l-amber-500'; })()}`} style={{ animationDelay: `${i * 30}ms`, animationFillMode: 'both' }}>
                         <TableCell>
                           <input
                             type="checkbox"
@@ -301,6 +303,15 @@ export default function TradeTable({
                             {trade.type}
                           </span>
                         </TableCell>
+                        <TableCell>
+                          {trade.keyLevel ? (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-caption font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                              {trade.keyLevel}
+                            </span>
+                          ) : (
+                            <span className="text-caption text-slate-400">&mdash;</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right font-mono hidden sm:table-cell">{formatPrice(trade.entryPrice, trade.pair)}</TableCell>
                         <TableCell className="text-right font-mono hidden sm:table-cell">
                           {trade.exitPrice ? formatPrice(trade.exitPrice, trade.pair) : '-'}
@@ -309,15 +320,18 @@ export default function TradeTable({
                           {(() => {
                             const realPL = getTradeRealPL(trade);
                             const absPL = Math.abs(realPL);
+                            const category = getTradeCategory(trade);
+                            const barColor = category === 'win' ? 'bg-emerald-500/10' : category === 'loss' ? 'bg-rose-500/10' : 'bg-amber-400/10';
+                            const textColor = category === 'win' ? 'text-emerald-700' : category === 'loss' ? 'text-rose-700' : 'text-amber-600';
                             return (
                               <div className="relative flex items-center justify-end">
                                 {realPL !== 0 && (
                                   <div
-                                    className={`absolute right-0 h-5 rounded-sm transition-all duration-300 ${realPL > 0 ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}
+                                    className={`absolute right-0 h-5 rounded-sm transition-all duration-300 ${barColor}`}
                                     style={{ width: `${Math.min(absPL / 10, 100)}%`, maxWidth: '100%' }}
                                   />
                                 )}
-                                <span className={`relative z-10 inline-flex items-center gap-1 font-bold tabular-nums ${realPL > 0 ? 'text-emerald-700' : realPL < 0 ? 'text-rose-700' : 'text-slate-400'}`}>
+                                <span className={`relative z-10 inline-flex items-center gap-1 font-bold tabular-nums ${textColor}`}>
                                   {formatMoney(realPL, true)}
                                 </span>
                               </div>

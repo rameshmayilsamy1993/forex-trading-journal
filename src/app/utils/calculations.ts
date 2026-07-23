@@ -1,7 +1,16 @@
 import { Trade, TradeStats } from '../types/trading';
 
-const getRealPL = (trade: Trade): number => {
+export type TradeCategory = 'win' | 'be' | 'loss';
+
+export const getRealPL = (trade: Trade): number => {
   return (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs(((trade as any).swap || 0)));
+};
+
+export const getTradeCategory = (trade: Trade): TradeCategory => {
+  const pl = getRealPL(trade);
+  if (pl > 50) return 'win';
+  if (pl < -50) return 'loss';
+  return 'be';
 };
 
 export const calculateRiskReward = (trade: Trade): number | undefined => {
@@ -42,6 +51,37 @@ export const formatMoney = (value?: number, showPlus = false): string => {
   if (value === undefined || Number.isNaN(value)) return '-';
   const prefix = showPlus && value > 0 ? '+$' : value < 0 ? '-$' : '$';
   return `${prefix}${Math.abs(value).toFixed(2)}`;
+};
+
+export interface KeyLevelStat {
+  keyLevel: string;
+  trades: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  netPL: number;
+}
+
+export const calculateKeyLevelStats = (trades: Trade[]): KeyLevelStat[] => {
+  const closedTrades = trades.filter(t => t.status === 'CLOSED' && t.profit !== undefined);
+  const grouped = new Map<string, KeyLevelStat>();
+
+  for (const trade of closedTrades) {
+    const kl = trade.keyLevel || 'No Key Level';
+    const pl = getRealPL(trade);
+    const existing = grouped.get(kl) || { keyLevel: kl, trades: 0, wins: 0, losses: 0, winRate: 0, netPL: 0 };
+    existing.trades += 1;
+    existing.netPL += pl;
+    if (pl > 0) existing.wins += 1;
+    else if (pl < 0) existing.losses += 1;
+    grouped.set(kl, existing);
+  }
+
+  const stats = Array.from(grouped.values());
+  for (const stat of stats) {
+    stat.winRate = stat.trades > 0 ? (stat.wins / stat.trades) * 100 : 0;
+  }
+  return stats.sort((a, b) => b.trades - a.trades);
 };
 
 export const calculateTradeStats = (trades: Trade[]): TradeStats => {
