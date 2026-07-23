@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
