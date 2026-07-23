@@ -70,7 +70,7 @@ const getById = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { pair, date, weeklyReviewId, dayOfWeek, bias, expectedDirection, htfBias, crtDirection, premium, discount, liquidityDirection, pdh, pdl, pdo, previousRange, previousClose, previousHigh, previousLow, adr, expansion, narrative, liquidityTarget, expectedSweep, expectedCrt, expectedSmt, expectedSession, killZone, biasConfidence, status } = req.body;
+    const { pair, date, weeklyReviewId, dayOfWeek, bias, crtDirection, narrative } = req.body;
 
     if (!pair || !date) {
       return res.status(400).json({ message: 'Pair and date are required' });
@@ -84,11 +84,8 @@ const create = async (req, res, next) => {
     }
 
     const review = new DailyReview({
-      userId: req.session.userId, pair, date, weeklyReviewId, dayOfWeek, bias, expectedDirection,
-      htfBias, crtDirection, premium, discount, liquidityDirection, pdh, pdl, pdo,
-      previousRange, previousClose, previousHigh, previousLow, adr, expansion, narrative,
-      liquidityTarget, expectedSweep, expectedCrt, expectedSmt, expectedSession, killZone,
-      biasConfidence, status,
+      userId: req.session.userId, pair, date, weeklyReviewId, dayOfWeek, bias,
+      crtDirection, narrative,
     });
     const saved = await review.save();
     res.status(201).json(saved);
