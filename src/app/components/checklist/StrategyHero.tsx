@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, RefreshCw } from 'lucide-react';
+import { ArrowRight, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface StrategyHeroProps {
@@ -7,6 +7,7 @@ interface StrategyHeroProps {
   completionPercent: number;
   qualityRating: string;
   onChangeStrategy: () => void;
+  onViewDetails?: () => void;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -15,7 +16,7 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <svg
           key={star}
-          className={`w-4 h-4 ${star <= rating ? 'text-yellow-400' : 'text-white/20'}`}
+          className={`w-3.5 h-3.5 ${star <= rating ? 'text-yellow-300' : 'text-white/20'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -31,6 +32,7 @@ export default function StrategyHero({
   completionPercent,
   qualityRating,
   onChangeStrategy,
+  onViewDetails,
 }: StrategyHeroProps) {
   const readinessColor =
     completionPercent >= 80
@@ -40,88 +42,60 @@ export default function StrategyHero({
         : 'text-red-300';
 
   return (
-    <div className="relative overflow-hidden rounded-[22px] h-[220px] bg-gradient-to-br from-violet-600 via-purple-600 to-blue-600">
+    <div className="relative overflow-hidden rounded-[18px] h-[140px] bg-gradient-to-br from-violet-600 via-purple-600 to-blue-600">
       <div className="absolute inset-0">
-        <div className="absolute top-[-80px] right-[-40px] w-[300px] h-[300px] rounded-full bg-violet-400/20 blur-[80px]" />
-        <div className="absolute bottom-[-60px] left-[-30px] w-[250px] h-[250px] rounded-full bg-blue-400/20 blur-[80px]" />
-        <div className="absolute top-[20px] left-[40%] w-[120px] h-[120px] rounded-full bg-fuchsia-300/15 blur-[60px]" />
+        <div className="absolute top-[-60px] right-[-30px] w-[220px] h-[220px] rounded-full bg-violet-400/20 blur-[60px]" />
+        <div className="absolute bottom-[-40px] left-[-20px] w-[180px] h-[180px] rounded-full bg-blue-400/20 blur-[60px]" />
       </div>
 
-      <motion.div
-        className="absolute inset-0 opacity-30"
-        animate={{
-          backgroundPosition: ['0% 0%', '100% 100%'],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          repeatType: 'reverse',
-          ease: 'easeInOut',
-        }}
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 70% 50%, rgba(255,255,255,0.08) 0%, transparent 50%)',
-          backgroundSize: '200% 200%',
-        }}
-      />
-
-      {[...Array(6)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1.5 h-1.5 rounded-full bg-white/30"
-          style={{
-            left: `${15 + i * 14}%`,
-            top: `${20 + (i % 3) * 25}%`,
-          }}
-          animate={{
-            y: [0, -8, 0],
-            opacity: [0.3, 0.7, 0.3],
-          }}
-          transition={{
-            duration: 3 + i * 0.4,
-            repeat: Infinity,
-            delay: i * 0.3,
-          }}
-        />
-      ))}
-
-      <div className="relative h-full px-7 py-6 flex flex-col justify-between">
+      <div className="relative h-full px-6 py-5 flex flex-col justify-between">
         <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-white/60 text-[13px] font-semibold tracking-wider uppercase">
+          <div className="space-y-0.5">
+            <p className="text-white/60 text-[11px] font-semibold tracking-wider uppercase">
               Selected Strategy
             </p>
-            <h2 className="text-white text-[28px] font-extrabold leading-tight tracking-tight">
+            <h2 className="text-white text-[22px] font-extrabold leading-tight tracking-tight">
               {strategyName}
             </h2>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onChangeStrategy}
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 shadow-none"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Change
-          </Button>
+          <div className="flex items-center gap-2">
+            {onViewDetails && (
+              <button
+                onClick={onViewDetails}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              >
+                View Details
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onChangeStrategy}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 shadow-none h-8"
+            >
+              <RefreshCw className="w-3 h-3 mr-1.5" />
+              Change
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-end justify-between">
-          <div className="space-y-1.5">
-            <p className="text-white/60 text-[13px] font-semibold">Trade Readiness</p>
+          <div className="space-y-1">
+            <p className="text-white/60 text-[11px] font-semibold">Trade Readiness</p>
             <div className="flex items-center gap-3">
-              <span className={`text-[34px] font-bold leading-none tracking-tight ${readinessColor}`}>
+              <span className={`text-[28px] font-bold leading-none tracking-tight ${readinessColor}`}>
                 {completionPercent}%
               </span>
               <div className="flex flex-col gap-0.5">
                 <StarRating rating={completionPercent >= 80 ? 4 : completionPercent >= 50 ? 3 : 2} />
-                <p className="text-white/70 text-[12px] font-medium">Estimated Quality</p>
+                <p className="text-white/60 text-[11px] font-medium">Estimated Quality</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-white/80">
-            <span className="text-[13px] font-medium">{qualityRating}</span>
-            <ArrowRight className="w-4 h-4 text-white/50" />
+          <div className="flex items-center gap-1.5 text-white/70">
+            <span className="text-[12px] font-medium">{qualityRating}</span>
+            <ArrowRight className="w-3.5 h-3.5 text-white/40" />
           </div>
         </div>
       </div>
