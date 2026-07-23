@@ -189,9 +189,9 @@ export default function DailyReviewList() {
               <DailyReviewCard
                 key={review._id || review.id}
                 review={review}
-                onOpen={handleOpen}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                onView={() => handleOpen(review)}
+                onEdit={() => handleEdit(review)}
+                onDelete={() => handleDelete(review)}
               />
             ))}
           </div>
