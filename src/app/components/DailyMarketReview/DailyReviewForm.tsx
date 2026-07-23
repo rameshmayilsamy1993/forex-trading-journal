@@ -55,26 +55,29 @@ export default function DailyReviewForm() {
         setBias(review.bias || '');
         setCrtDirection(review.crtDirection || '');
         setNarrative(review.narrative || '');
-        apiService.dailyReviews.getEntries(reviewId).then(entries => {
-          const morningEntry = entries.find(e => e.entryTitle === 'Morning Setup');
-          if (morningEntry) {
-            if (morningEntry.images?.length > 0) {
-              const news = morningEntry.images[0];
-              setNewsScreenshot({ id: 'news', url: news.url, publicId: news.publicId, caption: news.caption || '' });
-              if (morningEntry.images.length > 1) {
-                setChartImages(morningEntry.images.slice(1).map((img: any, i: number) => ({
-                  id: `chart-${i}`, url: img.url, publicId: img.publicId, caption: img.caption || '',
-                })));
-              }
+        return apiService.dailyReviews.getEntries(reviewId).catch(err => {
+          console.error('Failed to load entries for edit:', err);
+          return [];
+        });
+      })
+      .then(entries => {
+        const morningEntry = entries.find(e => e.entryTitle === 'Morning Setup');
+        if (morningEntry) {
+          if (morningEntry.images?.length > 0) {
+            const news = morningEntry.images[0];
+            setNewsScreenshot({ id: 'news', url: news.url, publicId: news.publicId, caption: news.caption || '' });
+            if (morningEntry.images.length > 1) {
+              setChartImages(morningEntry.images.slice(1).map((img: any, i: number) => ({
+                id: `chart-${i}`, url: img.url, publicId: img.publicId, caption: img.caption || '',
+              })));
             }
           }
-        });
-        setIsLoading(false);
+        }
       })
       .catch(() => {
         setError('Failed to load review data.');
-        setIsLoading(false);
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, [isEditMode, reviewId]);
 
   const handleBack = () => {
@@ -108,9 +111,13 @@ export default function DailyReviewForm() {
           allImages.push({ url: newsScreenshot.url, publicId: newsScreenshot.publicId, caption: newsScreenshot.caption || 'News' });
         }
       }
+      const chartUploadResults = await Promise.all(
+        chartImages.filter(img => img.file).map(img => uploadImage(img.file!))
+      );
+      let uploadIdx = 0;
       for (const img of chartImages) {
         if (img.file) {
-          const result = await uploadImage(img.file);
+          const result = chartUploadResults[uploadIdx++];
           allImages.push({ url: result.url, publicId: result.publicId, caption: img.caption });
         } else if (img.url) {
           allImages.push({ url: img.url, publicId: img.publicId, caption: img.caption });

@@ -96,7 +96,7 @@ export default function DailyReviewDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           {/* Morning Setup */}
-          {review.bias && (
+          {(review.bias || review.crtDirection || review.narrative) && (
             <section className="bg-white rounded-2xl border border-[#E5EAF2] p-6">
               <h2 className="text-lg font-bold text-[#0F172A] mb-4">Morning Setup</h2>
               <div className="flex items-center gap-3 mb-4">

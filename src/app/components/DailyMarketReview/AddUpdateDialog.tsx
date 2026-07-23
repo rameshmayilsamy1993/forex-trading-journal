@@ -33,10 +33,14 @@ export default function AddUpdateDialog({ open, onOpenChange, onSaved, reviewId 
   const handleSubmit = async () => {
     setSaving(true);
     try {
+      const uploadResults = await Promise.all(
+        images.filter(img => img.file).map(img => uploadImage(img.file!))
+      );
+      let uploadIdx = 0;
       const uploadedImages = [];
       for (const img of images) {
         if (img.file) {
-          const result = await uploadImage(img.file);
+          const result = uploadResults[uploadIdx++];
           uploadedImages.push({ url: result.url, publicId: result.publicId, caption: img.caption });
         } else if (img.url) {
           uploadedImages.push({ url: img.url, publicId: img.publicId, caption: img.caption });
@@ -44,7 +48,7 @@ export default function AddUpdateDialog({ open, onOpenChange, onSaved, reviewId 
       }
 
       await apiService.dailyReviews.createEntry(reviewId, {
-        entryTitle: `Update ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        entryTitle: 'Intraday Update',
         comment: notes,
         images: uploadedImages,
         bias: bias || undefined,
