@@ -124,7 +124,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }: Image
       >
         <img
           ref={imgRef}
-          src={getResponsiveUrl(images[currentIndex].url, 800)}
+          src={getResponsiveUrl(images[currentIndex].url, 1920)}
           alt={images[currentIndex].label}
           className="max-w-full max-h-full object-contain select-none"
           loading="lazy"

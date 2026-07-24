@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import apiService from '../../services/apiService';
 import AddUpdateDialog from './AddUpdateDialog';
 import { Badge } from '../ui/badge';
+import ImageViewer from '../ImageViewer';
 
 const biasVariant: Record<string, 'success' | 'destructive' | 'secondary'> = {
   Bullish: 'success',
@@ -22,6 +23,7 @@ export default function DailyReviewDetail() {
   const [entries, setEntries] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addUpdateOpen, setAddUpdateOpen] = useState(false);
+  const [viewingImages, setViewingImages] = useState<{ images: { url: string; label: string }[]; index: number } | null>(null);
 
   const reviewId = (window as any).__dailyReviewId;
 
@@ -130,10 +132,22 @@ export default function DailyReviewDetail() {
               <h2 className="text-lg font-bold text-[#0F172A] mb-4 flex items-center gap-2">
                 <Image className="size-5 text-[#2563EB]" /> Screenshots
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {allImages.map((img: any, i: number) => (
-                  <div key={i} className="group relative aspect-video bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] overflow-hidden">
+                  <div
+                    key={i}
+                    className="group relative aspect-video bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] overflow-hidden cursor-pointer"
+                    onClick={() => setViewingImages({
+                      images: allImages.map((im: any) => ({ url: im.url, label: im.caption || 'Screenshot' })),
+                      index: i,
+                    })}
+                  >
                     <img src={img.url} alt={img.caption || ''} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-white/20 backdrop-blur-sm rounded-full">
+                        <Image className="size-5 text-white" />
+                      </div>
+                    </div>
                     {img.caption && (
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
                         <span className="text-xs text-white">{img.caption}</span>
@@ -167,8 +181,15 @@ export default function DailyReviewDetail() {
                       {entry.images?.length > 0 && (
                         <div className="grid grid-cols-3 gap-2">
                           {entry.images.map((img: any, j: number) => (
-                            <div key={j} className="aspect-video bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] overflow-hidden">
-                              <img src={img.url} alt={img.caption || ''} className="w-full h-full object-cover" />
+                            <div
+                              key={j}
+                              className="aspect-video bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] overflow-hidden cursor-pointer group"
+                              onClick={() => setViewingImages({
+                                images: entry.images.map((im: any) => ({ url: im.url, label: im.caption || 'Screenshot' })),
+                                index: j,
+                              })}
+                            >
+                              <img src={img.url} alt={img.caption || ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                             </div>
                           ))}
                         </div>
@@ -223,6 +244,14 @@ export default function DailyReviewDetail() {
         onSaved={loadData}
         reviewId={reviewId}
       />
+
+      {viewingImages && (
+        <ImageViewer
+          images={viewingImages.images}
+          initialIndex={viewingImages.index}
+          onClose={() => setViewingImages(null)}
+        />
+      )}
     </div>
   );
 }

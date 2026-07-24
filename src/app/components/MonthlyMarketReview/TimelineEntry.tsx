@@ -14,9 +14,10 @@ interface TimelineEntryProps {
   };
   onEdit: (entry: any) => void;
   onDelete: (entry: any) => void;
+  onViewImage?: (images: { url: string; label: string }[], index: number) => void;
 }
 
-export default function TimelineEntry({ entry, onEdit, onDelete }: TimelineEntryProps) {
+export default function TimelineEntry({ entry, onEdit, onDelete, onViewImage }: TimelineEntryProps) {
   const day = format(new Date(entry.createdAt), 'dd');
   const monthAbbr = format(new Date(entry.createdAt), 'MMM');
   const year = format(new Date(entry.createdAt), 'yyyy');
@@ -93,7 +94,14 @@ export default function TimelineEntry({ entry, onEdit, onDelete }: TimelineEntry
           {hasImages && (
             <div className="grid grid-cols-4 gap-2 mt-4">
               {entry.images!.map((img, idx) => (
-                <div key={img.url || `entry-img-${idx}`} className="group/img relative overflow-hidden rounded-xl">
+                <div
+                  key={img.url || `entry-img-${idx}`}
+                  className="group/img relative overflow-hidden rounded-xl cursor-pointer"
+                  onClick={() => onViewImage?.(
+                    entry.images!.map((im: any) => ({ url: im.url, label: im.caption || 'Screenshot' })),
+                    idx,
+                  )}
+                >
                   <img
                     src={img.url}
                     alt={img.caption || ''}

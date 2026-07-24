@@ -52,11 +52,18 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'TOOLS',
+    title: 'Discipline',
     items: [
-      { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
-      { id: 'market-stats', label: 'Market Statistics', icon: BarChart4 },
-      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
+      { id: 'checklist', label: 'Pre-Trade Checklist', icon: ClipboardCheck },
+      { id: 'bias-input', label: 'Bias Input (CISD)', icon: TrendingDown },
+      { id: 'bias-history', label: 'Bias History', icon: History },
+      { id: 'liquidity-input', label: 'Liquidity Input', icon: Layers },
+      { id: 'liquidity-history', label: 'Liquidity History', icon: History },
+      { id: 'crt-input', label: 'CRT Tracker', icon: Activity },
+      { id: 'crt-history', label: 'CRT History', icon: History },
+      { id: 'daily-review', label: 'Daily Market Review', icon: TrendingUp },
+      { id: 'weekly-review', label: 'Weekly Market Review', icon: Calendar },
+      { id: 'monthly-review', label: 'Monthly Market Review', icon: NotebookText },
     ],
   },
   {
@@ -69,15 +76,11 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'Discipline',
+    title: 'Tools',
     items: [
-      { id: 'checklist', label: 'Pre-Trade Checklist', icon: ClipboardCheck },
-      { id: 'bias-input', label: 'Bias Input (CISD)', icon: TrendingDown },
-      { id: 'bias-history', label: 'Bias History', icon: History },
-      { id: 'liquidity-input', label: 'Liquidity Input', icon: Layers },
-      { id: 'liquidity-history', label: 'Liquidity History', icon: History },
-      { id: 'crt-input', label: 'CRT Tracker', icon: Activity },
-      { id: 'crt-history', label: 'CRT History', icon: History },
+      { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
+      { id: 'market-stats', label: 'Market Statistics', icon: BarChart4 },
+      { id: 'forex-lot-calculator', label: 'Forex Lot Calculator', icon: DollarSign },
     ],
   },
   {
@@ -89,9 +92,6 @@ const navigationGroups: NavGroup[] = [
       { id: 'missed-log-calendar', label: 'Missed Trade Calendar', icon: Calendar },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
       { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
-      { id: 'monthly-review', label: 'Monthly Market Review', icon: NotebookText },
-      { id: 'weekly-review', label: 'Weekly Market Review', icon: Calendar },
-      { id: 'daily-review', label: 'Daily Market Review', icon: TrendingUp },
     ],
   },
   {

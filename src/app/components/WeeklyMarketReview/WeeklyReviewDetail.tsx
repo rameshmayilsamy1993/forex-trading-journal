@@ -1,13 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Plus, Calendar, Image, FileText, Clock, TrendingUp, TrendingDown, Minus, PieChart, BarChart3, Target, Layers, CheckSquare, Newspaper, Grid3X3 } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, Image, FileText, Clock, TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import apiService from '../../services/apiService';
 import TimelineEntry from '../MonthlyMarketReview/TimelineEntry';
-import ImageGallery from '../MonthlyMarketReview/ImageGallery';
+import ImageViewer from '../ImageViewer';
 import AddEntryDialog from './AddEntryDialog';
 import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
 import { Skeleton } from '../ui/skeleton';
 
 const biasVariant: Record<string, 'success' | 'destructive' | 'secondary' | 'default'> = {
@@ -20,8 +19,7 @@ const statCards = [
   { label: 'Week', key: 'week', icon: Calendar, gradient: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-500/20' },
   { label: 'Entries', key: 'entries', icon: FileText, gradient: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
   { label: 'Images', key: 'images', icon: Image, gradient: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-500/20' },
-  { label: 'Notes', key: 'notes', icon: PieChart, gradient: 'from-pink-500 to-pink-600', shadow: 'shadow-pink-500/20' },
-  { label: 'Checklist', key: 'checklist', icon: CheckSquare, gradient: 'from-orange-500 to-orange-600', shadow: 'shadow-orange-500/20' },
+  { label: 'Notes', key: 'notes', icon: FileText, gradient: 'from-pink-500 to-pink-600', shadow: 'shadow-pink-500/20' },
 ];
 
 const containerVariants = {
@@ -57,33 +55,7 @@ const BiasIcon = ({ bias }: { bias: string }) => {
   return <Minus className="size-5" />;
 };
 
-const keyLevels = [
-  { label: 'PWH', key: 'pwh', formatPrice: true },
-  { label: 'PWL', key: 'pwl', formatPrice: true },
-  { label: 'Weekly Open', key: 'weeklyOpen', formatPrice: true },
-  { label: 'FVG', key: 'weeklyFvg' },
-  { label: 'IFVG', key: 'weeklyIfvg' },
-  { label: 'OB', key: 'weeklyOb' },
-  { label: 'Breaker', key: 'weeklyBreaker' },
-  { label: 'EQH', key: 'eqh', formatPrice: true },
-  { label: 'EQL', key: 'eql', formatPrice: true },
-  { label: 'Liquidity', key: 'liquidity' },
-  { label: 'Premium', key: 'premium' },
-  { label: 'Discount', key: 'discount' },
-];
 
-const objectives = [
-  { label: 'Main Target', key: 'mainTarget', formatPrice: true, icon: Target },
-  { label: 'CRT', key: 'weeklyCrt', icon: BarChart3 },
-  { label: 'SMT', key: 'weeklySmt', icon: Layers },
-  { label: 'CISD', key: 'weeklyCisd', icon: PieChart },
-];
-
-const sessions = [
-  { label: 'Asian Session', key: 'asianSession', icon: Clock },
-  { label: 'London Session', key: 'londonSession', icon: Clock },
-  { label: 'New York Session', key: 'newYorkSession', icon: Clock },
-];
 
 export default function WeeklyReviewDetail() {
   const [review, setReview] = useState<any>(null);
@@ -91,6 +63,7 @@ export default function WeeklyReviewDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [addEntryOpen, setAddEntryOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<any>(null);
+  const [viewingImages, setViewingImages] = useState<{ images: { url: string; label: string }[]; index: number } | null>(null);
 
   const reviewId = (window as any).__weeklyReviewId;
 
@@ -158,12 +131,6 @@ export default function WeeklyReviewDetail() {
   const imageCount = review?.imageCount ?? allImages.length;
   const noteCount = sortedEntries.filter(e => e.comment).length;
 
-  const checklistCompleted = useMemo(() => {
-    return sortedEntries.reduce((sum, e) =>
-      sum + (e.checklistItems?.filter((item: any) => item.checked).length || 0), 0
-    );
-  }, [sortedEntries]);
-
   if (!reviewId) {
     return (
       <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -202,13 +169,6 @@ export default function WeeklyReviewDetail() {
     entries: entries.length,
     images: imageCount,
     notes: noteCount,
-    checklist: checklistCompleted,
-  };
-
-  const formatPrice = (val: any) => {
-    if (val === null || val === undefined || val === '') return '—';
-    if (typeof val === 'number') return val.toFixed(5);
-    return val;
   };
 
   return (
@@ -336,181 +296,6 @@ export default function WeeklyReviewDetail() {
 
       <div className="px-6 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-10">
-          {(review.theme || review.expectedDirection || review.weeklyStory || review.institutionalNarrative || review.marketStructure) && (
-            <motion.section
-              variants={itemVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: '-50px' }}
-            >
-              <h2 className="text-section-title font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-                <Target className="size-5 text-[#2563EB]" />
-                Weekly Analysis
-              </h2>
-              <div className="relative bg-white rounded-2xl border border-[#E2E8F0] shadow-lg shadow-blue-500/5 p-6 space-y-5">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 pointer-events-none" />
-                <div className="relative space-y-5">
-                  {review.theme && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Theme</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.theme}</p>
-                    </div>
-                  )}
-                  {review.expectedDirection && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Expected Direction</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.expectedDirection}</p>
-                    </div>
-                  )}
-                  {review.weeklyStory && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Weekly Story</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.weeklyStory}</p>
-                    </div>
-                  )}
-                  {review.institutionalNarrative && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Institutional Narrative</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.institutionalNarrative}</p>
-                    </div>
-                  )}
-                  {review.marketStructure && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Market Structure</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.marketStructure}</p>
-                    </div>
-                  )}
-                  {review.expectedManipulation && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Expected Manipulation</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.expectedManipulation}</p>
-                    </div>
-                  )}
-                  {review.expansionDirection && (
-                    <div>
-                      <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Expansion Direction</span>
-                      <p className="text-body text-[#0F172A] mt-1 leading-relaxed">{review.expansionDirection}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.section>
-          )}
-
-          <motion.section
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-          >
-            <h2 className="text-section-title font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-              <Grid3X3 className="size-5 text-[#2563EB]" />
-              Key Levels
-            </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {keyLevels.map((level) => {
-                const value = (review as any)[level.key];
-                const displayVal = level.formatPrice ? formatPrice(value) : (value || '—');
-                return (
-                  <div
-                    key={level.key}
-                    className="bg-white rounded-2xl border border-[#E5EAF2] p-4 shadow-sm hover:shadow-md transition-shadow duration-200 flex items-center justify-between"
-                  >
-                    <span className="text-body-sm font-medium text-[#64748B]">{level.label}</span>
-                    <span className="text-body font-bold text-[#0F172A]">{displayVal}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.section>
-
-          <motion.section
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-          >
-            <h2 className="text-section-title font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-              <Target className="size-5 text-[#2563EB]" />
-              Objectives
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {objectives.map((obj) => {
-                const Icon = obj.icon;
-                const value = (review as any)[obj.key];
-                const displayVal = obj.formatPrice ? formatPrice(value) : (value || '—');
-                return (
-                  <div
-                    key={obj.key}
-                    className="bg-white rounded-2xl border border-[#E5EAF2] p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <div className="size-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/20 shadow flex items-center justify-center mb-3">
-                      <Icon className="size-4 text-white" />
-                    </div>
-                    <p className="text-caption text-[#94A3B8] mb-0.5">{obj.label}</p>
-                    <p className="text-body font-bold text-[#0F172A]">{displayVal}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.section>
-
-          <motion.section
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-          >
-            <h2 className="text-section-title font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-              <Clock className="size-5 text-[#2563EB]" />
-              Sessions
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {sessions.map((session) => {
-                const Icon = session.icon;
-                const value = (review as any)[session.key];
-                return (
-                  <div
-                    key={session.key}
-                    className="bg-white rounded-2xl border border-[#E5EAF2] p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="size-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/20 shadow flex items-center justify-center">
-                        <Icon className="size-3.5 text-white" />
-                      </div>
-                      <h3 className="text-body font-semibold text-[#0F172A]">{session.label}</h3>
-                    </div>
-                    {value ? (
-                      <p className="text-body-sm text-[#64748B] leading-relaxed">{value}</p>
-                    ) : (
-                      <p className="text-body-sm text-[#94A3B8] italic">No session notes</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </motion.section>
-
-          {review.economicEvents && (
-            <motion.section
-              variants={itemVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: '-50px' }}
-            >
-              <h2 className="text-section-title font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-                <Newspaper className="size-5 text-[#2563EB]" />
-                Economic Events
-              </h2>
-              <div className="relative bg-white rounded-2xl border border-[#E2E8F0] shadow-lg shadow-blue-500/5 p-6">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 pointer-events-none" />
-                <p className="relative text-body text-[#0F172A] leading-relaxed whitespace-pre-line">
-                  {review.economicEvents}
-                </p>
-              </div>
-            </motion.section>
-          )}
-
           <motion.section
             variants={itemVariants}
             initial="hidden"
@@ -519,7 +304,7 @@ export default function WeeklyReviewDetail() {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-section-title font-bold text-[#0F172A] flex items-center gap-2">
-                <Layers className="size-5 text-[#2563EB]" />
+                <BarChart3 className="size-5 text-[#2563EB]" />
                 Timeline
               </h2>
               <Button
@@ -539,6 +324,7 @@ export default function WeeklyReviewDetail() {
                     entry={entry}
                     onEdit={handleEditEntry}
                     onDelete={handleDeleteEntry}
+                    onViewImage={(images, index) => setViewingImages({ images, index })}
                   />
                 ))}
               </div>
@@ -575,7 +361,30 @@ export default function WeeklyReviewDetail() {
                 <Image className="size-5 text-[#2563EB]" />
                 Image Gallery
               </h2>
-              <ImageGallery images={allImages} />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {allImages.map((img: any, i: number) => (
+                  <div
+                    key={i}
+                    className="group relative aspect-video bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] overflow-hidden cursor-pointer"
+                    onClick={() => setViewingImages({
+                      images: allImages.map((im: any) => ({ url: im.url, label: im.caption || 'Screenshot' })),
+                      index: i,
+                    })}
+                  >
+                    <img src={img.url} alt={img.caption || ''} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-white/20 backdrop-blur-sm rounded-full">
+                        <Image className="size-5 text-white" />
+                      </div>
+                    </div>
+                    {img.caption && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                        <span className="text-xs text-white">{img.caption}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </motion.section>
           )}
 
@@ -747,6 +556,14 @@ export default function WeeklyReviewDetail() {
         reviewId={reviewId}
         editEntry={editEntry}
       />
+
+      {viewingImages && (
+        <ImageViewer
+          images={viewingImages.images}
+          initialIndex={viewingImages.index}
+          onClose={() => setViewingImages(null)}
+        />
+      )}
     </div>
   );
 }
