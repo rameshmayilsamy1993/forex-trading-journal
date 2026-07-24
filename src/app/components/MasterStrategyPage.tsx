@@ -175,7 +175,7 @@ export default function MasterStrategyPage() {
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., ICT 4HR + 15MIN Entry"
+                placeholder="e.g., ICT HTF + LTF Entry"
                 className="text-card-title"
               />
             </div>

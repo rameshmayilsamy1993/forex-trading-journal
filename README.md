@@ -59,6 +59,13 @@ The application is built with a focus on discipline tracking and continuous impr
 - Progress tracking and validation
 - Link checklist results to trades
 
+### Market Reviews (Daily / Weekly / Monthly)
+- Structured review forms with bias, CRT direction, and screenshots
+- Simple textarea notes (no rich text editor)
+- Timeline entries for tracking changes over time
+- Premium image viewer with zoom, pan, rotate, and thumbnail strip
+- Image resolution at 1920px for sharp zoom quality
+
 ## 🧠 Key Concepts
 
 | Concept | Description |
@@ -85,10 +92,11 @@ Understanding the difference between mistake losses and valid losses is crucial 
 - **Session-based Authentication**
 
 ### Other
-- **Cloudinary** — Image upload and storage
+- **Cloudinary** — Image upload and storage (1920px responsive delivery)
 - **Multer** — File upload handling
 - **ExcelJS** — Excel file parsing
 - **Concurrently** — Development server orchestration
+- **framer-motion** — Page animations and transitions
 
 ## 📁 Project Structure
 
@@ -97,9 +105,13 @@ fx-journal/
 ├── src/                    # Frontend source
 │   ├── app/
 │   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── lib/
+│   │   │   ├── DailyMarketReview/   # Daily review form, detail, dialog
+│   │   │   ├── WeeklyMarketReview/  # Weekly review form, detail, dialog
+│   │   │   ├── MonthlyMarketReview/ # Monthly review form, detail, dialog
+│   │   │   └── ui/                  # Shared primitives (button, badge, select)
+│   │   ├── services/       # API service layer
+│   │   ├── types/          # TypeScript type definitions
+│   │   └── utils/          # Utility functions
 │   └── styles/
 ├── backend/                # Backend source
 │   ├── server.js           # Entry point
@@ -144,6 +156,9 @@ module/
 | `trades` | Trade journal with import/export |
 | `missedTrades` | Missed opportunity tracking |
 | `lossAnalysis` | Loss analysis with chart images |
+| `dailyReviews` | Daily market review with entries |
+| `weeklyReviews` | Weekly market review with entries |
+| `monthlyReviews` | Monthly market review with entries |
 | `masters` | Strategies, sessions, key levels |
 | `settings` | Application settings |
 | `upload` | Image upload handling |

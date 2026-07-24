@@ -17,7 +17,7 @@ const LOSS_REASON_TYPES = [
 
 const VALID_LOSS_REASONS = [
   'Followed Plan',
-  'Valid Setup (4HR + 15MIN Confirmed)',
+  'Valid Setup (HTF + LTF Confirmed)',
   'SL Hit Before Target',
   'Market Structure Shift',
   'News Spike (Unavoidable)',
@@ -36,7 +36,7 @@ const lossAnalysisSchema = new mongoose.Schema({
   description: { type: String, default: '' },
   images: [{
     url: String,
-    timeframe: { type: String, enum: ['4HR', '15MIN'], default: '4HR' },
+    timeframe: { type: String, enum: ['HTF', 'LTF'], default: 'HTF' },
     publicId: String
   }],
   tags: [String],

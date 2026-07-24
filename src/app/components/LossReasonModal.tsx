@@ -22,7 +22,7 @@ const MISTAKE_REASONS = [
 
 const VALID_LOSS_REASONS = [
   'Followed Plan',
-  'Valid Setup (4HR + 15MIN Confirmed)',
+  'Valid Setup (HTF + LTF Confirmed)',
   'SL Hit Before Target',
   'Market Structure Shift',
   'News Spike (Unavoidable)',
@@ -30,7 +30,7 @@ const VALID_LOSS_REASONS = [
   'Spread/Slippage Issue'
 ];
 
-const TIMEFRAMES = ['4HR', '15MIN'];
+const TIMEFRAMES = ['HTF', 'LTF'];
 
 interface ImageData {
   url: string;

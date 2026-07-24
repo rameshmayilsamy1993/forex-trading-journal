@@ -17,6 +17,7 @@ export default function LossAnalysisModal({ isOpen, tradeId, tradeData, existing
   if (!isOpen || !tradeId) return null;
   return (
     <LossReasonModal
+      isOpen={isOpen}
       tradeId={tradeId}
       tradeData={tradeData || undefined}
       existingAnalysis={existingAnalysis}
