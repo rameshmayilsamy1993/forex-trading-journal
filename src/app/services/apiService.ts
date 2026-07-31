@@ -888,6 +888,56 @@ const apiService = {
       return apiDelete(`/daily-reviews/${reviewId}/entries/${entryId}`);
     },
   },
+
+  saturdayReviews: {
+    getAll: async (filters?: {
+      pair?: string; month?: number; year?: number; bias?: string; candleType?: string;
+      status?: string; search?: string; sort?: string; page?: number; limit?: number;
+    }): Promise<{ reviews: any[]; total: number; page: number; limit: number }> => {
+      const params = new URLSearchParams();
+      if (filters?.pair) params.set('pair', filters.pair);
+      if (filters?.month) params.set('month', filters.month.toString());
+      if (filters?.year) params.set('year', filters.year.toString());
+      if (filters?.bias) params.set('bias', filters.bias);
+      if (filters?.candleType) params.set('candleType', filters.candleType);
+      if (filters?.status) params.set('status', filters.status);
+      if (filters?.search) params.set('search', filters.search);
+      if (filters?.sort) params.set('sort', filters.sort);
+      if (filters?.page) params.set('page', filters.page.toString());
+      if (filters?.limit) params.set('limit', filters.limit.toString());
+      const qs = params.toString();
+      return apiGet(`/saturday-reviews${qs ? `?${qs}` : ''}`);
+    },
+
+    getById: async (id: string): Promise<any> => {
+      return apiGet(`/saturday-reviews/${id}`);
+    },
+
+    create: async (data: {
+      pair: string; weekStart: string; weekEnd: string; reviewDate?: string; status?: string;
+    }): Promise<any> => {
+      return apiPost('/saturday-reviews', data);
+    },
+
+    update: async (id: string, data: any): Promise<any> => {
+      return apiPut(`/saturday-reviews/${id}`, data);
+    },
+
+    delete: async (id: string): Promise<void> => {
+      return apiDelete(`/saturday-reviews/${id}`);
+    },
+
+    upsertEvent: async (id: string, eventType: string, data: {
+      day?: string; date?: string; time?: string; category?: string; keyLevel?: string;
+      answer?: string; notes?: string; images?: { url: string; publicId?: string; caption?: string }[];
+    }): Promise<any> => {
+      return apiPut(`/saturday-reviews/${id}/events/${eventType}`, data);
+    },
+
+    deleteEvent: async (id: string, eventType: string): Promise<void> => {
+      return apiDelete(`/saturday-reviews/${id}/events/${eventType}`);
+    },
+  },
 };
 
 export default apiService;
