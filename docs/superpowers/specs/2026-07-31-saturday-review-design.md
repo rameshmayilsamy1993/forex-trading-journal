@@ -106,13 +106,13 @@ Secondary index: `{ userId: 1, weekStart: -1 }`.
 
 ### `saturday_review_events` (`SaturdayReviewEvent`)
 
-Each review has exactly **5 fixed event slots** — one row per `eventType`, enforced by a unique index.
+Each review has exactly **6 fixed event slots** — one row per `eventType` (`weekly_high`, `weekly_low`, `candle`, `weekly_high_origin`, `weekly_low_origin`, `ote`), enforced by a unique index. The `candle` slot (added to hold S2's notes + screenshots) reuses the same fields: `notes` for the S2 notes and `SaturdayReviewImage` rows for its screenshots.
 
 | Field | Type | Notes |
 |---|---|---|
 | `reviewId` | ObjectId ref SaturdayReview | required |
 | `userId` | ObjectId ref User | required |
-| `eventType` | String enum | `weekly_high`, `weekly_low`, `weekly_high_origin`, `weekly_low_origin`, `ote` |
+| `eventType` | String enum | `weekly_high`, `weekly_low`, `candle`, `weekly_high_origin`, `weekly_low_origin`, `ote` |
 | `day` | String | Mon–Fri (weekly high/low/ote) |
 | `date` | String (ISO date) | |
 | `time` | String | e.g. `09:30` |
