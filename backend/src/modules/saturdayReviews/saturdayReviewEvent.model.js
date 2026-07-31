@@ -10,7 +10,7 @@ const saturdayReviewEventSchema = new mongoose.Schema({
   day: { type: String, default: '' },
   date: { type: String, default: '' },
   time: { type: String, default: '' },
-  category: { type: String, enum: ['Weekly', 'Daily'], default: '' },
+  category: { type: String, enum: ['', 'Weekly', 'Daily'], default: '' },
   keyLevel: { type: String, default: '' },
   answer: { type: String, default: '' },
   notes: { type: String, default: '' },
