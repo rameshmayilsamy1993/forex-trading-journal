@@ -101,6 +101,12 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.1.8
         version: 1.1.8(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tiptap/extension-image':
+        specifier: ^3.29.2
+        version: 3.29.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))
+      '@tiptap/extension-placeholder':
+        specifier: ^3.29.2
+        version: 3.29.2(@tiptap/extensions@3.29.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))(@tiptap/pm@3.27.2))
       '@tiptap/extension-text-align':
         specifier: ^3.27.2
         version: 3.27.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))
@@ -237,9 +243,6 @@ importers:
       tailwindcss:
         specifier: 4.1.12
         version: 4.1.12
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
       vite:
         specifier: ^6.4.1
         version: 6.4.3(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.30.1)
@@ -1695,6 +1698,11 @@ packages:
       '@tiptap/core': 3.27.1
       '@tiptap/pm': 3.27.1
 
+  '@tiptap/extension-image@3.29.2':
+    resolution: {integrity: sha512-F+S4iru247mNVZdkNwNDZHeb281DkjsBJinaOGsOyJTvXY+KU5Uq7vY1LQTn493dTfU48Z0yMBUXwJffCT92Mg==}
+    peerDependencies:
+      '@tiptap/core': 3.29.2
+
   '@tiptap/extension-italic@3.27.1':
     resolution: {integrity: sha512-jGGeyn9uRUnNjSTHpbqhiGsp6KaYTSbV09jDXPJI9cDwfV9hpugLvpaCZd0BMBbhU1B1W6kOfX0BE15qX/HQfA==}
     peerDependencies:
@@ -1732,6 +1740,11 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.27.1
 
+  '@tiptap/extension-placeholder@3.29.2':
+    resolution: {integrity: sha512-/BlpPIq2JZk6zLaeYVOXazi6dmd0iRriTymNEnFn1doManN1y5HED9LsMeb/AhNhauL5AgmcHgpvAjbsN9k4SA==}
+    peerDependencies:
+      '@tiptap/extensions': 3.29.2
+
   '@tiptap/extension-strike@3.27.1':
     resolution: {integrity: sha512-Y3DW1jlSlCNCyMGHP3+3qBNNPS83wuFz4RTYGjZtvRRTCRh7apZme9XRWMq1rN5mJ2Cr7fKocA2/5Bs13KgN6Q==}
     peerDependencies:
@@ -1757,6 +1770,12 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.27.1
       '@tiptap/pm': 3.27.1
+
+  '@tiptap/extensions@3.29.2':
+    resolution: {integrity: sha512-BCz+FCAChSYtUe4BFj97HEO+nSK+J7GxbJgZG4Hg7DT/gI+hRyeNndU8efiQAx3WGdzsFi3UxRpcF1tTQM7iMQ==}
+    peerDependencies:
+      '@tiptap/core': 3.29.2
+      '@tiptap/pm': 3.29.2
 
   '@tiptap/pm@3.27.2':
     resolution: {integrity: sha512-4eBV9Fx16ZZUJuO4AvHzykxdYXfF/iMjpoI8q9PHvxOe+xx8tNa4ONhZMKJLpgCKEECJiBkQmr0gOmarzB0MtA==}
@@ -3507,11 +3526,6 @@ packages:
   typedarray@0.0.6:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
 
-  typescript@6.0.3:
-    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
   uid-safe@2.1.5:
     resolution: {integrity: sha512-KPHm4VL5dDXKz01UuEd88Df+KzynaohSL9fBh096KWAxSKZQDI2uBrVqtvRM4rwrIrRRKsdLNML/lnaaVSRioA==}
     engines: {node: '>= 0.8'}
@@ -5017,6 +5031,10 @@ snapshots:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
       '@tiptap/pm': 3.27.2
 
+  '@tiptap/extension-image@3.29.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))':
+    dependencies:
+      '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
+
   '@tiptap/extension-italic@3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))':
     dependencies:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
@@ -5048,6 +5066,10 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
 
+  '@tiptap/extension-placeholder@3.29.2(@tiptap/extensions@3.29.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))(@tiptap/pm@3.27.2))':
+    dependencies:
+      '@tiptap/extensions': 3.29.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))(@tiptap/pm@3.27.2)
+
   '@tiptap/extension-strike@3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))':
     dependencies:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
@@ -5065,6 +5087,11 @@ snapshots:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
 
   '@tiptap/extensions@3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))(@tiptap/pm@3.27.2)':
+    dependencies:
+      '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
+      '@tiptap/pm': 3.27.2
+
+  '@tiptap/extensions@3.29.2(@tiptap/core@3.27.1(@tiptap/pm@3.27.2))(@tiptap/pm@3.27.2)':
     dependencies:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.2)
       '@tiptap/pm': 3.27.2
@@ -6921,8 +6948,6 @@ snapshots:
       mime-types: 2.1.35
 
   typedarray@0.0.6: {}
-
-  typescript@6.0.3: {}
 
   uid-safe@2.1.5:
     dependencies:
