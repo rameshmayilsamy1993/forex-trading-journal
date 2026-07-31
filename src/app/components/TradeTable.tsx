@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Edit2, Trash2, Eye, FileText, ClipboardCheck, Link2, Unlink, Trash, AlertTriangle, Check } from 'lucide-react';
+import { TrendingUp, TrendingDown, Edit2, Trash2, Eye, FileText, ClipboardCheck, Link2, Unlink, Trash, AlertTriangle, Check, Clock } from 'lucide-react';
 import { Trade, TradingAccount, PropFirm } from '../types/trading';
 import { formatPrice, formatMoney, getTradeCategory } from '../utils/calculations';
 import { getLocalDateString } from '../utils/dateUtils';
@@ -48,6 +48,66 @@ function getAccountName(accountId: any, accounts: TradingAccount[]): string {
 
 function getTradeRealPL(trade: Trade): number {
   return (trade as any).realPL ?? ((trade.profit || 0) - Math.abs(trade.commission || 0) - Math.abs((trade as any).swap || 0));
+}
+
+function formatTimeDisplay(time?: string): string {
+  if (!time) return '';
+  if (/^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(time.trim())) return time.trim();
+  const d = new Date(time);
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+  const timePart = time.split('T').pop() || time;
+  const [h, m] = timePart.split(':');
+  if (h && m) {
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${String(hour12).padStart(2, '0')}:${m.replace(/[^0-9]/g, '').substring(0, 2)} ${ampm}`;
+  }
+  return time;
+}
+
+function EntryTimeBadge({ time }: { time?: string }) {
+  const display = formatTimeDisplay(time);
+  if (!display) return <span className="text-caption text-slate-300">-</span>;
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption bg-amber-50 text-amber-700 ring-1 ring-amber-200/50">
+      <Clock className="w-3 h-3 text-amber-500" />
+      {display}
+    </span>
+  );
+}
+
+function calculateDuration(entryTime?: string, exitTime?: string): string {
+  if (!entryTime || !exitTime) return '-';
+  const toMinutes = (t: string): number | null => {
+    const cleaned = t.trim().toUpperCase();
+    let match = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (match) {
+      let h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      if (match[3] === 'PM' && h !== 12) h += 12;
+      if (match[3] === 'AM' && h === 12) h = 0;
+      return h * 60 + m;
+    }
+    match = cleaned.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (match) {
+      const h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      return h * 60 + m;
+    }
+    return null;
+  };
+  const entryMin = toMinutes(entryTime);
+  const exitMin = toMinutes(exitTime);
+  if (entryMin === null || exitMin === null) return '-';
+  let diff = exitMin - entryMin;
+  if (diff < 0) diff += 24 * 60;
+  const hours = Math.floor(diff / 60);
+  const minutes = diff % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 export default function TradeTable({
@@ -256,8 +316,9 @@ export default function TradeTable({
                       <TableHead className="w-[120px]">Pair</TableHead>
                       <TableHead className="w-[120px]">Type</TableHead>
                       <TableHead className="w-[130px]">Key Level</TableHead>
-                      <TableHead className="text-right hidden sm:table-cell w-[120px]">Entry</TableHead>
-                      <TableHead className="text-right hidden sm:table-cell w-[120px]">Exit</TableHead>
+                      <TableHead className="text-center w-[120px]">Entry Time</TableHead>
+                      <TableHead className="text-center w-[120px]">Exit Time</TableHead>
+                      <TableHead className="text-center w-[100px]">Duration</TableHead>
                       <TableHead className="text-right w-[120px]">Real P/L</TableHead>
                       <TableHead className="text-center w-[120px]">Checklist</TableHead>
                       <TableHead className="text-right w-[140px]">Actions</TableHead>
@@ -312,9 +373,12 @@ export default function TradeTable({
                             <span className="text-caption text-slate-400">&mdash;</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right font-mono hidden sm:table-cell">{formatPrice(trade.entryPrice, trade.pair)}</TableCell>
-                        <TableCell className="text-right font-mono hidden sm:table-cell">
-                          {trade.exitPrice ? formatPrice(trade.exitPrice, trade.pair) : '-'}
+                        <TableCell className="text-center">{<EntryTimeBadge time={trade.entryTime} />}</TableCell>
+                        <TableCell className="text-center">
+                          {trade.exitTime ? <EntryTimeBadge time={trade.exitTime} /> : <span className="text-caption text-slate-300">-</span>}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="text-caption font-semibold tabular-nums text-violet-600">{calculateDuration(trade.entryTime, trade.exitTime)}</span>
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
                           {(() => {

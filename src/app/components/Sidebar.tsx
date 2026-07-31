@@ -76,6 +76,13 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
+    title: 'Missed Trade',
+    items: [
+      { id: 'missed-log', label: 'Missed Trades', icon: EyeOff },
+      { id: 'missed-log-calendar', label: 'Missed Trade Calendar', icon: Calendar },
+    ],
+  },
+  {
     title: 'Tools',
     items: [
       { id: 'xauusd-calculator', label: 'XAUUSD Lot Calculator', icon: Calculator },
@@ -88,8 +95,6 @@ const navigationGroups: NavGroup[] = [
     items: [
       { id: 'missed', label: 'CRT Missed Trades', icon: EyeOff },
       { id: 'missed-calendar', label: 'CRT Missed Trade Calendar', icon: Calendar },
-      { id: 'missed-log', label: 'Missed Trades', icon: EyeOff },
-      { id: 'missed-log-calendar', label: 'Missed Trade Calendar', icon: Calendar },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
       { id: 'breached-trades', label: 'Breached Trades', icon: AlertTriangle },
     ],

@@ -52,8 +52,6 @@ const monthlyReviewRoutes = require('./src/modules/monthlyReviews/monthlyReview.
 const weeklyReviewRoutes = require('./src/modules/weeklyReviews/weeklyReview.routes');
 const dailyReviewRoutes = require('./src/modules/dailyReviews/dailyReview.routes');
 const reminderRoutes = require('./src/modules/reminders/reminder.routes');
-const { startScheduler } = require('./src/services/reminderScheduler');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -124,7 +122,6 @@ app.use(errorMiddleware);
 const startServer = async () => {
   await connectWithRetry();
   await seedAdminUser();
-  startScheduler();
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

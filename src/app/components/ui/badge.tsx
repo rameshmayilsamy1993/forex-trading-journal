@@ -5,26 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-badge w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-all duration-200",
+  "inline-flex items-center justify-center rounded px-2 py-0.5 text-[13px] font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 [&>svg]:pointer-events-none transition-all duration-150",
   {
     variants: {
       variant: {
         default:
-          "bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20",
+          "bg-[#007aff] text-[#fdfcfc]",
         secondary:
-          "bg-[#F1F5F9] text-[#64748B] border border-[#E5EAF2]",
+          "bg-[#f1eeee] text-[#201d1d]",
         destructive:
-          "bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/20",
+          "bg-[#ff3b30] text-[#fdfcfc]",
         success:
-          "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20",
+          "bg-[#30d158] text-[#fdfcfc]",
         warning:
-          "bg-[#EA580C]/10 text-[#EA580C] border border-[#EA580C]/20",
+          "bg-[#ff9f0a] text-[#fdfcfc]",
         outline:
-          "border border-[#E5EAF2] text-[#64748B] bg-white",
-        purple:
-          "bg-[#7C3AED]/10 text-[#7C3AED] border border-[#7C3AED]/20",
-        teal:
-          "bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20",
+          "border border-[#646262] text-[#424245]",
+        accent:
+          "bg-[#007aff] text-[#fdfcfc]",
       },
     },
     defaultVariants: {

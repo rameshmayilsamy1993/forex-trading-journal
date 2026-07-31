@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Plus, X, TrendingUp, TrendingDown, Clock, CalendarDays, Target, BarChart3, FileText, ClipboardCheck, Image as ImageIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Plus, X, TrendingUp, TrendingDown, Clock, CalendarDays, Target, BarChart3, FileText, ClipboardCheck, Image as ImageIcon, Download, ChevronRight } from 'lucide-react';
 import { useTradeState } from '../hooks/useTradeState';
 import { PageLayout } from './ui/PageLayout';
 import TradeForm from './TradeForm';
@@ -15,10 +15,12 @@ import Modal from './ui/Modal';
 import { useAuthContext } from '../context/AuthContext';
 import { formatPrice, formatMoney, calculateTradeStats, calculateKeyLevelStats, getRealPL, getTradeCategory } from '../utils/calculations';
 import { getLocalDateString } from '../utils/dateUtils';
+import { generateTradePDF } from '../utils/pdfExport';
 
 export default function TradeJournal() {
   const state = useTradeState();
   const { user } = useAuthContext();
+  const [keyLevelExpanded, setKeyLevelExpanded] = useState(false);
 
   const editingTrade = state.editingId
     ? state.trades.find(t => t.id === state.editingId)
@@ -39,6 +41,10 @@ export default function TradeJournal() {
   }, [closedTrades]);
 
   const keyLevelStats = useMemo(() => calculateKeyLevelStats(state.filteredTrades), [state.filteredTrades]);
+
+  const handleExportPDF = () => {
+    generateTradePDF(state.filteredTrades, state.accounts, state.firms, state.analysesMap);
+  };
 
   return (
     <PageLayout
@@ -152,43 +158,64 @@ export default function TradeJournal() {
 
       {/* Key Level Performance */}
       {keyLevelStats.length > 0 && (
-        <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB] p-4 transition-all duration-200">
-          <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
-            Key Level Performance
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
-                  <th className="pb-2 pr-4 font-medium">Key Level</th>
-                  <th className="pb-2 pr-4 font-medium text-right">Trades</th>
-                  <th className="pb-2 pr-4 font-medium text-right">Wins</th>
-                  <th className="pb-2 pr-4 font-medium text-right">Losses</th>
-                  <th className="pb-2 pr-4 font-medium text-right">Win Rate</th>
-                  <th className="pb-2 font-medium text-right">Net P/L</th>
-                </tr>
-              </thead>
-              <tbody>
-                {keyLevelStats.map(stat => (
-                  <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
-                    <td className="py-2.5 pr-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
-                        {stat.keyLevel}
-                      </span>
-                    </td>
-                    <td className="py-2.5 pr-4 text-right font-medium">{stat.trades}</td>
-                    <td className="py-2.5 pr-4 text-right text-emerald-600 font-medium">{stat.wins}</td>
-                    <td className="py-2.5 pr-4 text-right text-rose-600 font-medium">{stat.losses}</td>
-                    <td className="py-2.5 pr-4 text-right font-medium">{stat.winRate.toFixed(1)}%</td>
-                    <td className={`py-2.5 text-right font-bold tabular-nums ${stat.netPL >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {formatMoney(stat.netPL, true)}
-                    </td>
+        <div className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#E5E7EB]">
+          <button
+            onClick={() => setKeyLevelExpanded(prev => !prev)}
+            className="w-full flex items-center justify-between p-4 hover:bg-[#F8FAFC] transition-colors rounded-[20px]"
+          >
+            <h4 className="text-body-sm text-foreground flex items-center gap-2">
+              <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+              Key Level Performance
+            </h4>
+            <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${keyLevelExpanded ? 'rotate-90' : 'rotate-0'}`} />
+          </button>
+          {keyLevelExpanded && (
+            <div className="px-4 pb-4 border-t border-[#E5E7EB] pt-3">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
+                    <th className="pb-2 pr-4 font-medium">Key Level</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Trades</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Wins</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Losses</th>
+                    <th className="pb-2 pr-4 font-medium text-right">Win Rate</th>
+                    <th className="pb-2 font-medium text-right">Net P/L</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {keyLevelStats.map(stat => (
+                    <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
+                      <td className="py-2.5 pr-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
+                          {stat.keyLevel}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-right font-medium">{stat.trades}</td>
+                      <td className="py-2.5 pr-4 text-right text-emerald-600 font-medium">{stat.wins}</td>
+                      <td className="py-2.5 pr-4 text-right text-rose-600 font-medium">{stat.losses}</td>
+                      <td className="py-2.5 pr-4 text-right font-medium">{stat.winRate.toFixed(1)}%</td>
+                      <td className={`py-2.5 text-right font-bold tabular-nums ${stat.netPL >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {formatMoney(stat.netPL, true)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Export PDF */}
+      {state.filteredTrades.length > 0 && !state.isAdding && !state.editingId && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleExportPDF}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white rounded-xl hover:from-[#6D28D9] hover:to-[#4338CA] transition-all duration-200 shadow-lg shadow-[#7C3AED]/25 text-body-sm font-medium"
+          >
+            <Download className="w-4 h-4" />
+            Export PDF
+          </button>
         </div>
       )}
 
@@ -401,6 +428,12 @@ export default function TradeJournal() {
                   <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
                     <p className="text-caption text-muted-foreground">R:R Ratio</p>
                     <p className="text-body-sm text-violet-600 mt-0.5 font-bold">1:{state.viewingTrade.riskRewardRatio.toFixed(2)}</p>
+                  </div>
+                )}
+                {(state.viewingTrade as any).rrAchievable && (
+                  <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
+                    <p className="text-caption text-muted-foreground">RR Achievable</p>
+                    <p className="text-body-sm text-emerald-600 mt-0.5 font-bold">{(state.viewingTrade as any).rrAchievable}</p>
                   </div>
                 )}
                 {(state.viewingTrade as any).highLowTime && (

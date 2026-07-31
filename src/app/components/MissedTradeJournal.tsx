@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn, Eye as ViewIcon, Clock, CalendarDays, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, ZoomIn, Eye as ViewIcon, Clock, CalendarDays, BarChart3, ChevronRight } from 'lucide-react';
 import { MissedTrade, MasterData, SMTType, Model1Type, Model1ConfirmationType, SsmtConfirmationType } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -147,6 +147,7 @@ export default function MissedTradeJournal() {
   const [viewingImageIndex, setViewingImageIndex] = useState(0);
   const [viewingReason, setViewingReason] = useState<{ title: string; content: string } | null>(null);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  const [keyLevelExpanded, setKeyLevelExpanded] = useState(false);
 
   const [formData, setFormData] = useState({
     pair: '',
@@ -588,35 +589,43 @@ export default function MissedTradeJournal() {
           </div>
         </div>
 
-        {/* Key Level Breakdown */}
+        {/* Key Level Performance */}
         {keyLevelStats.length > 0 && (
-          <div className="bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] p-4 mt-4">
-            <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
-              <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
-              Key Level Breakdown
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
-                    <th className="pb-2 pr-4 font-medium">Key Level</th>
-                    <th className="pb-2 font-medium text-right">Trades</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {keyLevelStats.map(stat => (
-                    <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
-                      <td className="py-2.5 pr-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
-                          {stat.keyLevel}
-                        </span>
-                      </td>
-                      <td className="py-2.5 text-right font-medium">{stat.count}</td>
+          <div className="bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] mt-4">
+            <button
+              onClick={() => setKeyLevelExpanded(prev => !prev)}
+              className="w-full flex items-center justify-between p-4 hover:bg-[#F8FAFC] transition-colors rounded-[20px]"
+            >
+              <h4 className="text-body-sm text-foreground flex items-center gap-2">
+                <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+                Key Level Performance
+              </h4>
+              <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${keyLevelExpanded ? 'rotate-90' : 'rotate-0'}`} />
+            </button>
+            {keyLevelExpanded && (
+              <div className="px-4 pb-4 border-t border-[#E5E7EB] pt-3">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
+                      <th className="pb-2 pr-4 font-medium">Key Level</th>
+                      <th className="pb-2 font-medium text-right">Trades</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {keyLevelStats.map(stat => (
+                      <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
+                        <td className="py-2.5 pr-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
+                            {stat.keyLevel}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-right font-medium">{stat.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>

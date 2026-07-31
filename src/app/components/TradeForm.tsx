@@ -40,6 +40,7 @@ interface TradeFormProps {
     afterScreenshot: string;
     checklistId: string;
     checklistSession: string;
+    rrAchievable: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     accountId: string;
@@ -69,6 +70,7 @@ interface TradeFormProps {
     afterScreenshot: string;
     checklistId: string;
     checklistSession: string;
+    rrAchievable: string;
   }>>;
   accounts: TradingAccount[];
   pairs: string[];
@@ -293,6 +295,19 @@ export default function TradeForm({
             </span>
           </div>
         )}
+
+        <FormField label="RR Achievable">
+          <Select value={formData.rrAchievable} onValueChange={value => setFormData({ ...formData, rrAchievable: value })}>
+            <SelectTrigger className="bg-slate-50 border-slate-200 hover:bg-slate-100 transition-colors">
+              <SelectValue placeholder="Select RR" />
+            </SelectTrigger>
+            <SelectContent>
+              {['1:1','1:2','1:3','1:4','1:5','1:6','1:7','1:8','1:9','1:10'].map(rr => (
+                <SelectItem key={rr} value={rr}>{rr}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
 
         <FormField label="Session">
           <Select value={formData.session} onValueChange={value => setFormData({ ...formData, session: value as TradingSession })}>

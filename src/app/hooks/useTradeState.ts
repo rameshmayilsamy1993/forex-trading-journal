@@ -89,6 +89,7 @@ export function useTradeState() {
     afterScreenshot: '',
     checklistId: '',
     checklistSession: '',
+    rrAchievable: '',
   });
 
   useEffect(() => {
@@ -334,6 +335,7 @@ export function useTradeState() {
       realPL: calculatedRealPL,
       checklistId: checklistIdToUse || undefined,
       checklistSession: checklistSessionToUse || undefined,
+      rrAchievable: formData.rrAchievable || undefined,
     };
 
     try {
@@ -441,6 +443,7 @@ export function useTradeState() {
         beforeScreenshot: formData.beforeScreenshot || undefined,
         afterScreenshot: formData.afterScreenshot || undefined,
         realPL: calculatedRealPL,
+        rrAchievable: formData.rrAchievable || undefined,
       };
 
       const savedTrade = await apiService.updateTrade(id, updatedTrade);
@@ -765,6 +768,7 @@ export function useTradeState() {
       afterScreenshot: trade.afterScreenshot || '',
       checklistId: (trade as any).checklistId || '',
       checklistSession: (trade as any).checklistSession || '',
+      rrAchievable: (trade as any).rrAchievable || '',
     });
     setIsAdding(false);
   };
@@ -798,6 +802,7 @@ export function useTradeState() {
       afterScreenshot: '',
       checklistId: '',
       checklistSession: '',
+      rrAchievable: '',
     });
   };
 

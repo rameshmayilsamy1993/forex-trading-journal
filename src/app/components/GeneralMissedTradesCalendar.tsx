@@ -564,6 +564,12 @@ export default function GeneralMissedTradesCalendar() {
                               {trade.riskRewardRatio.toFixed(2)}
                             </div>
                           )}
+                          {(trade as any).rrAchievable && (
+                            <div>
+                              <span className="text-slate-400">RR Ach.:</span>{' '}
+                              <span className="text-emerald-600 font-medium">{(trade as any).rrAchievable}</span>
+                            </div>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 text-body text-slate-500 mb-2">

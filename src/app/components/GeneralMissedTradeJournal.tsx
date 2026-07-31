@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, Clock, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, Eye, EyeOff, Image as ImageIcon, Clock, BarChart3, ChevronRight } from 'lucide-react';
 import { GeneralMissedTrade, GeneralMissedTradeStatus, MasterData } from '../types/trading';
 import apiService from '../services/apiService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -78,6 +78,37 @@ function EntryTimeBadge({ time }: { time?: string }) {
   );
 }
 
+function calculateDuration(entryTime?: string, exitTime?: string): string {
+  if (!entryTime || !exitTime) return '-';
+  const toMinutes = (t: string): number | null => {
+    const cleaned = t.trim().toUpperCase();
+    let match = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (match) {
+      let h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      if (match[3] === 'PM' && h !== 12) h += 12;
+      if (match[3] === 'AM' && h === 12) h = 0;
+      return h * 60 + m;
+    }
+    match = cleaned.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (match) {
+      const h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      return h * 60 + m;
+    }
+    return null;
+  };
+  const entryMin = toMinutes(entryTime);
+  const exitMin = toMinutes(exitTime);
+  if (entryMin === null || exitMin === null) return '-';
+  let diff = exitMin - entryMin;
+  if (diff < 0) diff += 24 * 60;
+  const hours = Math.floor(diff / 60);
+  const minutes = diff % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
 export default function GeneralMissedTradeJournal() {
   const [missedTrades, setMissedTrades] = useState<GeneralMissedTrade[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -96,6 +127,7 @@ export default function GeneralMissedTradeJournal() {
   const [viewingImages, setViewingImages] = useState<{ url: string; label: string }[]>([]);
   const [viewingImageIndex, setViewingImageIndex] = useState(0);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  const [keyLevelExpanded, setKeyLevelExpanded] = useState(false);
 
   const [formData, setFormData] = useState({
     accountId: '',
@@ -123,6 +155,7 @@ export default function GeneralMissedTradeJournal() {
     afterScreenshot: '',
     reason: '',
     missedStatus: 'MISSED' as GeneralMissedTradeStatus,
+    rrAchievable: '',
   });
 
   useEffect(() => {
@@ -266,6 +299,7 @@ export default function GeneralMissedTradeJournal() {
       afterScreenshot: '',
       reason: '',
       missedStatus: 'MISSED',
+      rrAchievable: '',
     });
   };
 
@@ -284,9 +318,9 @@ export default function GeneralMissedTradeJournal() {
       swap: trade.swap?.toString() || '',
       profit: trade.profit?.toString() || '',
       entryDate: extractDateFromISO(trade.entryDate),
-      entryTime: trade.entryTime ? extractTimeFromISO(trade.entryTime) : formatTimeDisplay(trade.entryTime),
+      entryTime: formatTimeDisplay(trade.entryTime),
       exitDate: extractDateFromISO(trade.exitDate),
-      exitTime: trade.exitTime ? extractTimeFromISO(trade.exitTime) : formatTimeDisplay(trade.exitTime),
+      exitTime: formatTimeDisplay(trade.exitTime),
       stopLoss: trade.stopLoss?.toString() || '',
       takeProfit: trade.takeProfit?.toString() || '',
       notes: trade.notes || '',
@@ -297,6 +331,7 @@ export default function GeneralMissedTradeJournal() {
       afterScreenshot: trade.afterScreenshot || '',
       reason: trade.reason,
       missedStatus: trade.missedStatus,
+      rrAchievable: (trade as any).rrAchievable || '',
     });
     setIsAdding(false);
   };
@@ -343,6 +378,7 @@ export default function GeneralMissedTradeJournal() {
       afterScreenshot: formData.afterScreenshot || undefined,
       reason: formData.reason,
       missedStatus: formData.missedStatus,
+      rrAchievable: formData.rrAchievable || undefined,
     };
 
     try {
@@ -444,43 +480,51 @@ export default function GeneralMissedTradeJournal() {
 
         {/* Key Level Performance */}
         {keyLevelStats.length > 0 && (
-          <div className="bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] p-4 mt-4">
-            <h4 className="text-body-sm text-foreground mb-3 flex items-center gap-2">
-              <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
-              Key Level Performance
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
-                    <th className="pb-2 pr-4 font-medium">Key Level</th>
-                    <th className="pb-2 pr-4 font-medium text-right">Trades</th>
-                    <th className="pb-2 pr-4 font-medium text-right">Wins</th>
-                    <th className="pb-2 pr-4 font-medium text-right">Losses</th>
-                    <th className="pb-2 pr-4 font-medium text-right">Win Rate</th>
-                    <th className="pb-2 font-medium text-right">Net P/L</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {keyLevelStats.map(stat => (
-                    <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
-                      <td className="py-2.5 pr-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
-                          {stat.keyLevel}
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-4 text-right font-medium">{stat.trades}</td>
-                      <td className="py-2.5 pr-4 text-right text-emerald-600 font-medium">{stat.wins}</td>
-                      <td className="py-2.5 pr-4 text-right text-rose-600 font-medium">{stat.losses}</td>
-                      <td className="py-2.5 pr-4 text-right font-medium">{stat.winRate.toFixed(1)}%</td>
-                      <td className={`py-2.5 text-right font-bold tabular-nums ${stat.netPL >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {formatMoney(stat.netPL, true)}
-                      </td>
+          <div className="bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] mt-4">
+            <button
+              onClick={() => setKeyLevelExpanded(prev => !prev)}
+              className="w-full flex items-center justify-between p-4 hover:bg-[#F8FAFC] transition-colors rounded-[20px]"
+            >
+              <h4 className="text-body-sm text-foreground flex items-center gap-2">
+                <span className="w-1 h-4 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></span>
+                Key Level Performance
+              </h4>
+              <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${keyLevelExpanded ? 'rotate-90' : 'rotate-0'}`} />
+            </button>
+            {keyLevelExpanded && (
+              <div className="px-4 pb-4 border-t border-[#E5E7EB] pt-3">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-caption text-[#64748B] uppercase tracking-wider border-b border-[#E5E7EB]">
+                      <th className="pb-2 pr-4 font-medium">Key Level</th>
+                      <th className="pb-2 pr-4 font-medium text-right">Trades</th>
+                      <th className="pb-2 pr-4 font-medium text-right">Wins</th>
+                      <th className="pb-2 pr-4 font-medium text-right">Losses</th>
+                      <th className="pb-2 pr-4 font-medium text-right">Win Rate</th>
+                      <th className="pb-2 font-medium text-right">Net P/L</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {keyLevelStats.map(stat => (
+                      <tr key={stat.keyLevel} className="border-b border-[#F1F5F9] text-body-sm">
+                        <td className="py-2.5 pr-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-semibold border ${stat.keyLevel === 'No Key Level' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-violet-100 text-violet-700 border-violet-200'}`}>
+                            {stat.keyLevel}
+                          </span>
+                        </td>
+                        <td className="py-2.5 pr-4 text-right font-medium">{stat.trades}</td>
+                        <td className="py-2.5 pr-4 text-right text-emerald-600 font-medium">{stat.wins}</td>
+                        <td className="py-2.5 pr-4 text-right text-rose-600 font-medium">{stat.losses}</td>
+                        <td className="py-2.5 pr-4 text-right font-medium">{stat.winRate.toFixed(1)}%</td>
+                        <td className={`py-2.5 text-right font-bold tabular-nums ${stat.netPL >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {formatMoney(stat.netPL, true)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -650,6 +694,19 @@ export default function GeneralMissedTradeJournal() {
                       {calculatedRR !== null ? `1:${calculatedRR.toFixed(2)}` : 'Auto'}
                     </span>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-body-sm text-muted-foreground mb-1">RR Achievable</label>
+                  <Select value={formData.rrAchievable} onValueChange={(value) => setFormData({ ...formData, rrAchievable: value })}>
+                    <SelectTrigger className="bg-white border-[#E2E8F0]">
+                      <SelectValue placeholder="Select RR" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['1:1','1:2','1:3','1:4','1:5','1:6','1:7','1:8','1:9','1:10'].map(rr => (
+                        <SelectItem key={rr} value={rr}>{rr}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -934,8 +991,9 @@ export default function GeneralMissedTradeJournal() {
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Pair</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Type</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Key Level</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Entry</th>
-                  <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">Exit</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Entry Time</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Exit Time</th>
+                  <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Duration</th>
                   <th className="text-right py-3.5 px-4 text-table-header text-muted-foreground">P/L</th>
                   <th className="text-left py-3.5 px-4 text-table-header text-muted-foreground">Reason</th>
                   <th className="text-center py-3.5 px-4 text-table-header text-muted-foreground">Status</th>
@@ -971,13 +1029,19 @@ export default function GeneralMissedTradeJournal() {
                           <span className="text-caption text-slate-400">&mdash;</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-table-cell text-right font-mono text-foreground whitespace-nowrap">{formatPrice(trade.entryPrice, trade.pair)}</td>
-                      <td className="py-3.5 px-4 text-table-cell text-right font-mono whitespace-nowrap">
-                        {trade.exitPrice ? (
-                          <span className="text-foreground">{formatPrice(trade.exitPrice, trade.pair)}</span>
-                        ) : (
-                          <span className="text-slate-300">-</span>
-                        )}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <EntryTimeBadge time={trade.entryTime} />
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption bg-sky-50 text-sky-700 ring-1 ring-sky-200/50">
+                          {formatTimeDisplay(trade.exitTime) || <span className="text-slate-300">-</span>}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-mono bg-slate-100 text-slate-700 ring-1 ring-slate-200/50">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          {calculateDuration(trade.entryTime, trade.exitTime)}
+                        </span>
                       </td>
                       <td className={`py-3.5 px-4 text-table-cell text-right whitespace-nowrap ${realPL >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                         {realPL >= 0 ? '+' : ''}${realPL.toFixed(2)}
@@ -1094,8 +1158,14 @@ export default function GeneralMissedTradeJournal() {
                   )}
                   {viewingTrade.riskRewardRatio && (
                     <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
-                      <p className="text-caption text-muted-foreground">R:R Ratio</p>
+                      <p className="text-caption text-muted-foreground">R:R</p>
                       <p className="text-body-sm text-foreground mt-0.5 font-mono">1:{viewingTrade.riskRewardRatio.toFixed(2)}</p>
+                    </div>
+                  )}
+                  {(viewingTrade as any).rrAchievable && (
+                    <div className="bg-white rounded-lg p-3 border border-[#E2E8F0]">
+                      <p className="text-caption text-muted-foreground">RR Achievable</p>
+                      <p className="text-body-sm text-emerald-600 mt-0.5 font-bold">{(viewingTrade as any).rrAchievable}</p>
                     </div>
                   )}
                 </div>

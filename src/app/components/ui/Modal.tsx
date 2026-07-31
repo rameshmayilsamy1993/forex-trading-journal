@@ -39,55 +39,49 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 z-50"
-      style={{ animation: 'modalBackdropIn 0.3s ease-out forwards' }}
+      className="fixed inset-0 bg-black/40 flex items-center justify-center p-3 sm:p-6 z-50"
+      onClick={onClose}
     >
       <div
         className={cn(
-          'bg-white rounded-2xl shadow-2xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-white/20',
+          'bg-[#fdfcfc] w-full max-h-[92vh] overflow-hidden flex flex-col border border-[rgba(15,0,0,0.12)]',
           sizeClasses[size]
         )}
-        style={{
-          animation: 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-        }}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || showX) && (
-          <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700 text-white flex-shrink-0">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#22c55e,_transparent_32%),radial-gradient(circle_at_top_right,_#38bdf8,_transparent_30%)]" />
-            <div className="relative p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  {icon && (
-                    <div className="p-2 bg-white/10 rounded-xl flex-shrink-0">
-                      {icon}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    {title && <h2 className="text-section-title">{title}</h2>}
-                    {subtitle && <p className="text-body-sm text-violet-100 mt-0.5">{subtitle}</p>}
+          <div className="bg-[#201d1d] text-[#fdfcfc] flex-shrink-0">
+            <div className="flex items-start justify-between gap-4 p-4 sm:p-5">
+              <div className="flex items-center gap-3 min-w-0">
+                {icon && (
+                  <div className="p-1.5 bg-[#302c2c] rounded flex-shrink-0">
+                    {icon}
                   </div>
-                </div>
-                {showX && onClose && (
-                  <button
-                    onClick={onClose}
-                    className="p-2 bg-white/10 hover:bg-white/25 text-white/80 hover:text-white rounded-full transition-colors flex-shrink-0"
-                    title="Close"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
                 )}
+                <div className="min-w-0">
+                  {title && <h2 className="text-[16px] font-bold">{title}</h2>}
+                  {subtitle && <p className="text-[14px] text-[#9a9898] mt-0.5">{subtitle}</p>}
+                </div>
               </div>
+              {showX && onClose && (
+                <button
+                  onClick={onClose}
+                  className="p-1.5 bg-[#302c2c] hover:bg-[#424245] text-[#9a9898] hover:text-[#fdfcfc] rounded transition-colors flex-shrink-0"
+                  title="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-5">
           {children}
         </div>
 
         {footer && (
-          <div className="flex-shrink-0 p-4 border-t border-slate-200 bg-white flex items-center justify-end gap-3">
+          <div className="flex-shrink-0 p-4 border-t border-[rgba(15,0,0,0.12)] bg-[#fdfcfc] flex items-center justify-end gap-3">
             {footer}
           </div>
         )}

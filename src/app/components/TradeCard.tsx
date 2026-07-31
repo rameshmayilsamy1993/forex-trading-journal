@@ -64,6 +64,12 @@ export default function TradeCard({ trade, accounts, onEdit, onDelete, onView, i
             <span className="font-medium text-violet-600 text-body-sm">1:{trade.riskRewardRatio.toFixed(1)}</span>
           </div>
         )}
+        {(trade as any).rrAchievable && (
+          <div>
+            <span className="block text-[#94A3B8] text-micro">RR Ach.</span>
+            <span className="font-medium text-emerald-600 text-body-sm">{(trade as any).rrAchievable}</span>
+          </div>
+        )}
         <div>
           <span className="block text-[#94A3B8] text-micro">Key Level</span>
           {trade.keyLevel ? (

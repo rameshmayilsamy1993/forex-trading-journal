@@ -128,12 +128,10 @@ const seedAdminUser = async () => {
     const adminName = process.env.ADMIN_NAME || 'Admin';
 
     if (!adminEmail || !adminPassword) {
-      console.log('Admin seed skipped: ADMIN_EMAIL and ADMIN_PASSWORD are not set');
       return;
     }
 
     if (adminPassword.length < 8) {
-      console.warn('Admin seed skipped: ADMIN_PASSWORD must be at least 8 characters');
       return;
     }
 

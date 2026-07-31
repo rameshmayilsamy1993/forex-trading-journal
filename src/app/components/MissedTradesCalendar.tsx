@@ -524,6 +524,12 @@ export default function MissedTradesCalendar() {
                           <span className="text-slate-400">RR:</span>{' '}
                           {trade.rr?.toFixed(2) || '-'}
                         </div>
+                        {(trade as any).rrAchievable && (
+                          <div>
+                            <span className="text-slate-400">RR Ach.:</span>{' '}
+                            <span className="text-emerald-600 font-medium">{(trade as any).rrAchievable}</span>
+                          </div>
+                        )}
                       </div>
                       {trade.keyLevel && (
                         <div className="mb-2">
