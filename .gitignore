@@ -62,3 +62,4 @@ backend/build/
 #code
 AGENTS.md
 .superpowers/
+.worktrees/
