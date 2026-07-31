@@ -194,3 +194,59 @@ export interface GeneralMissedTrade {
   missedStatus: GeneralMissedTradeStatus;
   createdAt: string;
 }
+
+export type SaturdayReviewEventType = 'weekly_high' | 'weekly_low' | 'candle' | 'weekly_high_origin' | 'weekly_low_origin' | 'ote';
+
+export interface SaturdayReviewImage {
+  id: string;
+  image: string;
+  publicId?: string;
+  caption?: string;
+  sortOrder?: number;
+}
+
+export interface SaturdayReviewEvent {
+  id: string;
+  eventType: SaturdayReviewEventType;
+  day?: string;
+  date?: string;
+  time?: string;
+  category?: string;
+  keyLevel?: string;
+  answer?: string;
+  notes?: string;
+  images: SaturdayReviewImage[];
+}
+
+export interface SaturdayReviewLesson {
+  label: string;
+  checked: boolean;
+}
+
+export interface SaturdayReview {
+  id: string;
+  pair: string;
+  weekStart: string;
+  weekEnd: string;
+  reviewDate: string;
+  overallBias: string;
+  candleType: string;
+  highOrLowFirst: string;
+  expansionDirection: string;
+  oteTouched: string;
+  oteDirection: string;
+  oteReaction: string;
+  marketQuality?: number;
+  difficulty: string;
+  confidence?: number;
+  weeklyStory: string;
+  lessons: SaturdayReviewLesson[];
+  lessonsNotes?: string;
+  status: 'Draft' | 'Completed';
+  lastAiUpdateAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  completionPercent?: number;
+  imageCount?: number;
+  events?: SaturdayReviewEvent[];
+}

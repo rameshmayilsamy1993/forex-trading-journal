@@ -51,6 +51,7 @@ const marketStatsRoutes = require('./src/modules/marketStats/marketStats.routes'
 const monthlyReviewRoutes = require('./src/modules/monthlyReviews/monthlyReview.routes');
 const weeklyReviewRoutes = require('./src/modules/weeklyReviews/weeklyReview.routes');
 const dailyReviewRoutes = require('./src/modules/dailyReviews/dailyReview.routes');
+const saturdayReviewRoutes = require('./src/modules/saturdayReviews/saturdayReview.routes');
 const reminderRoutes = require('./src/modules/reminders/reminder.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -113,6 +114,7 @@ app.use('/api/market-stats', isAuthenticated, marketStatsRoutes);
 app.use('/api/monthly-reviews', isAuthenticated, monthlyReviewRoutes);
 app.use('/api/weekly-reviews', isAuthenticated, weeklyReviewRoutes);
 app.use('/api/daily-reviews', isAuthenticated, dailyReviewRoutes);
+app.use('/api/saturday-reviews', isAuthenticated, saturdayReviewRoutes);
 app.use('/api/reminders', isAuthenticated, reminderRoutes);
 app.post('/api/import/convert-mt5', isAuthenticated, uploadCSV.single('file'), convertMT5);
 
