@@ -44,6 +44,7 @@ SaturdayReviewList.tsx      — table list with filters/search/sort/actions
 SaturdayReviewForm.tsx      — create/edit with 7 collapsible sections + auto-save
 SaturdayReviewDetail.tsx    — read-only view page
 saturdayReviewConstants.ts  — all dropdown option arrays + completion config
+saturdayReviewUtils.ts      — completion % + validation helpers shared by form/list/detail
 ```
 
 Reusable sub-components in the same folder:
@@ -155,6 +156,8 @@ Each list row is augmented with `imageCount` (total images across events) and `c
 The server replaces the event's images with the supplied array. For each image in the array missing from the previous array, nothing extra is needed (frontend already uploaded to Cloudinary). For each removed image, the Cloudinary `publicId` is deleted.
 
 **Image upload**: images upload to Cloudinary immediately on selection via the existing `apiService.upload.single` / `uploadService.uploadImage` (progress callback). The 30s auto-save only persists the resulting references. If a user uploads then discards an image before saving, the frontend calls `apiService.upload.delete(publicId)` to clean up.
+
+**Duplicate flow**: the duplicate action opens a small dialog prompting for the **new week** (week start picker, default = the week after the source review; week end auto-fills). `POST /:id/duplicate` accepts `{ weekStart, weekEnd }` (pair carried over). It copies the source review's non-identity fields (minus pair/week identity, minus `weekStart`/`weekEnd` from source) plus all events and their images into a new `Draft` review with a fresh `reviewDate`. This avoids colliding with the unique `{userId, pair, weekStart}` index (same pair + different week is allowed). After creation the app navigates to the new review's detail page.
 
 ## Frontend Specification
 
